@@ -35,7 +35,7 @@ public class Short {
 	}
 
 	public Short(String shortId, String ownerId, String blobUrl) {
-		this( shortId, ownerId, blobUrl, System.currentTimeMillis(), 0);
+		this(shortId, ownerId, blobUrl, System.currentTimeMillis(), 0);
 	}
 	
 	public String getShortId() {

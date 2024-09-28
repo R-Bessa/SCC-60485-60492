@@ -10,7 +10,7 @@ import tukano.api.User;
 import tukano.clients.rest.RestBlobsClient;
 import tukano.clients.rest.RestShortsClient;
 import tukano.clients.rest.RestUsersClient;
-import tukano.impl.rest.TukanoRestServer;
+import tukano.impl.rest.TukanoApplication;
 
 public class Test {
 	
@@ -19,7 +19,7 @@ public class Test {
 	}
 	
 	public static void main(String[] args ) throws Exception {
-		new Thread( () -> {	
+		/*new Thread( () -> {
 			try { 
 				TukanoRestServer.main( new String[] {} );
 			} catch( Exception x ) {
@@ -37,7 +37,7 @@ public class Test {
 		var shorts = new RestShortsClient(serverURI);
 
 		runTester(blobs, users, shorts);
-		//runBlobTester(blobs, users, shorts);
+		//runBlobTester(blobs, users, shorts);*/
 
 		System.exit(0);
 	}

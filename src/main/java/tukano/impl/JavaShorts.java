@@ -21,7 +21,7 @@ import tukano.api.Shorts;
 import tukano.api.User;
 import tukano.impl.data.Following;
 import tukano.impl.data.Likes;
-import tukano.impl.rest.TukanoRestServer;
+import tukano.impl.rest.TukanoApplication;
 import utils.DB;
 
 public class JavaShorts implements Shorts {
@@ -46,8 +46,9 @@ public class JavaShorts implements Shorts {
 		return errorOrResult( okUser(userId, password), user -> {
 			
 			var shortId = format("%s+%s", userId, UUID.randomUUID());
-			var blobUrl = format("%s/%s/%s", TukanoRestServer.serverURI, Blobs.NAME, shortId); 
-			var shrt = new Short(shortId, userId, blobUrl);
+			//var blobUrl = format("%s/%s/%s", TukanoRestServer.serverURI, Blobs.NAME, shortId);
+			//var shrt = new Short(shortId, userId, blobUrl);
+			var shrt = new Short(shortId, userId, "default_blol_url" + UUID.randomUUID());
 
 			return errorOrValue(DB.insertOne(shrt), s -> s.copyWithLikes_And_Token(0));
 		});

@@ -1,0 +1,259 @@
+{
+	"info": {
+		"_postman_id": "c6b9705d-5603-46e9-8f99-46cc2d30dfc3",
+		"name": "SCC",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "26438780",
+		"_collection_link": "https://warped-water-615168.postman.co/workspace/SCC-60485-60492~43b11e4e-9b7f-4c38-af4b-addc5718532c/collection/26438780-c6b9705d-5603-46e9-8f99-46cc2d30dfc3?action=share&source=collection_link&creator=26438780"
+	},
+	"item": [
+		{
+			"name": "Create User Wales",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\"userId\":\"wales\", \r\n\"pwd\":\"12345\", \r\n\"email\":\"jimmy@wikipedia.pt\", \r\n\"displayName\":\"Jimmy Wales\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://scc-60492-60485.azurewebsites.net/rest/users",
+					"protocol": "https",
+					"host": [
+						"scc-60492-60485",
+						"azurewebsites",
+						"net"
+					],
+					"path": [
+						"rest",
+						"users"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create User Liskov",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\"userId\":\"liskov\", \r\n\"pwd\":\"54321\", \r\n\"email\":\"liskov@mit.edu\", \r\n\"displayName\":\"Barbara Liskov\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://scc-60492-60485.azurewebsites.net/rest/users",
+					"protocol": "https",
+					"host": [
+						"scc-60492-60485",
+						"azurewebsites",
+						"net"
+					],
+					"path": [
+						"rest",
+						"users"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update User Wales",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\"userId\":\"wales\", \r\n\"pwd\":\"12345\", \r\n\"email\":\"jimmy@wikipedia.pt\", \r\n\"displayName\":\"Wales\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://scc-60492-60485.azurewebsites.net/rest/users/wales?pwd=12345",
+					"protocol": "https",
+					"host": [
+						"scc-60492-60485",
+						"azurewebsites",
+						"net"
+					],
+					"path": [
+						"rest",
+						"users",
+						"wales"
+					],
+					"query": [
+						{
+							"key": "pwd",
+							"value": "12345"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Short Liskov",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "https://scc-60492-60485.azurewebsites.net/rest/shorts/liskov?pwd=54321",
+					"protocol": "https",
+					"host": [
+						"scc-60492-60485",
+						"azurewebsites",
+						"net"
+					],
+					"path": [
+						"rest",
+						"shorts",
+						"liskov"
+					],
+					"query": [
+						{
+							"key": "pwd",
+							"value": "54321"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Short Wales",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "https://scc-60492-60485.azurewebsites.net/rest/shorts/wales?pwd=12345",
+					"protocol": "https",
+					"host": [
+						"scc-60492-60485",
+						"azurewebsites",
+						"net"
+					],
+					"path": [
+						"rest",
+						"shorts",
+						"wales"
+					],
+					"query": [
+						{
+							"key": "pwd",
+							"value": "12345"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Liskov follows Wales",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "true",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://scc-60492-60485.azurewebsites.net/rest/shorts/liskov/wales/followers?pwd=54321",
+					"protocol": "https",
+					"host": [
+						"scc-60492-60485",
+						"azurewebsites",
+						"net"
+					],
+					"path": [
+						"rest",
+						"shorts",
+						"liskov",
+						"wales",
+						"followers"
+					],
+					"query": [
+						{
+							"key": "pwd",
+							"value": "54321"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete User Wales",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "https://scc-60492-60485.azurewebsites.net/rest/users/wales?pwd=12345",
+					"protocol": "https",
+					"host": [
+						"scc-60492-60485",
+						"azurewebsites",
+						"net"
+					],
+					"path": [
+						"rest",
+						"users",
+						"wales"
+					],
+					"query": [
+						{
+							"key": "pwd",
+							"value": "12345"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete User Liskov",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "https://scc-60492-60485.azurewebsites.net/rest/users/liskov?pwd=54321",
+					"protocol": "https",
+					"host": [
+						"scc-60492-60485",
+						"azurewebsites",
+						"net"
+					],
+					"path": [
+						"rest",
+						"users",
+						"liskov"
+					],
+					"query": [
+						{
+							"key": "pwd",
+							"value": "54321"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

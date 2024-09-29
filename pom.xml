@@ -85,8 +85,8 @@
 			                </resource>
 			            </resources>
 			        </deployment>
-			        <resourceGroup>scc-project-60492</resourceGroup>
-			        <appName>scc-project-60485</appName>
+			        <resourceGroup>scc-rg-60485-60492</resourceGroup>
+			        <appName>scc-60492-60485</appName>
 			    </configuration>
 			</plugin>
 		</plugins>

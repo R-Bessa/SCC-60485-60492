@@ -18,6 +18,7 @@ tukano\api\Result$ErrorCode.class
 tukano\impl\rest\RestResource.class
 tukano\api\Users.class
 tukano\impl\JavaShorts.class
+tukano\impl\storage\AzureBlobStorage.class
 tukano\impl\JavaBlobs.class
 tukano\api\User.class
 tukano\api\rest\RestUsers.class
@@ -28,7 +29,6 @@ utils\Hex.class
 tukano\api\rest\RestBlobs.class
 utils\DB.class
 utils\IO.class
-tukano\impl\storage\FilesystemStorage.class
 tukano\api\ErrorResult.class
 utils\TryCatch$ThrowableSupplier.class
 tukano\impl\rest\TukanoApplication.class

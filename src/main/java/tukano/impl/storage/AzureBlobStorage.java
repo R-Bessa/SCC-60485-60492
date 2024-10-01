@@ -109,8 +109,9 @@ public class AzureBlobStorage implements BlobStorage {
 		if (path == null)
 			return error(BAD_REQUEST);
 
-		//TODO
-		return ok();
+		var blob = containerClient.getBlobClient(path);
+
+		return blob.deleteIfExists() ? ok() : error(NOT_FOUND);
 	}
 
 

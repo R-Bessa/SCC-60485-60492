@@ -33,8 +33,10 @@ public class AzureBlobStorage implements BlobStorage {
 	private static final int CHUNK_SIZE = 4096;
 	private static final int BLOB_CONFLICT = 409;
 	private static final int BLOB_NOT_FOUND = 404;
-	private static final String STORAGE_CONNECTION_STRING = "DefaultEndpointsProtocol=https;AccountName=scc60485;AccountKey=tRBfHsTj0Fe+vayowI6sGxu24UuVGf1rjY1p9OIL+0jMOP+P6DKzdXX7XSfbNapuL/2ygbMTRxpF+AStL9Ho9A==;EndpointSuffix=core.windows.net";
-
+	//Bessa
+	//private static final String STORAGE_CONNECTION_STRING = "DefaultEndpointsProtocol=https;AccountName=scc60485;AccountKey=tRBfHsTj0Fe+vayowI6sGxu24UuVGf1rjY1p9OIL+0jMOP+P6DKzdXX7XSfbNapuL/2ygbMTRxpF+AStL9Ho9A==;EndpointSuffix=core.windows.net";
+	//Project
+	private static final String STORAGE_CONNECTION_STRING = "DefaultEndpointsProtocol=https;AccountName=scc60492;AccountKey=2lddvpV/kKYzpiUq6yOzg52AyB599d1OyeJQf694VGMrr0UbRjIj6Rp3Ns/bsm7htNWCmmwkcDSl+AStQ1GPyg==;EndpointSuffix=core.windows.net";
 	private static final String VIDEOS_CONTAINER = "videos";
 	private final BlobContainerClient containerClient;
 
@@ -76,11 +78,19 @@ public class AzureBlobStorage implements BlobStorage {
 	public Result<byte[]> read(String path) {
 		if (path == null)
 			return error(BAD_REQUEST);
-		
-		//TODO
-		//return error(NOT_FOUND);
-		
-		var bytes = new byte[0];
+
+		byte[] bytes = null;
+		var blob = containerClient.getBlobClient(path);
+
+		try {
+			BinaryData data = blob.downloadContent();
+			bytes = data.toBytes();
+		}
+		catch(BlobStorageException e) {
+			if(e.getStatusCode() == BLOB_NOT_FOUND)
+				return error(NOT_FOUND);
+		}
+
 		return bytes != null ? ok( bytes ) : error( INTERNAL_ERROR );
 	}
 

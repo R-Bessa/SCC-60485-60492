@@ -75,12 +75,14 @@ public class JavaShorts implements Shorts {
 			return errorOrResult( okUser( shrt.getOwnerId(), password), user -> {
 				return DB.transaction( hibernate -> {
 
-					hibernate.remove( shrt);
+					hibernate.remove(shrt);
 					
 					var query = format("DELETE FROM Likes l WHERE l.shortId = '%s'", shortId);
 					hibernate.createNativeQuery( query, Likes.class).executeUpdate();
-					
-					JavaBlobs.getInstance().delete(shrt.getBlobUrl(), Token.get() );
+					String blobUrl = shrt.getBlobUrl();
+					String queryParam = "token=";
+					String token = blobUrl.substring(blobUrl.indexOf(queryParam) + queryParam.length());
+					JavaBlobs.getInstance().delete(shortId, token);
 				});
 			});	
 		});

@@ -21,6 +21,7 @@ import com.azure.core.exception.ResourceNotFoundException;
 import com.azure.core.util.BinaryData;
 import com.azure.storage.blob.BlobContainerClient;
 import com.azure.storage.blob.BlobServiceClientBuilder;
+import com.azure.storage.blob.models.BlobItem;
 import com.azure.storage.blob.models.BlobStorageException;
 import com.azure.storage.blob.models.PublicAccessType;
 import jakarta.ws.rs.WebApplicationException;
@@ -34,9 +35,9 @@ public class AzureBlobStorage implements BlobStorage {
 	private static final int BLOB_CONFLICT = 409;
 	private static final int BLOB_NOT_FOUND = 404;
 	//Bessa
-	private static final String STORAGE_CONNECTION_STRING = "DefaultEndpointsProtocol=https;AccountName=scc60485;AccountKey=tRBfHsTj0Fe+vayowI6sGxu24UuVGf1rjY1p9OIL+0jMOP+P6DKzdXX7XSfbNapuL/2ygbMTRxpF+AStL9Ho9A==;EndpointSuffix=core.windows.net";
+	//private static final String STORAGE_CONNECTION_STRING = "DefaultEndpointsProtocol=https;AccountName=scc60485;AccountKey=tRBfHsTj0Fe+vayowI6sGxu24UuVGf1rjY1p9OIL+0jMOP+P6DKzdXX7XSfbNapuL/2ygbMTRxpF+AStL9Ho9A==;EndpointSuffix=core.windows.net";
 	//Project
-	//private static final String STORAGE_CONNECTION_STRING = "DefaultEndpointsProtocol=https;AccountName=scc60492;AccountKey=2lddvpV/kKYzpiUq6yOzg52AyB599d1OyeJQf694VGMrr0UbRjIj6Rp3Ns/bsm7htNWCmmwkcDSl+AStQ1GPyg==;EndpointSuffix=core.windows.net";
+	private static final String STORAGE_CONNECTION_STRING = "DefaultEndpointsProtocol=https;AccountName=scc60492;AccountKey=2lddvpV/kKYzpiUq6yOzg52AyB599d1OyeJQf694VGMrr0UbRjIj6Rp3Ns/bsm7htNWCmmwkcDSl+AStQ1GPyg==;EndpointSuffix=core.windows.net";
 	private static final String VIDEOS_CONTAINER = "videos";
 	private final BlobContainerClient containerClient;
 
@@ -111,7 +112,24 @@ public class AzureBlobStorage implements BlobStorage {
 
 		var blob = containerClient.getBlobClient(path);
 
-		return blob.deleteIfExists() ? ok() : error(NOT_FOUND);
+		if(blob.deleteIfExists())
+			return ok();
+
+		else {
+			var blobs = containerClient.listBlobsByHierarchy(path + "/");
+
+			if (!blobs.iterator().hasNext())
+				return error(NOT_FOUND);
+
+			else {
+				blobs.forEach(blobItem -> {
+					String blobName = blobItem.getName();
+					containerClient.getBlobClient(blobName).delete();
+				});
+
+				return ok();
+			}
+		}
 	}
 
 

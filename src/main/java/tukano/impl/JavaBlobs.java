@@ -93,7 +93,7 @@ public class JavaBlobs implements Blobs {
 		return blobId.replace("+", "/");
 	}
 	
-	private String toURL( String blobId ) {
+	private String toURL(String blobId ) {
 		return baseURI + blobId ;
 	}
 }

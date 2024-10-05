@@ -8,6 +8,7 @@ import static tukano.api.Result.ErrorCode.CONFLICT;
 import static tukano.api.Result.ErrorCode.INTERNAL_ERROR;
 import static tukano.api.Result.ErrorCode.NOT_FOUND;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -22,6 +23,7 @@ import com.azure.core.util.BinaryData;
 import com.azure.storage.blob.BlobContainerClient;
 import com.azure.storage.blob.BlobServiceClientBuilder;
 import com.azure.storage.blob.models.BlobItem;
+import com.azure.storage.blob.models.BlobRange;
 import com.azure.storage.blob.models.BlobStorageException;
 import com.azure.storage.blob.models.PublicAccessType;
 import jakarta.ws.rs.WebApplicationException;
@@ -35,11 +37,11 @@ public class AzureBlobStorage implements BlobStorage {
 	private static final int BLOB_CONFLICT = 409;
 	private static final int BLOB_NOT_FOUND = 404;
 	//Bessa
-	//private static final String STORAGE_CONNECTION_STRING = "DefaultEndpointsProtocol=https;AccountName=scc60485;AccountKey=tRBfHsTj0Fe+vayowI6sGxu24UuVGf1rjY1p9OIL+0jMOP+P6DKzdXX7XSfbNapuL/2ygbMTRxpF+AStL9Ho9A==;EndpointSuffix=core.windows.net";
+	private static final String STORAGE_CONNECTION_STRING = "DefaultEndpointsProtocol=https;AccountName=scc60485;AccountKey=tRBfHsTj0Fe+vayowI6sGxu24UuVGf1rjY1p9OIL+0jMOP+P6DKzdXX7XSfbNapuL/2ygbMTRxpF+AStL9Ho9A==;EndpointSuffix=core.windows.net";
 	//Project
-	private static final String STORAGE_CONNECTION_STRING = "DefaultEndpointsProtocol=https;AccountName=scc60492;AccountKey=2lddvpV/kKYzpiUq6yOzg52AyB599d1OyeJQf694VGMrr0UbRjIj6Rp3Ns/bsm7htNWCmmwkcDSl+AStQ1GPyg==;EndpointSuffix=core.windows.net";
+	//private static final String STORAGE_CONNECTION_STRING = "DefaultEndpointsProtocol=https;AccountName=scc60492;AccountKey=2lddvpV/kKYzpiUq6yOzg52AyB599d1OyeJQf694VGMrr0UbRjIj6Rp3Ns/bsm7htNWCmmwkcDSl+AStQ1GPyg==;EndpointSuffix=core.windows.net";
 	private static final String VIDEOS_CONTAINER = "videos";
-	private final BlobContainerClient containerClient;
+	private static BlobContainerClient containerClient = null;
 
 
 	public AzureBlobStorage() {
@@ -100,8 +102,28 @@ public class AzureBlobStorage implements BlobStorage {
 		if (path == null)
 			return error(BAD_REQUEST);
 
-		//TODO containerClient.getBlobClient(path).getBlockBlobClient();
-		//IO.read( file, CHUNK_SIZE, sink );
+		var blob = containerClient.getBlobClient(path);
+
+		if(!blob.exists())
+			return error(NOT_FOUND);
+
+		long blobSize = blob.getProperties().getBlobSize();
+		long offset = 0;
+
+		while (offset < blobSize) {
+			long nBytes = Math.min(CHUNK_SIZE, blobSize - offset);
+			BlobRange range = new BlobRange(offset, nBytes);
+
+			ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+			blob.downloadStreamWithResponse(outputStream, range, null, null, false, null, null);
+
+			byte[] chunk = outputStream.toByteArray();
+			sink.accept(chunk);
+			System.out.println(Arrays.toString(chunk));
+
+			offset += nBytes;
+		}
+
 		return ok();
 	}
 	

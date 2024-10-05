@@ -8,13 +8,12 @@ import static tukano.api.Result.ErrorCode.CONFLICT;
 import static tukano.api.Result.ErrorCode.INTERNAL_ERROR;
 import static tukano.api.Result.ErrorCode.NOT_FOUND;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Properties;
 import java.util.function.Consumer;
 
 import com.azure.core.exception.AzureException;
@@ -29,6 +28,7 @@ import com.azure.storage.blob.models.PublicAccessType;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 import tukano.api.Result;
+import tukano.impl.rest.TukanoApplication;
 import utils.Hash;
 import utils.IO;
 
@@ -36,17 +36,13 @@ public class AzureBlobStorage implements BlobStorage {
 	private static final int CHUNK_SIZE = 4096;
 	private static final int BLOB_CONFLICT = 409;
 	private static final int BLOB_NOT_FOUND = 404;
-	//Bessa
-	private static final String STORAGE_CONNECTION_STRING = "DefaultEndpointsProtocol=https;AccountName=scc60485;AccountKey=tRBfHsTj0Fe+vayowI6sGxu24UuVGf1rjY1p9OIL+0jMOP+P6DKzdXX7XSfbNapuL/2ygbMTRxpF+AStL9Ho9A==;EndpointSuffix=core.windows.net";
-	//Project
-	//private static final String STORAGE_CONNECTION_STRING = "DefaultEndpointsProtocol=https;AccountName=scc60492;AccountKey=2lddvpV/kKYzpiUq6yOzg52AyB599d1OyeJQf694VGMrr0UbRjIj6Rp3Ns/bsm7htNWCmmwkcDSl+AStQ1GPyg==;EndpointSuffix=core.windows.net";
 	private static final String VIDEOS_CONTAINER = "videos";
-	private static BlobContainerClient containerClient = null;
+	private final BlobContainerClient containerClient;
 
 
 	public AzureBlobStorage() {
 		containerClient = new BlobServiceClientBuilder()
-				.connectionString(STORAGE_CONNECTION_STRING)
+				.connectionString(TukanoApplication.BLOB_STORAGE_KEY)
 				.buildClient()
 				.createBlobContainerIfNotExists(VIDEOS_CONTAINER);
 
@@ -119,7 +115,6 @@ public class AzureBlobStorage implements BlobStorage {
 
 			byte[] chunk = outputStream.toByteArray();
 			sink.accept(chunk);
-			System.out.println(Arrays.toString(chunk));
 
 			offset += nBytes;
 		}

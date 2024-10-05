@@ -12,6 +12,7 @@ import tukano.api.Result;
 import tukano.impl.rest.TukanoApplication;
 import tukano.impl.storage.BlobStorage;
 import tukano.impl.storage.AzureBlobStorage;
+import tukano.impl.storage.FilesystemStorage;
 import utils.Hash;
 import utils.Hex;
 
@@ -30,8 +31,13 @@ public class JavaBlobs implements Blobs {
 	}
 	
 	private JavaBlobs() {
-		storage = new AzureBlobStorage();
+		storage = initStorage();
 		baseURI = String.format("%s/%s/", TukanoApplication.BASE_URI, Blobs.NAME);
+	}
+
+
+	private BlobStorage initStorage() {
+		return TukanoApplication.AZURE_BLOBS ? new AzureBlobStorage() : new FilesystemStorage();
 	}
 	
 	@Override

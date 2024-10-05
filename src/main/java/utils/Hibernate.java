@@ -1,6 +1,5 @@
 package utils;
 
-import java.io.File;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -29,7 +28,7 @@ public class Hibernate {
 
 	private Hibernate() {
 		try {
-			sessionFactory = new Configuration().configure().buildSessionFactory();
+			sessionFactory = new Configuration().configure(HIBERNATE_CFG_FILE).buildSessionFactory();
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -91,32 +90,33 @@ public class Hibernate {
 			throw e;
 		}
 	}
-	
+
 	public <T> Result<T> execute(Consumer<Session> proc) {
 		return execute( (hibernate) -> {
 			proc.accept( hibernate);
 			return Result.ok();
 		});
 	}
-	
+
 	public <T> Result<T> execute(Function<Session, Result<T>> func) {
 		Transaction tx = null;
-		try (var session = sessionFactory.openSession()) {
+		Session session = null;  // Declare session outside of try-with-resources
+		try {
+			session = sessionFactory.openSession();  // Open session here
 			tx = session.beginTransaction();
-			var res = func.apply( session );
-			session.flush();
+			var res = func.apply(session);
 			tx.commit();
 			return res;
-		}
-		catch (ConstraintViolationException __) {	
+		} catch (ConstraintViolationException __) {
+			if (tx != null) tx.rollback();
 			return Result.error(ErrorCode.CONFLICT);
-		}  
-		catch (Exception e) {
-			if( tx != null )
-				tx.rollback();
-			
+		} catch (Exception e) {
+			if (tx != null) tx.rollback();
 			e.printStackTrace();
-			throw e;
+			throw e;  // Rethrow exception to let the caller handle it
+		} finally {
+			if (session != null) session.close();  // Close the session in the finally block
 		}
 	}
+
 }

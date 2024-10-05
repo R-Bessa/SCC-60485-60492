@@ -69,14 +69,14 @@ public class JavaShorts implements Shorts {
 	@Override
 	public Result<Void> deleteShort(String shortId, String password) {
 		Log.info(() -> format("deleteShort : shortId = %s, pwd = %s\n", shortId, password));
-		
+
 		return errorOrResult( getShort(shortId), shrt -> {
-			
+
 			return errorOrResult( okUser( shrt.getOwnerId(), password), user -> {
 				return DB.transaction( hibernate -> {
 
 					hibernate.remove(shrt);
-					
+
 					var query = format("DELETE FROM Likes l WHERE l.shortId = '%s'", shortId);
 					hibernate.createNativeQuery( query, Likes.class).executeUpdate();
 					String blobUrl = shrt.getBlobUrl();
@@ -84,7 +84,7 @@ public class JavaShorts implements Shorts {
 					String token = blobUrl.substring(blobUrl.indexOf(queryParam) + queryParam.length());
 					JavaBlobs.getInstance().delete(shortId, token);
 				});
-			});	
+			});
 		});
 	}
 
@@ -169,7 +169,7 @@ public class JavaShorts implements Shorts {
 	public Result<Void> deleteAllShorts(String userId, String password, String token) {
 		Log.info(() -> format("deleteAllShorts : userId = %s, password = %s, token = %s\n", userId, password, token));
 
-		if( ! Token.isValid( token, userId ) )
+		if( ! Token.isValid(Token.get(userId), userId ) )
 			return error(FORBIDDEN);
 		
 		return DB.transaction( (hibernate) -> {

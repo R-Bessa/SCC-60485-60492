@@ -2,13 +2,13 @@ package tukano.impl;
 
 import java.util.logging.Logger;
 
+import tukano.impl.rest.TukanoApplication;
 import utils.Hash;
 
 public class Token {
 	private static Logger Log = Logger.getLogger(Token.class.getName());
 
 	private static final String DELIMITER = "-";
-	private static final long MAX_TOKEN_AGE = 1000000;
 	private static String secret;
 
 	public static void setSecret(String s) {
@@ -33,8 +33,8 @@ public class Token {
 			var timestamp = Long.valueOf(bits[0]);
 			var hmac = Hash.of(id, timestamp, secret);
 			var elapsed = Math.abs(System.currentTimeMillis() - timestamp);			
-			Log.info(String.format("hash ok:%s, elapsed %s ok: %s\n", hmac.equals(bits[1]), elapsed, elapsed < MAX_TOKEN_AGE));
-			return hmac.equals(bits[1]) && elapsed < MAX_TOKEN_AGE;			
+			Log.info(String.format("hash ok:%s, elapsed %s ok: %s\n", hmac.equals(bits[1]), elapsed, elapsed < TukanoApplication.MAX_TOKEN_AGE));
+			return hmac.equals(bits[1]) && elapsed < TukanoApplication.MAX_TOKEN_AGE;
 		} catch( Exception x ) {
 			x.printStackTrace();
 			return false;

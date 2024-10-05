@@ -29,6 +29,7 @@ utils\Hex.class
 tukano\api\rest\RestBlobs.class
 utils\DB.class
 utils\IO.class
+tukano\impl\rest\TukanoRestServer.class
 tukano\impl\storage\FilesystemStorage.class
 tukano\api\ErrorResult.class
 utils\TryCatch$ThrowableSupplier.class

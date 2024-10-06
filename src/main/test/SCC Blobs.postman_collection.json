@@ -1,0 +1,349 @@
+{
+	"info": {
+		"_postman_id": "f91a2f8c-9aad-4d97-b5e4-cf197307c942",
+		"name": "SCC Blobs",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "26438780",
+		"_collection_link": "https://warped-water-615168.postman.co/workspace/SCC-60485-60492~43b11e4e-9b7f-4c38-af4b-addc5718532c/collection/26055497-f91a2f8c-9aad-4d97-b5e4-cf197307c942?action=share&source=collection_link&creator=26438780"
+	},
+	"item": [
+		{
+			"name": "Create User Wales",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\"userId\":\"wales\", \r\n\"pwd\":\"12345\", \r\n\"email\":\"jimmy@wikipedia.pt\", \r\n\"displayName\":\"Jimmy Wales\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://scc-60485-60492.azurewebsites.net/rest/users",
+					"protocol": "https",
+					"host": [
+						"scc-60485-60492",
+						"azurewebsites",
+						"net"
+					],
+					"path": [
+						"rest",
+						"users"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Short Wales",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Parse the response body\r",
+							"let responseData = pm.response.json();\r",
+							"\r",
+							"// Save shortId to an environment variable\r",
+							"pm.environment.set(\"walesShortID\", responseData.shortId);\r",
+							"\r",
+							"// Extract the blobUrl from the JSON response\r",
+							"let blobUrl = responseData.blobUrl;\r",
+							"\r",
+							"// Use a regular expression to extract the token part\r",
+							"let token = blobUrl.match(/token=([^&]+)/)[1];\r",
+							"\r",
+							"// Save token to an environment variable\r",
+							"pm.environment.set(\"token\", token);\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "https://scc-60485-60492.azurewebsites.net/rest/shorts/wales?pwd=12345",
+					"protocol": "https",
+					"host": [
+						"scc-60485-60492",
+						"azurewebsites",
+						"net"
+					],
+					"path": [
+						"rest",
+						"shorts",
+						"wales"
+					],
+					"query": [
+						{
+							"key": "pwd",
+							"value": "12345"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Upload Blob",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/octet-stream",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "\\0x4a\\0x6f\\0x68\\0x6e\\0x44\\0x6f\\0x65\\0x31\\0x32\\0x33\\0x34\\0x35\\0x36\\0x37\\0x38\\0x39\r\n\\0x41\\0x42\\0x43\\0x44\\0x45\\0x46\\0x47\\0x48\\0x49\\0x4a\\0x4b\\0x4c\\0x4d\\0x4e\\0x4f\\0x50\r\n\\0x51\\0x52\\0x53\\0x54\\0x55\\0x56\\0x57\\0x58\\0x59\\0x5a\\0x61\\0x62\\0x63\\0x64\\0x65\\0x66\r\n\\0x67\\0x68\\0x69\\0x6a\\0x6b\\0x6c\\0x6d\\0x6e\\0x6f\\0x70\\0x71\\0x72\\0x73\\0x74\\0x75\\0x76\r\n\\0x77\\0x78\\0x79\\0x7a\\0x30\\0x31\\0x32\\0x33\\0x34\\0x35\\0x36\\0x37\\0x38\\0x39\\0x41\\0x42\r\n\\0x43\\0x44\\0x45\\0x46\\0x47\\0x48\\0x49\\0x4a\\0x4b\\0x4c\\0x4d\\0x4e\\0x4f\\0x50\\0x51\\0x52\r\n\\0x53\\0x54\\0x55\\0x56\\0x57\\0x58\\0x59\\0x5a\\0x61\\0x62\\0x63\\0x64\\0x65\\0x66\\0x67\\0x68\r\n\\0x69\\0x6a\\0x6b\\0x6c\\0x6d\\0x6e\\0x6f\\0x70\\0x71\\0x72\\0x73\\0x74\\0x75\\0x76\\0x77\\0x78\r\n\\0x79\\0x7a\\0x30\\0x31\\0x32\\0x33\\0x34\\0x35\\0x36\\0x37\\0x38\\0x39\\0x41\\0x42\\0x43\\0x44\r\n\\0x45\\0x46\\0x47\\0x48\\0x49\\0x4a\\0x4b\\0x4c\\0x4d\\0x4e\\0x4f\\0x50\\0x51\\0x52\\0x53\\0x54\r\n\\0x55\\0x56\\0x57\\0x58\\0x59\\0x5a\\0x61\\0x62\\0x63\\0x64\\0x65\\0x66\\0x67\\0x68\\0x69\\0x6a\r\n\\0x6b\\0x6c\\0x6d\\0x6e\\0x6f\\0x70\\0x71\\0x72\\0x73\\0x74\\0x75\\0x76\\0x77\\0x78\\0x79\\0x7a\r\n\\0x30\\0x31\\0x32\\0x33\\0x34\\0x35\\0x36\\0x37\\0x38\\0x39\\0x41\\0x42\\0x43\\0x44\\0x45\\0x46\r\n\\0x47\\0x48\\0x49\\0x4a\\0x4b\\0x4c\\0x4d\\0x4e\\0x4f\\0x50\\0x51\\0x52\\0x53\\0x54\\0x55\\0x56\r\n\\0x57\\0x58\\0x59\\0x5a\\0x61\\0x62\\0x63\\0x64\\0x65\\0x66\\0x67\\0x68\\0x69\\0x6a\\0x6b\\0x6c\r\n\\0x6d\\0x6e\\0x6f\\0x70\\0x71\\0x72\\0x73\\0x74\\0x75\\0x76\\0x77\\0x78\\0x79\\0x7a\\0x30\\0x31\r\n\\0x32\\0x33\\0x34\\0x35\\0x36\\0x37\\0x38\\0x39\\0x41\\0x42\\0x43\\0x44\\0x45\\0x46\\0x47\\0x48\r\n\\0x49\\0x4a\\0x4b\\0x4c\\0x4d\\0x4e\\0x4f\\0x50\\0x51\\0x52\\0x53\\0x54\\0x55\\0x56\\0x57\\0x58\r\n\\0x59\\0x5a\\0x61\\0x62\\0x63\\0x64\\0x65\\0x66\\0x67\\0x68\\0x69\\0x6a\\0x6b\\0x6c\\0x6d\\0x6e\r\n\\0x6f\\0x70\\0x71\\0x72\\0x73\\0x74\\0x75\\0x76\\0x77\\0x78\\0x79\\0x7a\\0x30\\0x31\\0x32\\0x33\r\n\\0x34\\0x35\\0x36\\0x37\\0x38\\0x39\\0x41\\0x42\\0x43\\0x44\\0x45\\0x46\\0x47\\0x48\\0x49\\0x4a\r\n\\0x4b\\0x4c\\0x4d\\0x4e\\0x4f\\0x50\\0x51\\0x52\\0x53\\0x54\\0x55\\0x56\\0x57\\0x58\\0x59\\0x5a\r\n\\0x61\\0x62\\0x63\\0x64\\0x65\\0x66\\0x67\\0x68\\0x69\\0x6a\\0x6b\\0x6c\\0x6d\\0x6e\\0x6f\\0x70\r\n\\0x71\\0x72\\0x73\\0x74\\0x75\\0x76\\0x77\\0x78\\0x79\\0x7a\\0x30\\0x31\\0x32\\0x33\\0x34\\0x35\r\n\\0x36\\0x37\\0x38\\0x39\\0x41\\0x42\\0x43\\0x44\\0x45\\0x46\\0x47\\0x48\\0x49\\0x4a\\0x4b\\0x4c\r\n\\0x4d\\0x4e\\0x4f\\0x50\\0x51\\0x52\\0x53\\0x54\\0x55\\0x56\\0x57\\0x58\\0x59\\0x5a\\0x61\\0x62\r\n\\0x63\\0x64\\0x65\\0x66\\0x67\\0x68\\0x69\\0x6a\\0x6b\\0x6c\\0x6d\\0x6e\\0x6f\\0x70\\0x71\\0x72\r\n\\0x73\\0x74\\0x75\\0x76\\0x77\\0x78\\0x79\\0x7a\\0x30\\0x31\\0x32\\0x33\\0x34\\0x35\\0x36\\0x37\r\n\\0x38\\0x39\\0x41\\0x42\\0x43\\0x44\\0x45\\0x46\\0x47\\0x48\\0x49\\0x4a\\0x4b\\0x4c\\0x4d\\0x4e\r\n\\0x4f\\0x50\\0x51\\0x52\\0x53\\0x54\\0x55\\0x56\\0x57\\"
+				},
+				"url": {
+					"raw": "https://scc-60485-60492.azurewebsites.net/rest/blobs/{{walesShortID}}?token={{token}}",
+					"protocol": "https",
+					"host": [
+						"scc-60485-60492",
+						"azurewebsites",
+						"net"
+					],
+					"path": [
+						"rest",
+						"blobs",
+						"{{walesShortID}}"
+					],
+					"query": [
+						{
+							"key": "token",
+							"value": "{{token}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Blob",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "https://scc-60485-60492.azurewebsites.net/rest/blobs/{{walesShortID}}?token={{token}}",
+					"protocol": "https",
+					"host": [
+						"scc-60485-60492",
+						"azurewebsites",
+						"net"
+					],
+					"path": [
+						"rest",
+						"blobs",
+						"{{walesShortID}}"
+					],
+					"query": [
+						{
+							"key": "token",
+							"value": "{{token}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete All Blobs Wales",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "https://scc-60485-60492.azurewebsites.net/rest/blobs/wales/blobs?token={{token}}",
+					"protocol": "https",
+					"host": [
+						"scc-60485-60492",
+						"azurewebsites",
+						"net"
+					],
+					"path": [
+						"rest",
+						"blobs",
+						"wales",
+						"blobs"
+					],
+					"query": [
+						{
+							"key": "token",
+							"value": "{{token}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Short Wales",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "https://scc-60485-60492.azurewebsites.net/rest/shorts/{{walesShortID}}?pwd=12345",
+					"protocol": "https",
+					"host": [
+						"scc-60485-60492",
+						"azurewebsites",
+						"net"
+					],
+					"path": [
+						"rest",
+						"shorts",
+						"{{walesShortID}}"
+					],
+					"query": [
+						{
+							"key": "pwd",
+							"value": "12345"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete All Short Wales",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "https://scc-60485-60492.azurewebsites.net/rest/shorts/wales/shorts?pwd=12345&token={{token}}",
+					"protocol": "https",
+					"host": [
+						"scc-60485-60492",
+						"azurewebsites",
+						"net"
+					],
+					"path": [
+						"rest",
+						"shorts",
+						"wales",
+						"shorts"
+					],
+					"query": [
+						{
+							"key": "pwd",
+							"value": "12345"
+						},
+						{
+							"key": "token",
+							"value": "{{token}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete User Wales",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "https://scc-60485-60492.azurewebsites.net/rest/users/wales?pwd=12345",
+					"protocol": "https",
+					"host": [
+						"scc-60485-60492",
+						"azurewebsites",
+						"net"
+					],
+					"path": [
+						"rest",
+						"users",
+						"wales"
+					],
+					"query": [
+						{
+							"key": "pwd",
+							"value": "12345"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create User Liskov",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\"userId\":\"liskov\", \r\n\"pwd\":\"54321\", \r\n\"email\":\"liskov@mit.edu\", \r\n\"displayName\":\"Barbara Liskov\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://scc-60492-60485.azurewebsites.net/rest/users",
+					"protocol": "https",
+					"host": [
+						"scc-60492-60485",
+						"azurewebsites",
+						"net"
+					],
+					"path": [
+						"rest",
+						"users"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Short Liskov",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "https://scc-60492-60485.azurewebsites.net/rest/shorts/liskov?pwd=54321",
+					"protocol": "https",
+					"host": [
+						"scc-60492-60485",
+						"azurewebsites",
+						"net"
+					],
+					"path": [
+						"rest",
+						"shorts",
+						"liskov"
+					],
+					"query": [
+						{
+							"key": "pwd",
+							"value": "54321"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

@@ -61,6 +61,7 @@ public class JavaUsers implements Users {
 		return errorOrResult( validatedUserOrError(DB.getOne( userId, User.class), pwd), user -> DB.updateOne( user.updateFrom(other)));
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public Result<User> deleteUser(String userId, String pwd) {
 		Log.info(() -> format("deleteUser : userId = %s, pwd = %s\n", userId, pwd));
@@ -72,11 +73,11 @@ public class JavaUsers implements Users {
 
 			// Delete user shorts and related info asynchronously in a separate thread
 			Executors.defaultThreadFactory().newThread( () -> {
-				//JavaShorts.getInstance().deleteAllShorts(userId, pwd, Token.get(userId));
+				JavaShorts.getInstance().deleteAllShorts(userId, pwd, Token.get(userId));
 				JavaBlobs.getInstance().deleteAllBlobs(userId, Token.get(userId));
 			}).start();
-			
-			return DB.deleteOne( user);
+
+			return (Result<User>) DB.deleteOne(user);
 		});
 	}
 
@@ -86,6 +87,7 @@ public class JavaUsers implements Users {
 
 		var query = format("SELECT * FROM User u WHERE UPPER(u.userId) LIKE '%%%s%%'", pattern.toUpperCase());
 		var hits = DB.sql(query, User.class)
+				.value()
 				.stream()
 				.map(User::copyWithoutPassword)
 				.toList();

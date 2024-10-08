@@ -1,9 +1,7 @@
 package tukano.impl.storage.db.azure;
 
 import com.azure.cosmos.*;
-import com.azure.cosmos.models.CosmosContainerProperties;
-import com.azure.cosmos.models.PartitionKey;
-import com.azure.cosmos.models.ThroughputProperties;
+import com.azure.cosmos.models.*;
 import org.hibernate.Session;
 import tukano.api.Result;
 import tukano.api.Result.ErrorCode;
@@ -98,12 +96,15 @@ public class CosmosDB implements Database {
 
     @Override
     public <T> Result<T> updateOne(T obj) {
-        return null;
+        var container = obj instanceof User ? users_container : shorts_container;
+        return tryCatch( () -> container.upsertItem(obj).getItem());
     }
 
     @Override
-    public <T> Result<T> deleteOne(T obj) {
-        return null;
+    public <T> Result<?> deleteOne(T obj) {
+        // TODO
+        var container = obj instanceof User ? users_container : shorts_container;
+        return tryCatch( () -> container.deleteItem(obj, new CosmosItemRequestOptions()).getItem());
     }
 
     @Override
@@ -113,8 +114,13 @@ public class CosmosDB implements Database {
     }
 
     @Override
-    public <T> List<T> sql(String sqlStatement, Class<T> clazz) {
-        return null;
+    public <T> Result<List<T>> sql(String sqlStatement, Class<T> clazz) {
+        // TODO
+        var container = clazz.equals(User.class) ? users_container : shorts_container;
+        return tryCatch(() -> {
+            var res = container.queryItems(sqlStatement, new CosmosQueryRequestOptions(), clazz);
+            return res.stream().toList();
+        });
     }
 
     @Override

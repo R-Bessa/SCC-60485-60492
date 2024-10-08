@@ -12,11 +12,11 @@ public interface Database {
 
     <T> Result<T> updateOne(T obj);
 
-    <T> Result<T> deleteOne(T obj);
+    <T> Result<?> deleteOne(T obj);
 
     <T> Result<T> getOne(String id, Class<T> clazz);
 
-    <T> List<T> sql(String sqlStatement, Class<T> clazz);
+    <T> Result<List<T>> sql(String sqlStatement, Class<T> clazz);
 
     <T> Result<T> execute(Consumer<Session> proc);
 

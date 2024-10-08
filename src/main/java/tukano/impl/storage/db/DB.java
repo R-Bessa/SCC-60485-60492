@@ -19,19 +19,19 @@ public class DB {
 	}
 
 
-	public static <T> List<T> sql(String query, Class<T> clazz) {
+	public static <T> Result<List<T>> sql(String query, Class<T> clazz) {
 		return db.sql(query, clazz);
 	}
 
 	public static <T> List<T> sql(Class<T> clazz, String fmt, Object ... args) {
-		return db.sql(String.format(fmt, args), clazz);
+		return db.sql(String.format(fmt, args), clazz).value();
 	}
 
 	public static <T> Result<T> getOne(String id, Class<T> clazz) {
 		return db.getOne(id, clazz);
 	}
 
-	public static <T> Result<T> deleteOne(T obj) {
+	public static <T> Result<?> deleteOne(T obj) {
 		return db.deleteOne(obj);
 	}
 

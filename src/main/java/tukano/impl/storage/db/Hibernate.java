@@ -66,7 +66,7 @@ public class Hibernate implements Database {
 	}
 
 	@Override
-	public <T> Result<T> deleteOne(T obj) {
+	public <T> Result<?> deleteOne(T obj) {
 		return execute( hibernate -> {
 			hibernate.remove( obj );
 			return Result.ok( obj );
@@ -87,10 +87,10 @@ public class Hibernate implements Database {
 	}
 
 	@Override
-	public <T> List<T> sql(String sqlStatement, Class<T> clazz) {
+	public <T> Result<List<T>> sql(String sqlStatement, Class<T> clazz) {
 		try (var session = sessionFactory.openSession()) {
 			var query = session.createNativeQuery(sqlStatement, clazz);
-			return query.list();
+			return Result.ok(query.list());
 		} catch (Exception e) {
 			throw e;
 		}

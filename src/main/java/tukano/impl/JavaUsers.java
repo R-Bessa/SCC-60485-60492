@@ -15,7 +15,7 @@ import java.util.logging.Logger;
 import tukano.api.Result;
 import tukano.api.User;
 import tukano.api.Users;
-import utils.DB;
+import tukano.impl.storage.db.DB;
 
 public class JavaUsers implements Users {
 	

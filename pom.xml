@@ -85,21 +85,25 @@
 			                </resource>
 			            </resources>
 			        </deployment>
-			        <!--<resourceGroup>scc-project-60485-rg</resourceGroup>
-			        <appName>scc-project-60485</appName>-->
-					<resourceGroup>scc-rg-60485-60492</resourceGroup>
-					<appName>scc-60485-60492</appName>
+			        <resourceGroup>scc-project-60485-rg</resourceGroup>
+			        <appName>scc-project-60485</appName>
+					<!--<resourceGroup>scc-rg-60485-60492</resourceGroup>
+					<appName>scc-60485-60492</appName>-->
 			    </configuration>
 			</plugin>
 		</plugins>
 	</build>
 	<dependencies>
 
+		<!-- Local Cache -->
+
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
 			<version>33.0.0-jre</version>
 		</dependency>
+
+		<!-- Rest Service -->
 
 		<dependency>
 			<groupId>org.glassfish.jersey.media</groupId>
@@ -117,6 +121,8 @@
 			<version>3.1.5</version>
 		</dependency>
 
+		<!-- Hibernate -->
+
 		<dependency>
 			<groupId>org.hsqldb</groupId>
 			<artifactId>hsqldb</artifactId>
@@ -127,6 +133,8 @@
 			<artifactId>hibernate-core</artifactId>
 			<version>6.4.4.Final</version>
 		</dependency>
+
+		<!-- Rest Web App -->
 
 		<dependency>
 			<groupId>org.jboss.resteasy</groupId>
@@ -192,10 +200,45 @@
 			<version>2.17.2</version>
 		</dependency>
 
+		<!-- Azure Blob Storage -->
+
 		<dependency>
 			<groupId>com.azure</groupId>
 			<artifactId>azure-storage-blob</artifactId>
 			<version>12.28.0</version>
+		</dependency>
+
+		<!-- Azure CosmosDB -->
+
+		<dependency>
+			<groupId>com.azure</groupId>
+			<artifactId>azure-cosmos</artifactId>
+			<version>4.63.3</version>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>2.0.16</version>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-simple</artifactId>
+			<version>2.0.16</version>
+		</dependency>
+		<dependency>
+			<groupId>com.azure</groupId>
+			<artifactId>azure-core-management</artifactId>
+			<version>1.11.9</version>
+		</dependency>
+		<dependency>
+			<groupId>com.azure</groupId>
+			<artifactId>azure-identity</artifactId>
+			<version>1.11.1</version>
+		</dependency>
+		<dependency>
+			<groupId>com.azure.resourcemanager</groupId>
+			<artifactId>azure-resourcemanager</artifactId>
+			<version>2.43.0</version>
 		</dependency>
 
 	</dependencies>

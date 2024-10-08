@@ -10,9 +10,9 @@ import java.util.logging.Logger;
 import tukano.api.Blobs;
 import tukano.api.Result;
 import tukano.impl.rest.TukanoApplication;
-import tukano.impl.storage.BlobStorage;
-import tukano.impl.storage.AzureBlobStorage;
-import tukano.impl.storage.FilesystemStorage;
+import tukano.impl.storage.blobs.BlobStorage;
+import tukano.impl.storage.blobs.AzureBlobStorage;
+import tukano.impl.storage.blobs.FilesystemStorage;
 import utils.Hash;
 import utils.Hex;
 

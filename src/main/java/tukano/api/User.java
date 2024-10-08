@@ -1,5 +1,8 @@
 package tukano.api;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 
@@ -7,17 +10,21 @@ import jakarta.persistence.Id;
 public class User {
 	
 	@Id
+	@JsonProperty("id")
+	@JsonAlias("userId")
 	private String userId;
 	private String pwd;
 	private String email;	
 	private String displayName;
 
 	public User() {}
-	
-	public User(String userId, String pwd, String email, String displayName) {
+
+	@JsonCreator
+	public User(@JsonProperty("id") @JsonAlias("userId") String userId, @JsonProperty("pwd") String pwd,
+				@JsonProperty("email") String email, @JsonProperty("displayName") String displayName) {
+		this.userId = userId;
 		this.pwd = pwd;
 		this.email = email;
-		this.userId = userId;
 		this.displayName = displayName;
 	}
 

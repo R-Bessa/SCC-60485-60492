@@ -171,22 +171,46 @@ public class JavaShorts implements Shorts {
 
 		if( ! Token.isValid(Token.get(userId), userId ) )
 			return error(FORBIDDEN);
-		
-		return DB.transaction( (hibernate) -> {
-						
+
+		if(TukanoApplication.COSMOS_DB) {
+
 			//delete shorts
-			var query1 = format("DELETE Short s WHERE s.ownerId = '%s'", userId);		
-			hibernate.createQuery(query1, Short.class).executeUpdate();
-			
-			//delete follows
-			var query2 = format("DELETE Following f WHERE f.follower = '%s' OR f.followee = '%s'", userId, userId);		
-			hibernate.createQuery(query2, Following.class).executeUpdate();
-			
-			//delete likes
-			var query3 = format("DELETE Likes l WHERE l.ownerId = '%s' OR l.userId = '%s'", userId, userId);		
-			hibernate.createQuery(query3, Likes.class).executeUpdate();
-			
-		});
+			var q1 = format("SELECT * FROM shorts WHERE shorts.ownerId = \"%s\"", userId);
+			List<Short> shortList = DB.sql(q1, Short.class).value();
+			for(Short s: shortList)
+				DB.deleteOne( s );
+
+			//TODO
+			var q2 = format("SELECT Following f FROM users WHERE f.follower = \"%s\" OR f.followee = \"%s\"", userId, userId);
+			List<Following> followingList = DB.sql(q2, Following.class).value();
+			for(Following f: followingList)
+				DB.deleteOne( f );
+
+			//TODO
+			var q3 = format("SELECT Likes l FROM shorts WHERE l.ownerId = \"%s\" OR l.userId = \"%s\"", userId, userId);
+			List<Likes> likesList = DB.sql(q3, Likes.class).value();
+			for(Likes l: likesList)
+				DB.deleteOne( l );
+
+			return Result.ok();
+		}
+		else {
+			return DB.transaction( (hibernate) -> {
+
+				//delete shorts
+				var query1 = format("DELETE Short s WHERE s.ownerId = %s", userId);
+				hibernate.createQuery(query1, Short.class).executeUpdate();
+
+				//delete follows
+				var query2 = format("DELETE Following f WHERE f.follower = \"%s\" OR f.followee = \"%s\"", userId, userId);
+				hibernate.createQuery(query2, Following.class).executeUpdate();
+
+				//delete likes
+				var query3 = format("DELETE Likes l WHERE l.ownerId = \"%s\" OR l.userId = \"%s\"", userId, userId);
+				hibernate.createQuery(query3, Likes.class).executeUpdate();
+
+			});
+		}
 	}
 	
 }

@@ -2,22 +2,28 @@ package tukano.impl.data;
 
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 
 @Entity
 public class Following{
 
-	@Id 
+	@Id
+	String id;
+
 	String follower;
-	
-	@Id 
+
 	String followee;
 
 	public Following() {}
 
+
 	public Following(String follower, String followee) {
 		super();
+		this.id = follower + followee;
 		this.follower = follower;
 		this.followee = followee;
 	}

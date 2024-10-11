@@ -6,6 +6,7 @@ import org.hibernate.Session;
 import tukano.api.Result;
 import tukano.api.Result.ErrorCode;
 import tukano.api.User;
+import tukano.impl.data.Following;
 import tukano.impl.rest.TukanoApplication;
 import tukano.impl.storage.db.Database;
 
@@ -21,6 +22,8 @@ public class CosmosDB implements Database {
     private static final String DB_NAME = "tukano-db-60485";
     private static final String USERS_CONTAINER = "users";
     private static final String SHORTS_CONTAINER = "shorts";
+    private static final String FOLLOW_CONTAINER = "follow";
+    private static final String LIKES_CONTAINER = "likes";
     private static final String PARTITION_KEY_PATH = "/id";
 
 
@@ -29,6 +32,9 @@ public class CosmosDB implements Database {
     private static CosmosDatabase db;
     private static CosmosContainer users_container;
     private static CosmosContainer shorts_container;
+    private static CosmosContainer follow_container;
+    private static CosmosContainer likes_container;
+
 
 
     public CosmosDB(CosmosClient client) {
@@ -48,6 +54,12 @@ public class CosmosDB implements Database {
 
         createContainerIfNotExists(SHORTS_CONTAINER);
         shorts_container = db.getContainer(SHORTS_CONTAINER);
+
+        createContainerIfNotExists(FOLLOW_CONTAINER);
+        follow_container = db.getContainer(FOLLOW_CONTAINER);
+
+        createContainerIfNotExists(LIKES_CONTAINER);
+        likes_container = db.getContainer(LIKES_CONTAINER);
     }
 
 
@@ -58,8 +70,8 @@ public class CosmosDB implements Database {
         CosmosClient client = new CosmosClientBuilder()
                 .endpoint(TukanoApplication.CONNECTION_URL)
                 .key(TukanoApplication.DB_KEY)
-                .directMode()
-                //.gatewayMode()
+                //.directMode()
+                .gatewayMode()
                 .consistencyLevel(ConsistencyLevel.SESSION)
                 .connectionSharingAcrossClientsEnabled(true)
                 .contentResponseOnWriteEnabled(true) //
@@ -87,36 +99,56 @@ public class CosmosDB implements Database {
         );
     }
 
+    private <T> Result<CosmosContainer> getContainerWithObj(T obj) {
+        if (obj instanceof User)
+            return Result.ok(users_container);
+        if(obj instanceof Short)
+            return Result.ok(shorts_container);
+        if(obj instanceof Following)
+            return Result.ok(follow_container);
+        else
+            return Result.ok(likes_container);
+    }
+
+    private <T> Result<CosmosContainer> getContainerWithClass(Class<T> clazz) {
+        if(clazz.equals(User.class))
+            return Result.ok(users_container);
+        if(clazz.equals(Short.class))
+            return Result.ok(shorts_container);
+        if(clazz.equals(Following.class))
+            return Result.ok(follow_container);
+        else
+            return Result.ok(likes_container);
+    }
 
     @Override
     public <T> Result<T>  persistOne(T obj) {
-        var container = obj instanceof User ? users_container : shorts_container;
+        var container = getContainerWithObj(obj).value();
         return tryCatch( () -> container.createItem(obj).getItem());
     }
 
     @Override
     public <T> Result<T> updateOne(T obj) {
-        var container = obj instanceof User ? users_container : shorts_container;
+        var container = getContainerWithObj(obj).value();
         return tryCatch( () -> container.upsertItem(obj).getItem());
     }
 
     @Override
     public <T> Result<?> deleteOne(T obj) {
         // TODO
-        var container = obj instanceof User ? users_container : shorts_container;
+        var container = getContainerWithObj(obj).value();
         return tryCatch( () -> container.deleteItem(obj, new CosmosItemRequestOptions()).getItem());
     }
 
     @Override
     public <T> Result<T> getOne(String id, Class<T> clazz) {
-        var container = clazz.equals(User.class) ? users_container : shorts_container;
+        var container = getContainerWithClass(clazz).value();
         return tryCatch( () -> container.readItem(id, new PartitionKey(id), clazz).getItem());
     }
 
     @Override
     public <T> Result<List<T>> sql(String sqlStatement, Class<T> clazz) {
-        // TODO
-        var container = clazz.equals(User.class) ? users_container : shorts_container;
+        var container = getContainerWithClass(clazz).value();
         return tryCatch(() -> {
             var res = container.queryItems(sqlStatement, new CosmosQueryRequestOptions(), clazz);
             return res.stream().toList();

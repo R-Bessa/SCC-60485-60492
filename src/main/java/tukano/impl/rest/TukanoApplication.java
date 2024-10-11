@@ -33,7 +33,7 @@ public class TukanoApplication extends Application {
 	//public static final String DB_KEY = "it7uZORVgE55xgqigGwXJs99RWfOX7IYH85dHUOcvVwhgEVt2wAzQQGz4OqkjO3Rs7WyQmMyKspsACDbOjKT8w==";
 
 	public static final String CONNECTION_URL = "https://scc-60485-60492.documents.azure.com:443/";
-	public static final String DB_KEY = "yX9MibRzYDxvkABm3GM9U1xmbo9N0dpDyCujsgwo2fx472vVdd0h2Rkjg0nPc7oBMwdsVyMis5LQACDbJnVCbw==";
+	public static final String DB_KEY = "gZGjVKxBMJF8fSwF2s3UBmsfdSk9k1vOZq6ziCkCBBsEJYx9wBr1ZRH4tncG5YYh5fW3hoDv0nSdACDbosz4Fg==";
 
 
 

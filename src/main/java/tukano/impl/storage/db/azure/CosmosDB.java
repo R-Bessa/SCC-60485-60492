@@ -7,6 +7,7 @@ import tukano.api.Result;
 import tukano.api.Result.ErrorCode;
 import tukano.api.User;
 import tukano.impl.data.Following;
+import tukano.impl.data.Likes;
 import tukano.impl.rest.TukanoApplication;
 import tukano.impl.storage.db.Database;
 
@@ -102,23 +103,23 @@ public class CosmosDB implements Database {
     private <T> Result<CosmosContainer> getContainerWithObj(T obj) {
         if (obj instanceof User)
             return Result.ok(users_container);
-        if(obj instanceof Short)
-            return Result.ok(shorts_container);
+        if(obj instanceof Likes)
+            return Result.ok(likes_container);
         if(obj instanceof Following)
             return Result.ok(follow_container);
         else
-            return Result.ok(likes_container);
+            return Result.ok(shorts_container);
     }
 
     private <T> Result<CosmosContainer> getContainerWithClass(Class<T> clazz) {
         if(clazz.equals(User.class))
             return Result.ok(users_container);
-        if(clazz.equals(Short.class))
-            return Result.ok(shorts_container);
+        if(clazz.equals(Likes.class))
+            return Result.ok(likes_container);
         if(clazz.equals(Following.class))
             return Result.ok(follow_container);
         else
-            return Result.ok(likes_container);
+            return Result.ok(shorts_container);
     }
 
     @Override

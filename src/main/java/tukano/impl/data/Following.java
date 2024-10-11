@@ -12,6 +12,8 @@ import jakarta.persistence.Id;
 public class Following{
 
 	@Id
+	@JsonProperty("id")
+	@JsonAlias("id")
 	String id;
 
 	String follower;
@@ -20,10 +22,10 @@ public class Following{
 
 	public Following() {}
 
-
-	public Following(String follower, String followee) {
+	@JsonCreator
+	public Following(@JsonProperty("follower")String follower, @JsonProperty("followee")String followee) {
 		super();
-		this.id = follower + followee;
+		this.id = follower + "-" + followee;
 		this.follower = follower;
 		this.followee = followee;
 	}

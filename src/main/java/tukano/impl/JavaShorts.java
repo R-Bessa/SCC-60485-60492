@@ -60,9 +60,10 @@ public class JavaShorts implements Shorts {
 		if( shortId == null )
 			return error(BAD_REQUEST);
 
-		var query = format("SELECT count(*) FROM Likes l WHERE l.shortId = '%s'", shortId);
+		//var query = format("SELECT count(*) FROM Likes l WHERE l.shortId = '%s'", shortId);
+		var query = format("SELECT * FROM Likes l WHERE l.shortId = '%s'", shortId);
 		var likes = DB.sql(query, Long.class).value();
-		return errorOrValue( getOne(shortId, Short.class), shrt -> shrt.copyWithLikes_And_Token( likes.get(0)));
+		return errorOrValue( getOne(shortId, Short.class), shrt -> shrt.copyWithLikes_And_Token( likes.size()));
 	}
 
 	

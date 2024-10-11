@@ -181,14 +181,14 @@ public class JavaShorts implements Shorts {
 			for(Short s: shortList)
 				DB.deleteOne( s );
 
-			//TODO
-			var q2 = format("SELECT Following f FROM users WHERE f.follower = \"%s\" OR f.followee = \"%s\"", userId, userId);
+			//delete follows
+			var q2 = format("SELECT * FROM follow WHERE follow.follower = \"%s\" OR follow.followee = \"%s\"", userId, userId);
 			List<Following> followingList = DB.sql(q2, Following.class).value();
 			for(Following f: followingList)
 				DB.deleteOne( f );
 
-			//TODO
-			var q3 = format("SELECT Likes l FROM shorts WHERE l.ownerId = \"%s\" OR l.userId = \"%s\"", userId, userId);
+			//delete likes
+			var q3 = format("SELECT * FROM likes WHERE likes.ownerId = \"%s\" OR likes.userId = \"%s\"", userId, userId);
 			List<Likes> likesList = DB.sql(q3, Likes.class).value();
 			for(Likes l: likesList)
 				DB.deleteOne( l );

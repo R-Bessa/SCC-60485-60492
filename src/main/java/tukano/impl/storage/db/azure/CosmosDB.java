@@ -114,7 +114,7 @@ public class CosmosDB implements Database {
     private <T> Result<CosmosContainer> getContainerWithClass(Class<T> clazz) {
         if(clazz.equals(User.class))
             return Result.ok(users_container);
-        if(clazz.equals(Long.class))
+        if(clazz.equals(Long.class) || clazz.equals(Likes.class))
             return Result.ok(likes_container);
         if(clazz.equals(Following.class))
             return Result.ok(follow_container);

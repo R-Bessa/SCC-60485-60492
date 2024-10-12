@@ -13,7 +13,6 @@ public class Likes {
 
 	@Id
 	@JsonProperty("id")
-	@JsonAlias("id")
 	String id;
 
 	String userId;

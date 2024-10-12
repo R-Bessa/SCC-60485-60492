@@ -7,6 +7,9 @@ import java.util.function.Function;
 import org.hibernate.Session;
 
 import tukano.api.Result;
+import tukano.api.Short;
+import tukano.impl.data.Following;
+import tukano.impl.data.Likes;
 import tukano.impl.rest.TukanoApplication;
 import tukano.impl.storage.db.azure.CosmosDB;
 
@@ -33,6 +36,12 @@ public class DB {
 
 	public static <T> Result<?> deleteOne(T obj) {
 		return db.deleteOne(obj);
+	}
+
+	public static void deleteAllShorts(String userId, Session session) {
+		db.deleteAllConditional(Short.class, session, "ownerID", userId);
+		db.deleteAllConditional(Following.class, session, "follower", userId, "followee", userId);
+		db.deleteAllConditional(Likes.class, session, "ownerId", userId, "userId", userId);
 	}
 
 	public static <T> Result<T> updateOne(T obj) {

@@ -13,6 +13,8 @@ import org.hibernate.exception.ConstraintViolationException;
 import tukano.api.Result;
 import tukano.api.Result.ErrorCode;
 
+import static java.lang.String.format;
+
 /**
  * A helper class to perform POJO (Plain Old Java Objects) persistence, using
  * Hibernate and a backing relational database.
@@ -71,6 +73,20 @@ public class Hibernate implements Database {
 			hibernate.remove( obj );
 			return Result.ok( obj );
 		});
+	}
+
+	@Override
+	public <T> void deleteAllConditional(Class<T> clazz, Session session, String ... args) {
+		String query;
+
+		if(args.length == 2)
+			query = format("DELETE %s obj WHERE obj.%s = %s", clazz.getSimpleName(), args[0], args[1]);
+
+		else
+			query = format("DELETE %s obj WHERE obj.%s = \"%s\" OR obj.%s = \"%s\"",
+					clazz.getSimpleName(), args[0], args[1], args[2], args[3]);
+
+		session.createQuery(query, clazz).executeUpdate();
 	}
 
 	@Override

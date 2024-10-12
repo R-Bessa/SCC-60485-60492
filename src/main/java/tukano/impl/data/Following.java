@@ -13,7 +13,6 @@ public class Following{
 
 	@Id
 	@JsonProperty("id")
-	@JsonAlias("id")
 	String id;
 
 	String follower;

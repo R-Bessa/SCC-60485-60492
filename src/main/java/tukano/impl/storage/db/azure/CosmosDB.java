@@ -9,6 +9,7 @@ import tukano.api.User;
 import tukano.impl.data.Following;
 import tukano.impl.data.Likes;
 import tukano.impl.rest.TukanoApplication;
+import tukano.impl.storage.db.DB;
 import tukano.impl.storage.db.Database;
 
 import java.util.List;
@@ -16,6 +17,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import static java.lang.String.format;
 import static tukano.api.Result.error;
 
 public class CosmosDB implements Database {
@@ -31,10 +33,10 @@ public class CosmosDB implements Database {
     private static CosmosDB instance;
     private CosmosClient client;
     private static CosmosDatabase db;
-    private static CosmosContainer users_container;
-    private static CosmosContainer shorts_container;
-    private static CosmosContainer follow_container;
-    private static CosmosContainer likes_container;
+    private static CosmosContainer users;
+    private static CosmosContainer shorts;
+    private static CosmosContainer follow;
+    private static CosmosContainer likes;
 
 
 
@@ -51,16 +53,16 @@ public class CosmosDB implements Database {
         db = createDatabaseIfNotExists(client);
 
         createContainerIfNotExists(USERS_CONTAINER);
-        users_container = db.getContainer(USERS_CONTAINER);
+        users = db.getContainer(USERS_CONTAINER);
 
         createContainerIfNotExists(SHORTS_CONTAINER);
-        shorts_container = db.getContainer(SHORTS_CONTAINER);
+        shorts = db.getContainer(SHORTS_CONTAINER);
 
         createContainerIfNotExists(FOLLOW_CONTAINER);
-        follow_container = db.getContainer(FOLLOW_CONTAINER);
+        follow = db.getContainer(FOLLOW_CONTAINER);
 
         createContainerIfNotExists(LIKES_CONTAINER);
-        likes_container = db.getContainer(LIKES_CONTAINER);
+        likes = db.getContainer(LIKES_CONTAINER);
     }
 
 
@@ -100,56 +102,49 @@ public class CosmosDB implements Database {
         );
     }
 
-    private <T> Result<CosmosContainer> getContainerWithObj(T obj) {
-        if (obj instanceof User)
-            return Result.ok(users_container);
-        if(obj instanceof Likes)
-            return Result.ok(likes_container);
-        if(obj instanceof Following)
-            return Result.ok(follow_container);
-        else
-            return Result.ok(shorts_container);
-    }
-
-    private <T> Result<CosmosContainer> getContainerWithClass(Class<T> clazz) {
-        if(clazz.equals(User.class))
-            return Result.ok(users_container);
-        if(clazz.equals(Long.class) || clazz.equals(Likes.class))
-            return Result.ok(likes_container);
-        if(clazz.equals(Following.class))
-            return Result.ok(follow_container);
-        else
-            return Result.ok(shorts_container);
-    }
 
     @Override
     public <T> Result<T>  persistOne(T obj) {
-        var container = getContainerWithObj(obj).value();
+        var container = getContainerByObj(obj).value();
         return tryCatch( () -> container.createItem(obj).getItem());
     }
 
     @Override
     public <T> Result<T> updateOne(T obj) {
-        var container = getContainerWithObj(obj).value();
+        var container = getContainerByObj(obj).value();
         return tryCatch( () -> container.upsertItem(obj).getItem());
     }
 
     @Override
     public <T> Result<?> deleteOne(T obj) {
-        // TODO
-        var container = getContainerWithObj(obj).value();
+        var container = getContainerByObj(obj).value();
         return tryCatch( () -> container.deleteItem(obj, new CosmosItemRequestOptions()).getItem());
     }
 
     @Override
+    public <T> void deleteAllConditional(Class<T> clazz, Session s, String... args) {
+        String query, container = getContainerByClass(clazz).value().getId();
+
+        if(args.length == 2)
+            query = format("SELECT * FROM %s WHERE %s.%s = \"%s\"", container, container, args[0], args[1]);
+        else
+            query = format("SELECT * FROM %s WHERE %s.%s = \"%s\" OR %s.%s = \"%s\"",
+                    container, container, args[0], args[1], container, args[2], args[3]);
+
+        List<T> toDelete = sql(query, clazz).value();
+        for(T obj: toDelete)
+            DB.deleteOne( obj );
+    }
+
+    @Override
     public <T> Result<T> getOne(String id, Class<T> clazz) {
-        var container = getContainerWithClass(clazz).value();
+        var container = getContainerByClass(clazz).value();
         return tryCatch( () -> container.readItem(id, new PartitionKey(id), clazz).getItem());
     }
 
     @Override
     public <T> Result<List<T>> sql(String sqlStatement, Class<T> clazz) {
-        var container = getContainerWithClass(clazz).value();
+        var container = getContainerByClass(clazz).value();
         return tryCatch(() -> {
             var res = container.queryItems(sqlStatement, new CosmosQueryRequestOptions(), clazz);
             return res.stream().toList();
@@ -165,7 +160,6 @@ public class CosmosDB implements Database {
     public <T> Result<T> execute(Function<Session, Result<T>> func) {
         return null;
     }
-
 
 
     <T> Result<T> tryCatch( Supplier<T> supplierFunc) {
@@ -187,5 +181,20 @@ public class CosmosDB implements Database {
             case 409 -> ErrorCode.CONFLICT;
             default -> ErrorCode.INTERNAL_ERROR;
         };
+    }
+
+    private <T> Result<CosmosContainer> getContainerByObj(T obj) {
+        return getContainerByClass(obj.getClass());
+    }
+
+    private Result<CosmosContainer> getContainerByClass(Class<?> clazz) {
+        if (clazz.equals(User.class))
+            return Result.ok(users);
+        if (clazz.equals(Likes.class) || clazz.equals(Long.class))
+            return Result.ok(likes);
+        if (clazz.equals(Following.class))
+            return Result.ok(follow);
+        else
+            return Result.ok(shorts);
     }
 }

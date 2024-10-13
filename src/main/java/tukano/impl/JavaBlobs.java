@@ -3,6 +3,7 @@ package tukano.impl;
 import static java.lang.String.format;
 import static tukano.api.Result.error;
 import static tukano.api.Result.ErrorCode.FORBIDDEN;
+import static tukano.impl.storage.blobs.BlobsType.AZURE_BLOBS;
 
 import java.util.function.Consumer;
 import java.util.logging.Logger;
@@ -37,7 +38,7 @@ public class JavaBlobs implements Blobs {
 
 
 	private BlobStorage initStorage() {
-		return TukanoApplication.AZURE_BLOBS ? new AzureBlobStorage() : new FilesystemStorage();
+		return TukanoApplication.BLOBS_TYPE.equals(AZURE_BLOBS) ? new AzureBlobStorage() : new FilesystemStorage();
 	}
 	
 	@Override

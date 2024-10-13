@@ -5,6 +5,8 @@ import java.util.Set;
 
 import jakarta.ws.rs.core.Application;
 import tukano.impl.Token;
+import tukano.impl.storage.blobs.BlobsType;
+import tukano.impl.storage.db.DatabaseType;
 
 /** Cloud Version of Tukano */
 public class TukanoApplication extends Application {
@@ -12,8 +14,9 @@ public class TukanoApplication extends Application {
 
 	public static final String TUKANO_SECRET = "tukano_app_secret";
 	public static final long MAX_TOKEN_AGE = 1000000;
-	public static final boolean AZURE_BLOBS = true;
-	public static final boolean COSMOS_DB = true;
+	public static final BlobsType BLOBS_TYPE = BlobsType.AZURE_BLOBS;
+	public static final DatabaseType USERS_DB_TYPE = DatabaseType.COSMOS_DB_NOSQL;
+	public static final DatabaseType SHORTS_DB_TYPE = DatabaseType.COSMOS_DB_NOSQL;
 
 
 	/** Service Base Uri */

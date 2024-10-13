@@ -14,9 +14,11 @@ public interface Database {
 
     <T> Result<?> deleteOne(T obj);
 
-    <T> void deleteAllConditional(Class<T> clazz, Session s, String... args);
+    <T> void deleteAll(Class<T> clazz, Session s, String... args);
 
     <T> Result<T> getOne(String id, Class<T> clazz);
+    <T> Result<List<T>> getAll(Class<T> clazz, String... args);
+    <T> Result<List<T>> getAllByAttribute(Class<T> clazz, String attribute, String param, String match);
 
     <T> Result<List<T>> sql(String sqlStatement, Class<T> clazz);
 

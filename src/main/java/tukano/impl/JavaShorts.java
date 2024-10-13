@@ -1,14 +1,14 @@
 package tukano.impl;
 
 import static java.lang.String.format;
+import static tukano.api.Result.ErrorCode.*;
 import static tukano.api.Result.error;
 import static tukano.api.Result.errorOrResult;
 import static tukano.api.Result.errorOrValue;
 import static tukano.api.Result.errorOrVoid;
 import static tukano.api.Result.ok;
-import static tukano.api.Result.ErrorCode.BAD_REQUEST;
-import static tukano.api.Result.ErrorCode.FORBIDDEN;
 import static tukano.impl.storage.db.DB.getOne;
+import static tukano.impl.storage.db.DB.shortsDB;
 
 import java.util.List;
 import java.util.UUID;
@@ -26,7 +26,7 @@ import tukano.impl.storage.db.DB;
 
 public class JavaShorts implements Shorts {
 
-	private static Logger Log = Logger.getLogger(JavaShorts.class.getName());
+	private static final Logger Log = Logger.getLogger(JavaShorts.class.getName());
 
 	private static Shorts instance;
 
@@ -50,7 +50,7 @@ public class JavaShorts implements Shorts {
 			var blobUrl = format("%s/%s/%s", TukanoApplication.BASE_URI, Blobs.NAME, shortId);
 			var shrt = new Short(shortId, userId, blobUrl);
 
-			return errorOrValue(DB.insertOne(shrt), s -> s.copyWithLikes_And_Token(0));
+			return errorOrValue(DB.insertOne(shrt, shortsDB), s -> s.copyWithLikes_And_Token(0));
 		});
 	}
 
@@ -63,8 +63,8 @@ public class JavaShorts implements Shorts {
 
 		//var query = format("SELECT count(*) FROM Likes l WHERE l.shortId = '%s'", shortId);
 		var query = format("SELECT * FROM Likes l WHERE l.shortId = '%s'", shortId);
-		var likes = DB.sql(query, Long.class).value();
-		return errorOrValue(getOne(shortId, Short.class), shrt -> shrt.copyWithLikes_And_Token(likes.size()));
+		var likes = DB.sql(query, Long.class, shortsDB).value();
+		return errorOrValue(getOne(shortId, Short.class, shortsDB), shrt -> shrt.copyWithLikes_And_Token(likes.size()));
 	}
 
 
@@ -95,7 +95,7 @@ public class JavaShorts implements Shorts {
 		Log.info(() -> format("getShorts : userId = %s\n", userId));
 
 		var query = format("SELECT s.shortId FROM Short s WHERE s.ownerId = '%s'", userId);
-		return errorOrValue(okUser(userId), DB.sql(query, String.class));
+		return errorOrValue(okUser(userId), DB.sql(query, String.class, shortsDB));
 	}
 
 	@Override
@@ -105,16 +105,16 @@ public class JavaShorts implements Shorts {
 
 		return errorOrResult(okUser(userId1, password), user -> {
 			var f = new Following(userId1, userId2);
-			return errorOrVoid(okUser(userId2), isFollowing ? DB.insertOne(f) : DB.deleteOne(f));
+			return errorOrVoid(okUser(userId2), isFollowing ? DB.insertOne(f, shortsDB) : DB.deleteOne(f, shortsDB));
 		});
 	}
 
 	@Override
 	public Result<List<String>> followers(String userId, String password) {
 		Log.info(() -> format("followers : userId = %s, pwd = %s\n", userId, password));
-
-		var query = format("SELECT f.follower FROM Following f WHERE f.followee = '%s'", userId);
-		return errorOrValue(okUser(userId, password), DB.sql(query, String.class));
+		return null;
+		// TODO
+		//return errorOrValue(okUser(userId, password), DB.getAllByAtTribute(Short.class,"follower", "followee", userId, shortsDB));
 	}
 
 	@Override
@@ -124,7 +124,7 @@ public class JavaShorts implements Shorts {
 
 		return errorOrResult(getShort(shortId), shrt -> {
 			var l = new Likes(userId, shortId, shrt.getOwnerId());
-			return errorOrVoid(okUser(userId, password), isLiked ? DB.insertOne(l) : DB.deleteOne(l));
+			return errorOrVoid(okUser(userId, password), isLiked ? DB.insertOne(l, shortsDB) : DB.deleteOne(l, shortsDB));
 		});
 	}
 
@@ -136,7 +136,7 @@ public class JavaShorts implements Shorts {
 
 			var query = format("SELECT l.userId FROM Likes l WHERE l.shortId = '%s'", shortId);
 
-			return errorOrValue(okUser(shrt.getOwnerId(), password), DB.sql(query, String.class));
+			return errorOrValue(okUser(shrt.getOwnerId(), password), DB.sql(query, String.class, shortsDB));
 		});
 	}
 
@@ -145,14 +145,14 @@ public class JavaShorts implements Shorts {
 		Log.info(() -> format("getFeed : userId = %s, pwd = %s\n", userId, password));
 
 		final var QUERY_FMT = """
-				SELECT s.shortId, s.timestamp FROM Short s WHERE	s.ownerId = '%s'				
-				UNION			
-				SELECT s.shortId, s.timestamp FROM Short s, Following f 
-					WHERE 
-						f.followee = s.ownerId AND f.follower = '%s' 
+				SELECT s.shortId, s.timestamp FROM Short s WHERE	s.ownerId = '%s'
+				UNION
+				SELECT s.shortId, s.timestamp FROM Short s, Following f
+					WHERE
+						f.followee = s.ownerId AND f.follower = '%s'
 				ORDER BY s.timestamp DESC""";
 
-		return errorOrValue(okUser(userId, password), DB.sql(format(QUERY_FMT, userId, userId), String.class));
+		return errorOrValue(okUser(userId, password), DB.sql(format(QUERY_FMT, userId, userId), String.class, shortsDB));
 	}
 
 	protected Result<User> okUser(String userId, String pwd) {
@@ -174,16 +174,6 @@ public class JavaShorts implements Shorts {
 		if (!Token.isValid(Token.get(userId), userId))
 			return error(FORBIDDEN);
 
-		if (TukanoApplication.COSMOS_DB) {
-			DB.deleteAllShorts(userId, null);
-			return Result.ok();
-		}
-
-		else {
-			return DB.transaction(hibernate -> {
-				DB.deleteAllShorts(userId, hibernate);
-			});
-		}
-
+		return DB.deleteAllShorts(userId);
 	}
 }

@@ -7,6 +7,7 @@ import static tukano.api.Result.errorOrValue;
 import static tukano.api.Result.ok;
 import static tukano.api.Result.ErrorCode.BAD_REQUEST;
 import static tukano.api.Result.ErrorCode.FORBIDDEN;
+import static tukano.impl.storage.db.DB.usersDB;
 
 import java.util.List;
 import java.util.concurrent.Executors;
@@ -38,7 +39,7 @@ public class JavaUsers implements Users {
 		if( badUserInfo( user ) )
 				return error(BAD_REQUEST);
 
-		return errorOrValue( DB.insertOne( user), user.getUserId() );
+		return errorOrValue( DB.insertOne( user, usersDB), user.getUserId() );
 	}
 
 	@Override
@@ -48,7 +49,7 @@ public class JavaUsers implements Users {
 		if (userId == null)
 			return error(BAD_REQUEST);
 		
-		return validatedUserOrError( DB.getOne( userId, User.class), pwd);
+		return validatedUserOrError( DB.getOne( userId, User.class, usersDB), pwd);
 	}
 
 	@Override
@@ -58,7 +59,7 @@ public class JavaUsers implements Users {
 		if (badUpdateUserInfo(userId, pwd, other))
 			return error(BAD_REQUEST);
 
-		return errorOrResult( validatedUserOrError(DB.getOne( userId, User.class), pwd), user -> DB.updateOne( user.updateFrom(other)));
+		return errorOrResult( validatedUserOrError(DB.getOne( userId, User.class, usersDB), pwd), user -> DB.updateOne( user.updateFrom(other), usersDB));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -69,7 +70,7 @@ public class JavaUsers implements Users {
 		if (userId == null || pwd == null )
 			return error(BAD_REQUEST);
 
-		return errorOrResult( validatedUserOrError(DB.getOne( userId, User.class), pwd), user -> {
+		return errorOrResult( validatedUserOrError(DB.getOne( userId, User.class, usersDB), pwd), user -> {
 
 			// Delete user shorts and related info asynchronously in a separate thread
 			Executors.defaultThreadFactory().newThread( () -> {
@@ -77,7 +78,7 @@ public class JavaUsers implements Users {
 				JavaBlobs.getInstance().deleteAllBlobs(userId, Token.get(userId));
 			}).start();
 
-			return (Result<User>) DB.deleteOne(user);
+			return (Result<User>) DB.deleteOne(user, usersDB);
 		});
 	}
 
@@ -86,7 +87,7 @@ public class JavaUsers implements Users {
 		Log.info( () -> format("searchUsers : patterns = %s\n", pattern));
 
 		var query = format("SELECT * FROM User u WHERE UPPER(u.userId) LIKE '%%%s%%'", pattern.toUpperCase());
-		var hits = DB.sql(query, User.class)
+		var hits = DB.sql(query, User.class, usersDB)
 				.value()
 				.stream()
 				.map(User::copyWithoutPassword)

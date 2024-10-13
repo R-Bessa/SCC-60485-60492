@@ -7,8 +7,7 @@ import static tukano.api.Result.errorOrResult;
 import static tukano.api.Result.errorOrValue;
 import static tukano.api.Result.errorOrVoid;
 import static tukano.api.Result.ok;
-import static tukano.impl.storage.db.DB.getOne;
-import static tukano.impl.storage.db.DB.shortsDB;
+import static tukano.impl.storage.db.DB.*;
 
 import java.util.List;
 import java.util.UUID;
@@ -112,9 +111,8 @@ public class JavaShorts implements Shorts {
 	@Override
 	public Result<List<String>> followers(String userId, String password) {
 		Log.info(() -> format("followers : userId = %s, pwd = %s\n", userId, password));
-		return null;
-		// TODO
-		//return errorOrValue(okUser(userId, password), DB.getAllByAtTribute(Short.class,"follower", "followee", userId, shortsDB));
+
+		return errorOrValue(okUser(userId, password), DB.getFollowers(userId));
 	}
 
 	@Override

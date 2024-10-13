@@ -13,12 +13,11 @@ import org.hibernate.exception.ConstraintViolationException;
 import tukano.api.Result;
 import tukano.api.Result.ErrorCode;
 import tukano.api.User;
-import tukano.impl.storage.db.DB;
 import tukano.impl.storage.db.Database;
 
 import static java.lang.String.format;
-import static tukano.impl.storage.db.DB.SHORTS_CONTAINER;
-import static tukano.impl.storage.db.DB.USERS_CONTAINER;
+import static tukano.impl.storage.db.DB.SHORTS;
+import static tukano.impl.storage.db.DB.USERS;
 
 
 /**
@@ -107,15 +106,13 @@ public class Hibernate implements Database {
 	}
 
 	@Override
-	public <T> Result<List<T>> getAllByAttribute(Class<T> clazz, String attribute, String param, String match) {
-		String container = clazz.equals(User.class) ? USERS_CONTAINER : SHORTS_CONTAINER;
+	public <T> Result<List<T>> getAllByAttribute(Class<T> clazz, String container, String attribute, String param, String match) {
 		var query = format("SELECT obj.%s FROM %s obj WHERE obj.%s = '%s'", attribute, container, param, match);
 		return sql(query, clazz);
 	}
 
 	@Override
-	public <T> Result<List<T>> getAll(Class<T> clazz, String... args) {
-		String container = clazz.equals(User.class) ? USERS_CONTAINER : SHORTS_CONTAINER;
+	public <T> Result<List<T>> getAll(Class<T> clazz, String container, String... args) {
 		var query = format("SELECT * FROM %s obj WHERE obj.%s = '%s'", container, args[0], args[1]);
 		return sql(query, clazz);
 	}

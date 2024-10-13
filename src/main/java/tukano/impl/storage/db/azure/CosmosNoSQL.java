@@ -24,8 +24,6 @@ import static tukano.impl.storage.db.DB.*;
 public class CosmosNoSQL implements Database {
 
     private static final String DB_NAME = "tukano-db-60485";
-    private static final String FOLLOW_CONTAINER = "follow";
-    private static final String LIKES_CONTAINER = "likes";
     private static final String PARTITION_KEY_PATH = "/id";
 
 
@@ -34,7 +32,7 @@ public class CosmosNoSQL implements Database {
     private static CosmosDatabase db;
     private static CosmosContainer users;
     private static CosmosContainer shorts;
-    private static CosmosContainer follow;
+    private static CosmosContainer following;
     private static CosmosContainer likes;
 
 
@@ -45,20 +43,20 @@ public class CosmosNoSQL implements Database {
 
 
     public synchronized void init(String container_name) {
-        if(container_name.equals(USERS_CONTAINER)) {
-            createContainerIfNotExists(USERS_CONTAINER);
-            users = db.getContainer(USERS_CONTAINER);
+        if(container_name.equals(USERS)) {
+            createContainerIfNotExists(USERS);
+            users = db.getContainer(USERS);
         }
 
-        else if(container_name.equals(SHORTS_CONTAINER)) {
-            createContainerIfNotExists(SHORTS_CONTAINER);
-            shorts = db.getContainer(SHORTS_CONTAINER);
+        else if(container_name.equals(SHORTS)) {
+            createContainerIfNotExists(SHORTS);
+            shorts = db.getContainer(SHORTS);
 
-            createContainerIfNotExists(FOLLOW_CONTAINER);
-            follow = db.getContainer(FOLLOW_CONTAINER);
+            createContainerIfNotExists(FOLLOWING);
+            following = db.getContainer(FOLLOWING);
 
-            createContainerIfNotExists(LIKES_CONTAINER);
-            likes = db.getContainer(LIKES_CONTAINER);
+            createContainerIfNotExists(LIKES);
+            likes = db.getContainer(LIKES);
         }
     }
 
@@ -121,7 +119,8 @@ public class CosmosNoSQL implements Database {
 
     @Override
     public <T> void deleteAll(Class<T> clazz, Session s, String... args) {
-        List<T> toDelete = getAll(clazz, args).value();
+        var container = getContainerByClass(clazz).value().getId();
+        List<T> toDelete = getAll(clazz, container, args).value();
         for(T obj: toDelete)
             deleteOne(obj);
     }
@@ -133,9 +132,8 @@ public class CosmosNoSQL implements Database {
     }
 
     @Override
-    public <T> Result<List<T>> getAll(Class<T> clazz, String... args) {
-        String query, container = getContainerByClass(clazz).value().getId();
-
+    public <T> Result<List<T>> getAll(Class<T> clazz, String container, String... args) {
+        String query;
         if(args.length == 2)
             query = format("SELECT * FROM %s WHERE %s.%s = \"%s\"", container, container, args[0], args[1]);
         else
@@ -146,10 +144,9 @@ public class CosmosNoSQL implements Database {
     }
 
     @Override
-    public <T> Result<List<T>> getAllByAttribute(Class<T> clazz, String attribute, String param, String match) {
-        var container = getContainerByClass(clazz).value().getId();
-        var query = format("SELECT %s FROM %s obj WHERE obj.%s = \"%s\"", attribute, container, param, match);
-        return sql(query, clazz);
+    public <T> Result<List<T>> getAllByAttribute(Class<T> clazz, String container, String attribute, String param, String match) {
+        var query = format("SELECT %s.%s FROM %s WHERE %s.%s = \"%s\"", container, attribute, container, container, param, match);
+        return sql(query, getClassByContainer(container));
     }
 
     @Override
@@ -203,8 +200,20 @@ public class CosmosNoSQL implements Database {
         if (clazz.equals(Likes.class) || clazz.equals(Long.class))
             return Result.ok(likes);
         if (clazz.equals(Following.class))
-            return Result.ok(follow);
+            return Result.ok(following);
         else
             return Result.ok(shorts);
     }
+
+    public <T> Class<T> getClassByContainer(String container_name) {
+        if (container_name.equals(USERS))
+            return (Class<T>) User.class;
+        if (container_name.equals(LIKES))
+            return (Class<T>) Likes.class;
+        if (container_name.equals(FOLLOWING))
+            return (Class<T>) Following.class;
+        else
+            return (Class<T>) Short.class;
+    }
+
 }

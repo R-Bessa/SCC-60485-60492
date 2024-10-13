@@ -46,12 +46,12 @@ public class CosmosPostgreSQL implements Database {
     }
 
     @Override
-    public <T> Result<List<T>> getAll(Class<T> clazz, String... args) {
+    public <T> Result<List<T>> getAll(Class<T> clazz, String container, String... args) {
         return null;
     }
 
     @Override
-    public <T> Result<List<T>> getAllByAttribute(Class<T> clazz, String attribute, String param, String match) {
+    public <T> Result<List<T>> getAllByAttribute(Class<T> clazz, String container, String attribute, String param, String match) {
         return null;
     }
 

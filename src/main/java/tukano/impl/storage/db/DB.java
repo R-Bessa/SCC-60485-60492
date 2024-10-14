@@ -15,6 +15,7 @@ import tukano.impl.storage.db.azure.CosmosNoSQL;
 import tukano.impl.storage.db.azure.CosmosPostgreSQL;
 import tukano.impl.storage.db.hibernate.Hibernate;
 
+import static java.lang.String.format;
 import static tukano.api.Result.ErrorCode.NOT_IMPLEMENTED;
 
 
@@ -60,35 +61,37 @@ public class DB {
 		return db.getAll(clazz, container, args);
 	}
 
-	public static <T> Result<List<T>> getAllByAtTribute(Class<T> clazz, String container, String attribute, String param, String match, Database db) {
+	public static Result<List<String>> getFeed(String userId) {
+		String query_fmt = null;
+		switch (TukanoApplication.SHORTS_DB_TYPE) {
+			case COSMOS_DB_POSTGRESQL -> query_fmt = "";
+
+			case HIBERNATE -> query_fmt = """
+					SELECT s.shortId, s.timestamp FROM Short s WHERE s.ownerId = '%s'
+					UNION
+					SELECT s.shortId, s.timestamp FROM Short s, Following f
+					WHERE f.followee = s.ownerId AND f.follower = '%s'
+					ORDER BY s.timestamp DESC
+					""";
+
+			case COSMOS_DB_NOSQL -> {
+
+			String ownerShortsQuery = "SELECT VALUE shorts.shortId, shorts.timestamp FROM shorts WHERE shorts.ownerId = \"%s\"";
+			String followingQuery = "SELECT following.followee FROM following WHERE following.follower = \"%s\"";
+			String followeeShortsQuery = "SELECT c.shortId, c.timestamp FROM c WHERE c.ownerId IN (%s)";
+			
+			}
+
+
+			default -> query_fmt = "";
+		}
+
+		return Result.ok(sql(String.class, query_fmt, shortsDB, userId, userId));
+	}
+
+	public static <T> Result<List<T>> getAllByAttribute(Class<T> clazz, String container, String attribute, String param, String match, Database db) {
 		return db.getAllByAttribute(clazz, container, attribute, param, match);
 	}
-
-	public static Result<List<String>> getFollowers(String userId) {
-		switch (TukanoApplication.SHORTS_DB_TYPE) {
-			case COSMOS_DB_NOSQL -> {
-				List<String> followers = shortsDB.getAllByAttribute(Following.class, FOLLOWING, "follower", "followee", userId)
-						.value()
-						.stream()
-						.map(Following::getFollower)
-						.toList();
-				return Result.ok(followers);
-			}
-
-			case HIBERNATE -> {
-				return shortsDB.getAllByAttribute(String.class, FOLLOWING, "follower", "followee", userId);
-			}
-
-			case COSMOS_DB_POSTGRESQL -> {
-				// TODO
-				return Result.ok();
-			}
-
-			default -> {
-				return Result.error(NOT_IMPLEMENTED);}
-		}
-	}
-
 
 	public static <T> Result<?> deleteOne(T obj, Database db) {
 		return db.deleteOne(obj);

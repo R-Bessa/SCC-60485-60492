@@ -112,7 +112,7 @@ public class JavaShorts implements Shorts {
 	public Result<List<String>> followers(String userId, String password) {
 		Log.info(() -> format("followers : userId = %s, pwd = %s\n", userId, password));
 
-		return errorOrValue(okUser(userId, password), DB.getFollowers(userId));
+		return errorOrValue(okUser(userId, password), DB.getAllByAttribute(String.class, FOLLOWING, "follower", "followee", userId, shortsDB));
 	}
 
 	@Override
@@ -130,27 +130,15 @@ public class JavaShorts implements Shorts {
 	public Result<List<String>> likes(String shortId, String password) {
 		Log.info(() -> format("likes : shortId = %s, pwd = %s\n", shortId, password));
 
-		return errorOrResult(getShort(shortId), shrt -> {
-
-			var query = format("SELECT l.userId FROM Likes l WHERE l.shortId = '%s'", shortId);
-
-			return errorOrValue(okUser(shrt.getOwnerId(), password), DB.sql(query, String.class, shortsDB));
-		});
+		return errorOrResult(getShort(shortId), shrt -> errorOrValue(okUser(shrt.getOwnerId(), password),
+				DB.getAllByAttribute(String.class, LIKES, "userId", "shortId", shortId, shortsDB)));
 	}
 
 	@Override
 	public Result<List<String>> getFeed(String userId, String password) {
 		Log.info(() -> format("getFeed : userId = %s, pwd = %s\n", userId, password));
 
-		final var QUERY_FMT = """
-				SELECT s.shortId, s.timestamp FROM Short s WHERE	s.ownerId = '%s'
-				UNION
-				SELECT s.shortId, s.timestamp FROM Short s, Following f
-					WHERE
-						f.followee = s.ownerId AND f.follower = '%s'
-				ORDER BY s.timestamp DESC""";
-
-		return errorOrValue(okUser(userId, password), DB.sql(format(QUERY_FMT, userId, userId), String.class, shortsDB));
+		return errorOrValue(okUser(userId, password), DB.getFeed(userId));
 	}
 
 	protected Result<User> okUser(String userId, String pwd) {

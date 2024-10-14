@@ -145,13 +145,13 @@ public class CosmosNoSQL implements Database {
 
     @Override
     public <T> Result<List<T>> getAllByAttribute(Class<T> clazz, String container, String attribute, String param, String match) {
-        var query = format("SELECT %s.%s FROM %s WHERE %s.%s = \"%s\"", container, attribute, container, container, param, match);
-        return sql(query, getClassByContainer(container));
+        var query = format("SELECT VALUE %s.%s FROM %s WHERE %s.%s = \"%s\"", container, attribute, container, container, param, match);
+        return sql(query, clazz);
     }
 
     @Override
     public <T> Result<List<T>> sql(String sqlStatement, Class<T> clazz) {
-        var container = getContainerByClass(clazz).value();
+        var container = getContainerByQuery(sqlStatement).value();
         return tryCatch(() -> {
             var res = container.queryItems(sqlStatement, new CosmosQueryRequestOptions(), clazz);
             return res.stream().toList();
@@ -205,15 +205,19 @@ public class CosmosNoSQL implements Database {
             return Result.ok(shorts);
     }
 
-    public <T> Class<T> getClassByContainer(String container_name) {
-        if (container_name.equals(USERS))
-            return (Class<T>) User.class;
-        if (container_name.equals(LIKES))
-            return (Class<T>) Likes.class;
-        if (container_name.equals(FOLLOWING))
-            return (Class<T>) Following.class;
+    private Result<CosmosContainer> getContainerByQuery(String query) {
+        if (query.contains(USERS))
+            return Result.ok(users);
+        if (query.contains(LIKES))
+            return Result.ok(likes);
+        if (query.contains(FOLLOWING))
+            return Result.ok(following);
         else
-            return (Class<T>) Short.class;
+            return Result.ok(shorts);
     }
+
+
+
+
 
 }

@@ -12,12 +12,10 @@ import org.hibernate.exception.ConstraintViolationException;
 
 import tukano.api.Result;
 import tukano.api.Result.ErrorCode;
-import tukano.api.User;
 import tukano.impl.storage.db.Database;
 
 import static java.lang.String.format;
-import static tukano.impl.storage.db.DB.SHORTS;
-import static tukano.impl.storage.db.DB.USERS;
+
 
 
 /**
@@ -83,7 +81,7 @@ public class Hibernate implements Database {
 		String query;
 
 		if(args.length == 2)
-			query = format("DELETE %s obj WHERE obj.%s = %s", clazz.getSimpleName(), args[0], args[1]);
+			query = format("DELETE %s obj WHERE obj.%s = \"%s\"", clazz.getSimpleName(), args[0], args[1]);
 
 		else
 			query = format("DELETE %s obj WHERE obj.%s = \"%s\" OR obj.%s = \"%s\"",
@@ -107,13 +105,13 @@ public class Hibernate implements Database {
 
 	@Override
 	public <T> Result<List<T>> getAllByAttribute(Class<T> clazz, String container, String attribute, String param, String match) {
-		var query = format("SELECT obj.%s FROM %s obj WHERE obj.%s = '%s'", attribute, container, param, match);
+		var query = format("SELECT obj.%s FROM %s obj WHERE obj.%s = \"%s\"", attribute, container, param, match);
 		return sql(query, clazz);
 	}
 
 	@Override
 	public <T> Result<List<T>> getAll(Class<T> clazz, String container, String... args) {
-		var query = format("SELECT * FROM %s obj WHERE obj.%s = '%s'", container, args[0], args[1]);
+		var query = format("SELECT * FROM %s obj WHERE obj.%s = \"%s\"", container, args[0], args[1]);
 		return sql(query, clazz);
 	}
 

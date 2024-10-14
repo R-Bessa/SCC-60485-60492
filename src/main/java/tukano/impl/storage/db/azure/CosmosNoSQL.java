@@ -30,10 +30,10 @@ public class CosmosNoSQL implements Database {
     private static CosmosNoSQL instance;
     private final CosmosClient client;
     private static CosmosDatabase db;
-    private static CosmosContainer users;
-    private static CosmosContainer shorts;
-    private static CosmosContainer following;
-    private static CosmosContainer likes;
+    public static CosmosContainer users_container;
+    public static CosmosContainer shorts_container;
+    public static CosmosContainer following_container;
+    public static CosmosContainer likes_container;
 
 
 
@@ -45,18 +45,18 @@ public class CosmosNoSQL implements Database {
     public synchronized void init(String container_name) {
         if(container_name.equals(USERS)) {
             createContainerIfNotExists(USERS);
-            users = db.getContainer(USERS);
+            users_container = db.getContainer(USERS);
         }
 
         else if(container_name.equals(SHORTS)) {
             createContainerIfNotExists(SHORTS);
-            shorts = db.getContainer(SHORTS);
+            shorts_container = db.getContainer(SHORTS);
 
             createContainerIfNotExists(FOLLOWING);
-            following = db.getContainer(FOLLOWING);
+            following_container = db.getContainer(FOLLOWING);
 
             createContainerIfNotExists(LIKES);
-            likes = db.getContainer(LIKES);
+            likes_container = db.getContainer(LIKES);
         }
     }
 
@@ -69,7 +69,7 @@ public class CosmosNoSQL implements Database {
                 .endpoint(TukanoApplication.CONNECTION_URL)
                 .key(TukanoApplication.DB_KEY)
                 .directMode()
-                //.gatewayMode()
+                //TODO .gatewayMode()
                 .consistencyLevel(ConsistencyLevel.SESSION)
                 .connectionSharingAcrossClientsEnabled(true)
                 .contentResponseOnWriteEnabled(true) //
@@ -196,24 +196,24 @@ public class CosmosNoSQL implements Database {
 
     private Result<CosmosContainer> getContainerByClass(Class<?> clazz) {
         if (clazz.equals(User.class))
-            return Result.ok(users);
+            return Result.ok(users_container);
         if (clazz.equals(Likes.class) || clazz.equals(Long.class))
-            return Result.ok(likes);
+            return Result.ok(likes_container);
         if (clazz.equals(Following.class))
-            return Result.ok(following);
+            return Result.ok(following_container);
         else
-            return Result.ok(shorts);
+            return Result.ok(shorts_container);
     }
 
     private Result<CosmosContainer> getContainerByQuery(String query) {
         if (query.contains(USERS))
-            return Result.ok(users);
+            return Result.ok(users_container);
         if (query.contains(LIKES))
-            return Result.ok(likes);
+            return Result.ok(likes_container);
         if (query.contains(FOLLOWING))
-            return Result.ok(following);
+            return Result.ok(following_container);
         else
-            return Result.ok(shorts);
+            return Result.ok(shorts_container);
     }
 
 

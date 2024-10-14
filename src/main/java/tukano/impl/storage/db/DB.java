@@ -1,9 +1,14 @@
 package tukano.impl.storage.db;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import com.azure.cosmos.models.CosmosQueryRequestOptions;
+import com.azure.cosmos.models.SqlParameter;
+import com.azure.cosmos.models.SqlQuerySpec;
+import com.azure.cosmos.util.CosmosPagedIterable;
 import org.hibernate.Session;
 
 import tukano.api.Result;
@@ -17,6 +22,7 @@ import tukano.impl.storage.db.hibernate.Hibernate;
 
 import static java.lang.String.format;
 import static tukano.api.Result.ErrorCode.NOT_IMPLEMENTED;
+import static tukano.impl.storage.db.azure.CosmosNoSQL.shorts_container;
 
 
 public class DB {
@@ -62,11 +68,13 @@ public class DB {
 	}
 
 	public static Result<List<String>> getFeed(String userId) {
-		String query_fmt = null;
 		switch (TukanoApplication.SHORTS_DB_TYPE) {
-			case COSMOS_DB_POSTGRESQL -> query_fmt = "";
-
-			case HIBERNATE -> query_fmt = """
+			case COSMOS_DB_POSTGRESQL -> {
+				return Result.error(NOT_IMPLEMENTED);
+			}
+			case HIBERNATE -> {
+				String query_fmt =
+					"""
 					SELECT s.shortId, s.timestamp FROM Short s WHERE s.ownerId = '%s'
 					UNION
 					SELECT s.shortId, s.timestamp FROM Short s, Following f
@@ -74,19 +82,30 @@ public class DB {
 					ORDER BY s.timestamp DESC
 					""";
 
-			case COSMOS_DB_NOSQL -> {
-
-			String ownerShortsQuery = "SELECT VALUE shorts.shortId, shorts.timestamp FROM shorts WHERE shorts.ownerId = \"%s\"";
-			String followingQuery = "SELECT following.followee FROM following WHERE following.follower = \"%s\"";
-			String followeeShortsQuery = "SELECT c.shortId, c.timestamp FROM c WHERE c.ownerId IN (%s)";
-			
+				return Result.ok(sql(String.class, query_fmt, shortsDB, userId, userId));
 			}
 
+			case COSMOS_DB_NOSQL -> {
+				List<Short> ownShorts = shortsDB.getAll(Short.class, "shorts", "ownerId", userId).value();
+				List<String> userFollowee = shortsDB.getAllByAttribute(String.class, "following", "followee", "follower", userId).value();
 
-			default -> query_fmt = "";
+				String q3_fmt = "SELECT * FROM shorts WHERE ARRAY_CONTAINS(@userFollowee, shorts.ownerId)";
+				SqlQuerySpec querySpec = new SqlQuerySpec(q3_fmt, List.of(new SqlParameter("@userFollowee", userFollowee)));
+				List<Short> followeeShorts = shorts_container.queryItems(querySpec, new CosmosQueryRequestOptions(), Short.class).stream().toList();
+
+				List<Short> feed = new ArrayList<>();
+				feed.addAll(ownShorts);
+				feed.addAll(followeeShorts);
+				feed.sort((s1, s2) -> Long.compare(s2.getTimestamp(), s1.getTimestamp()));
+
+				return Result.ok(feed.stream().map(Short::getShortId).toList());
+			}
+
+			default -> {
+				return Result.error(NOT_IMPLEMENTED);
+			}
 		}
 
-		return Result.ok(sql(String.class, query_fmt, shortsDB, userId, userId));
 	}
 
 	public static <T> Result<List<T>> getAllByAttribute(Class<T> clazz, String container, String attribute, String param, String match, Database db) {

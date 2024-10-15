@@ -51,6 +51,11 @@ public class CosmosPostgreSQL implements Database {
     }
 
     @Override
+    public <T> Result<List<T>> countAll(Class<T> clazz, String container, String attribute, String id) {
+        return null;
+    }
+
+    @Override
     public <T> Result<List<T>> getAllByAttribute(Class<T> clazz, String container, String attribute, String param, String match) {
         return null;
     }
@@ -70,6 +75,11 @@ public class CosmosPostgreSQL implements Database {
     @Override
     public <T> Result<T> execute(Function<Session, Result<T>> func) {
         // TODO
+        return null;
+    }
+
+    @Override
+    public <T> Result<List<T>> searchPattern(Class<T> clazz, String pattern, String container, String attribute) {
         return null;
     }
 }

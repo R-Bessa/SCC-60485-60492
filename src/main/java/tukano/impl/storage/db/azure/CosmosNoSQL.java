@@ -68,8 +68,8 @@ public class CosmosNoSQL implements Database {
         CosmosClient client = new CosmosClientBuilder()
                 .endpoint(TukanoApplication.CONNECTION_URL)
                 .key(TukanoApplication.DB_KEY)
-                .directMode()
-                //TODO .gatewayMode()
+                //.directMode()
+                .gatewayMode()
                 .consistencyLevel(ConsistencyLevel.SESSION)
                 .connectionSharingAcrossClientsEnabled(true)
                 .contentResponseOnWriteEnabled(true) //
@@ -144,8 +144,15 @@ public class CosmosNoSQL implements Database {
     }
 
     @Override
+    public <T> Result<List<T>> countAll(Class<T> clazz, String container, String attribute, String id) {
+        String query = format("SELECT VALUE COUNT(l.%s) FROM %s l WHERE l.%s = \"%s\"", attribute, container, attribute, id);
+        return sql(query, clazz);
+    }
+
+    @Override
     public <T> Result<List<T>> getAllByAttribute(Class<T> clazz, String container, String attribute, String param, String match) {
         var query = format("SELECT VALUE %s.%s FROM %s WHERE %s.%s = \"%s\"", container, attribute, container, container, param, match);
+        System.out.println(query + " AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
         return sql(query, clazz);
     }
 
@@ -168,6 +175,12 @@ public class CosmosNoSQL implements Database {
         return Result.error(NOT_IMPLEMENTED);
     }
 
+    @Override
+    public <T> Result<List<T>> searchPattern(Class<T> clazz, String pattern, String container, String attribute) {;
+        String query = format("SELECT * FROM %s u WHERE UPPER(u.%s) LIKE '%%%s%%'", container, attribute, pattern.toUpperCase());
+        System.out.println(query + " BBBBBBBBBBBBBBBBBBBBB");
+        return sql(query, clazz);
+    }
 
     <T> Result<T> tryCatch( Supplier<T> supplierFunc) {
         try {

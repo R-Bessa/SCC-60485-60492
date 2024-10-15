@@ -7,6 +7,7 @@ import static tukano.api.Result.errorOrValue;
 import static tukano.api.Result.ok;
 import static tukano.api.Result.ErrorCode.BAD_REQUEST;
 import static tukano.api.Result.ErrorCode.FORBIDDEN;
+import static tukano.impl.storage.db.DB.USERS;
 import static tukano.impl.storage.db.DB.usersDB;
 
 import java.util.List;
@@ -86,8 +87,7 @@ public class JavaUsers implements Users {
 	public Result<List<User>> searchUsers(String pattern) {
 		Log.info( () -> format("searchUsers : patterns = %s\n", pattern));
 
-		var query = format("SELECT * FROM User u WHERE UPPER(u.userId) LIKE '%%%s%%'", pattern.toUpperCase());
-		var hits = DB.sql(query, User.class, usersDB)
+		var hits = DB.searchPattern(usersDB, User.class, pattern, USERS, "id")
 				.value()
 				.stream()
 				.map(User::copyWithoutPassword)

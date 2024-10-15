@@ -116,6 +116,12 @@ public class Hibernate implements Database {
 	}
 
 	@Override
+	public <T> Result<List<T>> countAll(Class<T> clazz, String container, String attribute, String id) {
+		String query = format("SELECT count(*) FROM %s l WHERE l.%s = '%s'", container, attribute, id);
+		return sql(query, clazz);
+	}
+
+	@Override
 	public <T> Result<List<T>> sql(String sqlStatement, Class<T> clazz) {
 		try (var session = sessionFactory.openSession()) {
 			var query = session.createNativeQuery(sqlStatement, clazz);
@@ -152,6 +158,12 @@ public class Hibernate implements Database {
 			throw e;  // Rethrow exception to let the caller handle it
 		}
 		// Close the session in the final block
+	}
+
+	@Override
+	public <T> Result<List<T>> searchPattern(Class<T> clazz, String pattern, String container, String attribute) {
+		String query = format("SELECT * FROM %s u WHERE UPPER(u.%s) LIKE '%%%s%%'", container, attribute, pattern.toUpperCase());
+		return sql(query, clazz);
 	}
 
 }

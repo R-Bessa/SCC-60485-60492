@@ -67,6 +67,10 @@ public class DB {
 		return db.getAll(clazz, container, args);
 	}
 
+	public static <T> Result<List<T>> countAll(Class<T> clazz, String container, Database db, String attribute, String id) {
+		return db.countAll(clazz, container, attribute, id);
+	}
+
 	public static Result<List<String>> getFeed(String userId) {
 		switch (TukanoApplication.SHORTS_DB_TYPE) {
 			case COSMOS_DB_POSTGRESQL -> {
@@ -116,6 +120,27 @@ public class DB {
 		return db.deleteOne(obj);
 	}
 
+	public static Result<Void> deleteShort(String shortId) {
+		switch (TukanoApplication.SHORTS_DB_TYPE) {
+			case COSMOS_DB_NOSQL -> {
+				DB.processDeleteShort(shortId, null);
+				return Result.ok();
+			}
+			case HIBERNATE -> {
+				return DB.transaction(hibernate -> {
+					DB.processDeleteShort(shortId, hibernate);
+				});
+			}
+			case COSMOS_DB_POSTGRESQL -> {
+				// TODO
+				return Result.ok();
+			}
+
+			default -> {
+				return Result.error(NOT_IMPLEMENTED);}
+		}
+	}
+
 	public static Result<Void> deleteAllShorts(String userId) {
 		switch (TukanoApplication.SHORTS_DB_TYPE) {
 			case COSMOS_DB_NOSQL -> {
@@ -151,6 +176,15 @@ public class DB {
 
 	public static <T> Result<T> transaction(Function<Session, Result<T>> func) {
 		return shortsDB.execute( func );
+	}
+
+	public static <T> Result<List<T>> searchPattern(Database db, Class<T> clazz, String pattern, String container, String attribute) {
+		return db.searchPattern(clazz, pattern, container, attribute);
+	}
+
+	private static void processDeleteShort(String shortId, Session session) {
+		shortsDB.deleteAll(Short.class, session, "shortId", shortId);
+		shortsDB.deleteAll(Likes.class, session, "shortId", shortId);
 	}
 
 	private static void processDeleteAllShorts(String userId, Session session) {

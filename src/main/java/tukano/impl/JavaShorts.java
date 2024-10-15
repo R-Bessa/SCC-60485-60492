@@ -60,10 +60,8 @@ public class JavaShorts implements Shorts {
 		if (shortId == null)
 			return error(BAD_REQUEST);
 
-		//var query = format("SELECT count(*) FROM Likes l WHERE l.shortId = '%s'", shortId);
-		var query = format("SELECT * FROM Likes l WHERE l.shortId = '%s'", shortId);
-		var likes = DB.sql(query, Long.class, shortsDB).value();
-		return errorOrValue(getOne(shortId, Short.class, shortsDB), shrt -> shrt.copyWithLikes_And_Token(likes.size()));
+		var likes = DB.countAll(Long.class, LIKES, shortsDB, "shortId", shortId).value();
+		return errorOrValue(getOne(shortId, Short.class, shortsDB), shrt -> shrt.copyWithLikes_And_Token(likes.get(0)));
 	}
 
 
@@ -74,17 +72,11 @@ public class JavaShorts implements Shorts {
 		return errorOrResult(getShort(shortId), shrt -> {
 
 			return errorOrResult(okUser(shrt.getOwnerId(), password), user -> {
-				return DB.transaction(hibernate -> {
-
-					hibernate.remove(shrt);
-
-					var query = format("DELETE FROM Likes l WHERE l.shortId = '%s'", shortId);
-					hibernate.createNativeQuery(query, Likes.class).executeUpdate();
-					String blobUrl = shrt.getBlobUrl();
-					String queryParam = "token=";
-					String token = blobUrl.substring(blobUrl.indexOf(queryParam) + queryParam.length());
-					JavaBlobs.getInstance().delete(shortId, token);
-				});
+				String blobUrl = shrt.getBlobUrl();
+				String queryParam = "token=";
+				String token = blobUrl.substring(blobUrl.indexOf(queryParam) + queryParam.length());
+				JavaBlobs.getInstance().delete(shortId, token);
+				return DB.deleteShort(shortId);
 			});
 		});
 	}
@@ -93,8 +85,9 @@ public class JavaShorts implements Shorts {
 	public Result<List<String>> getShorts(String userId) {
 		Log.info(() -> format("getShorts : userId = %s\n", userId));
 
-		var query = format("SELECT s.shortId FROM Short s WHERE s.ownerId = '%s'", userId);
-		return errorOrValue(okUser(userId), DB.sql(query, String.class, shortsDB));
+		//var query = format("SELECT s.shortId FROM Short s WHERE s.ownerId = '%s'", userId);
+		//return errorOrValue(okUser(userId), DB.sql(query, String.class, shortsDB));
+		return errorOrValue(okUser(userId), DB.getAllByAttribute(String.class, SHORTS, "id", "ownerId", userId, shortsDB));
 	}
 
 	@Override

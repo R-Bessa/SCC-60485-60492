@@ -87,7 +87,7 @@ public class JavaUsers implements Users {
 	public Result<List<User>> searchUsers(String pattern) {
 		Log.info( () -> format("searchUsers : patterns = %s\n", pattern));
 
-		var hits = DB.searchPattern(usersDB, User.class, pattern, USERS, "id")
+		var hits = DB.searchPattern(usersDB, User.class, pattern, USERS, "userId")
 				.value()
 				.stream()
 				.map(User::copyWithoutPassword)

@@ -68,8 +68,8 @@ public class CosmosNoSQL implements Database {
         CosmosClient client = new CosmosClientBuilder()
                 .endpoint(TukanoApplication.CONNECTION_URL)
                 .key(TukanoApplication.DB_KEY)
-                //.directMode()
-                .gatewayMode()
+                .directMode()
+                //.gatewayMode()
                 .consistencyLevel(ConsistencyLevel.SESSION)
                 .connectionSharingAcrossClientsEnabled(true)
                 .contentResponseOnWriteEnabled(true) //
@@ -178,7 +178,6 @@ public class CosmosNoSQL implements Database {
     @Override
     public <T> Result<List<T>> searchPattern(Class<T> clazz, String pattern, String container, String attribute) {;
         String query = format("SELECT * FROM %s u WHERE UPPER(u.%s) LIKE '%%%s%%'", container, attribute, pattern.toUpperCase());
-        System.out.println(query + " BBBBBBBBBBBBBBBBBBBBB");
         return sql(query, clazz);
     }
 

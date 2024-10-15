@@ -85,9 +85,7 @@ public class JavaShorts implements Shorts {
 	public Result<List<String>> getShorts(String userId) {
 		Log.info(() -> format("getShorts : userId = %s\n", userId));
 
-		//var query = format("SELECT s.shortId FROM Short s WHERE s.ownerId = '%s'", userId);
-		//return errorOrValue(okUser(userId), DB.sql(query, String.class, shortsDB));
-		return errorOrValue(okUser(userId), DB.getAllByAttribute(String.class, SHORTS, "id", "ownerId", userId, shortsDB));
+		return errorOrValue(okUser(userId), DB.getAllByAttributeID(String.class, SHORTS, "shortId", "ownerId", userId, shortsDB));
 	}
 
 	@Override

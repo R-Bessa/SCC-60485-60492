@@ -11,6 +11,7 @@ import com.azure.cosmos.models.SqlQuerySpec;
 import com.azure.cosmos.util.CosmosPagedIterable;
 import org.hibernate.Session;
 
+import org.hsqldb.rights.User;
 import tukano.api.Result;
 import tukano.api.Short;
 import tukano.impl.data.Following;
@@ -22,6 +23,7 @@ import tukano.impl.storage.db.hibernate.Hibernate;
 
 import static java.lang.String.format;
 import static tukano.api.Result.ErrorCode.NOT_IMPLEMENTED;
+import static tukano.impl.rest.TukanoApplication.USERS_DB_TYPE;
 import static tukano.impl.storage.db.azure.CosmosNoSQL.shorts_container;
 
 
@@ -31,7 +33,7 @@ public class DB {
 	public static final String SHORTS = "shorts";
 	public static final String FOLLOWING = "following";
 	public static final String LIKES = "likes";
-	public static final Database usersDB = initDB(TukanoApplication.USERS_DB_TYPE, USERS);
+	public static final Database usersDB = initDB(USERS_DB_TYPE, USERS);
 	public static final Database shortsDB = initDB(TukanoApplication.SHORTS_DB_TYPE, SHORTS);
 
 	private static Database initDB(DatabaseType db_type, String container) {
@@ -179,8 +181,44 @@ public class DB {
 	}
 
 	public static <T> Result<List<T>> searchPattern(Database db, Class<T> clazz, String pattern, String container, String attribute) {
-		return db.searchPattern(clazz, pattern, container, attribute);
+
+		switch (TukanoApplication.SHORTS_DB_TYPE) {
+			case COSMOS_DB_NOSQL -> {
+				return db.searchPattern(clazz, pattern, container, "id");
+			}
+			case HIBERNATE -> {
+				return db.searchPattern(clazz, pattern, container, attribute);
+			}
+			case COSMOS_DB_POSTGRESQL -> {
+				//TODO
+			}
+
+			default -> {
+				return Result.error(NOT_IMPLEMENTED);}
+		}
+		return null;
 	}
+
+	public static <T> Result<List<T>> getAllByAttributeID(Class<T> clazz, String container, String attribute, String param, String match, Database db) {
+		switch (TukanoApplication.SHORTS_DB_TYPE) {
+			case COSMOS_DB_NOSQL -> {
+				return getAllByAttribute(clazz, container, "id", param, match, db);
+			}
+			case HIBERNATE -> {
+				String c = container.equals(USERS)? User.class.getSimpleName() : Short.class.getSimpleName();
+				return getAllByAttribute(clazz, c, attribute, param, match, db);
+			}
+			case COSMOS_DB_POSTGRESQL -> {
+				// TODO
+			}
+
+			default -> {
+				return Result.error(NOT_IMPLEMENTED);}
+		}
+
+        return null;
+    }
+
 
 	private static void processDeleteShort(String shortId, Session session) {
 		shortsDB.deleteAll(Short.class, session, "shortId", shortId);

@@ -81,10 +81,10 @@ public class Hibernate implements Database {
 		String query;
 
 		if(args.length == 2)
-			query = format("DELETE %s obj WHERE obj.%s = '%s'", clazz.getSimpleName(), args[0], args[1]);
+			query = format("DELETE FROM %s obj WHERE obj.%s = '%s'", clazz.getSimpleName(), args[0], args[1]);
 
 		else
-			query = format("DELETE %s obj WHERE obj.%s = '%s' OR obj.%s = '%s'",
+			query = format("DELETE FROM %s obj WHERE obj.%s = '%s' OR obj.%s = '%s'",
 					clazz.getSimpleName(), args[0], args[1], args[2], args[3]);
 
 		session.createQuery(query, clazz).executeUpdate();
@@ -162,7 +162,7 @@ public class Hibernate implements Database {
 
 	@Override
 	public <T> Result<List<T>> searchPattern(Class<T> clazz, String pattern, String container, String attribute) {
-		String query = format("SELECT * FROM %s u WHERE UPPER(u.%s) LIKE '%%%s%%'", container, attribute, pattern.toUpperCase());
+		String query = format("SELECT * FROM %s u WHERE UPPER(u.%s) LIKE '%%%s%%'", clazz.getSimpleName(), attribute, pattern.toUpperCase());
 		return sql(query, clazz);
 	}
 

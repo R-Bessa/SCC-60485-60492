@@ -1,0 +1,572 @@
+{
+	"info": {
+		"_postman_id": "908074ad-96e3-4668-9428-f2a2d5ee8f11",
+		"name": "DB",
+		"description": "# 🚀 Get started here\n\nThis template guides you through CRUD operations (GET, POST, PUT, DELETE), variables, and tests.\n\n## 🔖 **How to use this template**\n\n#### **Step 1: Send requests**\n\nRESTful APIs allow you to perform CRUD operations using the POST, GET, PUT, and DELETE HTTP methods.\n\nThis collection contains each of these [request](https://learning.postman.com/docs/sending-requests/requests/) types. Open each request and click \"Send\" to see what happens.\n\n#### **Step 2: View responses**\n\nObserve the response tab for status code (200 OK), response time, and size.\n\n#### **Step 3: Send new Body data**\n\nUpdate or add new data in \"Body\" in the POST request. Typically, Body data is also used in PUT request.\n\n```\n{\n    \"name\": \"Add your name in the body\"\n}\n\n ```\n\n#### **Step 4: Update the variable**\n\nVariables enable you to store and reuse values in Postman. We have created a [variable](https://learning.postman.com/docs/sending-requests/variables/) called `base_url` with the sample request [https://postman-api-learner.glitch.me](https://postman-api-learner.glitch.me). Replace it with your API endpoint to customize this collection.\n\n#### **Step 5: Add tests in the \"Scripts\" tab**\n\nAdding tests to your requests can help you confirm that your API is working as expected. You can write test scripts in JavaScript and view the output in the \"Test Results\" tab.\n\n<img src=\"https://content.pstmn.io/fa30ea0a-373d-4545-a668-e7b283cca343/aW1hZ2UucG5n\" alt=\"\" height=\"1530\" width=\"2162\">\n\n## 💪 Pro tips\n\n- Use folders to group related requests and organize the collection.\n    \n- Add more [scripts](https://learning.postman.com/docs/writing-scripts/intro-to-scripts/) to verify if the API works as expected and execute workflows.\n    \n\n## 💡Related templates\n\n[API testing basics](https://go.postman.co/redirect/workspace?type=personal&collectionTemplateId=e9a37a28-055b-49cd-8c7e-97494a21eb54&sourceTemplateId=ddb19591-3097-41cf-82af-c84273e56719)  \n[API documentation](https://go.postman.co/redirect/workspace?type=personal&collectionTemplateId=e9c28f47-1253-44af-a2f3-20dce4da1f18&sourceTemplateId=ddb19591-3097-41cf-82af-c84273e56719)  \n[Authorization methods](https://go.postman.co/redirect/workspace?type=personal&collectionTemplateId=31a9a6ed-4cdf-4ced-984c-d12c9aec1c27&sourceTemplateId=ddb19591-3097-41cf-82af-c84273e56719)",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "26438780",
+		"_collection_link": "https://warped-water-615168.postman.co/workspace/SCC-60485-60492~43b11e4e-9b7f-4c38-af4b-addc5718532c/collection/26055497-908074ad-96e3-4668-9428-f2a2d5ee8f11?action=share&source=collection_link&creator=26438780"
+	},
+	"item": [
+		{
+			"name": "Create User Wales",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\"userId\":\"wales\", \r\n\"pwd\":\"12345\", \r\n\"email\":\"jimmy@wikipedia.pt\", \r\n\"displayName\":\"Jimmy Wales\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://scc-60485-60492.azurewebsites.net/rest/users",
+					"protocol": "https",
+					"host": [
+						"scc-60485-60492",
+						"azurewebsites",
+						"net"
+					],
+					"path": [
+						"rest",
+						"users"
+					]
+				},
+				"description": "This is a GET request and it is used to \"get\" data from an endpoint. There is no request body for a GET request, but you can use query parameters to help specify the resource you want data on (e.g., in this request, we have `id=1`).\n\nA successful GET response will have a `200 OK` status, and should include some kind of response body - for example, HTML web content or JSON data."
+			},
+			"response": []
+		},
+		{
+			"name": "Create User Liskov",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\"userId\":\"liskov\", \r\n\"pwd\":\"54321\", \r\n\"email\":\"liskov@mit.edu\", \r\n\"displayName\":\"Barbara Liskov\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://scc-60485-60492.azurewebsites.net/rest/users",
+					"protocol": "https",
+					"host": [
+						"scc-60485-60492",
+						"azurewebsites",
+						"net"
+					],
+					"path": [
+						"rest",
+						"users"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Short Wales",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Parse the response body\r",
+							"let responseData = pm.response.json();\r",
+							"\r",
+							"// Save shortId to an environment variable\r",
+							"pm.environment.set(\"walesShortID\", responseData.id);\r",
+							"\r",
+							"// Extract the blobUrl from the JSON response\r",
+							"let blobUrl = responseData.blobUrl;\r",
+							"\r",
+							"// Use a regular expression to extract the token part\r",
+							"let token = blobUrl.match(/token=([^&]+)/)[1];\r",
+							"\r",
+							"// Save token to an environment variable\r",
+							"pm.environment.set(\"token\", token);\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "https://scc-60485-60492.azurewebsites.net/rest/shorts/wales?pwd=12345",
+					"protocol": "https",
+					"host": [
+						"scc-60485-60492",
+						"azurewebsites",
+						"net"
+					],
+					"path": [
+						"rest",
+						"shorts",
+						"wales"
+					],
+					"query": [
+						{
+							"key": "pwd",
+							"value": "12345"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Upload Blob Wales",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/octet-stream",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "\\0x4a\\0x6f\\0x68\\0x6e\\0x44\\0x6f\\0x65\\0x31\\0x32\\0x33\\0x34\\0x35\\0x36\\0x37\\0x38\\0x39\r\n\\0x41\\0x42\\0x43\\0x44\\0x45\\0x46\\0x47\\0x48\\0x49\\0x4a\\0x4b\\0x4c\\0x4d\\0x4e\\0x4f\\0x50\r\n\\0x51\\0x52\\0x53\\0x54\\0x55\\0x56\\0x57\\0x58\\0x59\\0x5a\\0x61\\0x62\\0x63\\0x64\\0x65\\0x66\r\n\\0x67\\0x68\\0x69\\0x6a\\0x6b\\0x6c\\0x6d\\0x6e\\0x6f\\0x70\\0x71\\0x72\\0x73\\0x74\\0x75\\0x76\r\n\\0x77\\0x78\\0x79\\0x7a\\0x30\\0x31\\0x32\\0x33\\0x34\\0x35\\0x36\\0x37\\0x38\\0x39\\0x41\\0x42\r\n\\0x43\\0x44\\0x45\\0x46\\0x47\\0x48\\0x49\\0x4a\\0x4b\\0x4c\\0x4d\\0x4e\\0x4f\\0x50\\0x51\\0x52\r\n\\0x53\\0x54\\0x55\\0x56\\0x57\\0x58\\0x59\\0x5a\\0x61\\0x62\\0x63\\0x64\\0x65\\0x66\\0x67\\0x68\r\n\\0x69\\0x6a\\0x6b\\0x6c\\0x6d\\0x6e\\0x6f\\0x70\\0x71\\0x72\\0x73\\0x74\\0x75\\0x76\\0x77\\0x78\r\n\\0x79\\0x7a\\0x30\\0x31\\0x32\\0x33\\0x34\\0x35\\0x36\\0x37\\0x38\\0x39\\0x41\\0x42\\0x43\\0x44\r\n\\0x45\\0x46\\0x47\\0x48\\0x49\\0x4a\\0x4b\\0x4c\\0x4d\\0x4e\\0x4f\\0x50\\0x51\\0x52\\0x53\\0x54\r\n\\0x55\\0x56\\0x57\\0x58\\0x59\\0x5a\\0x61\\0x62\\0x63\\0x64\\0x65\\0x66\\0x67\\0x68\\0x69\\0x6a\r\n\\0x6b\\0x6c\\0x6d\\0x6e\\0x6f\\0x70\\0x71\\0x72\\0x73\\0x74\\0x75\\0x76\\0x77\\0x78\\0x79\\0x7a\r\n\\0x30\\0x31\\0x32\\0x33\\0x34\\0x35\\0x36\\0x37\\0x38\\0x39\\0x41\\0x42\\0x43\\0x44\\0x45\\0x46\r\n\\0x47\\0x48\\0x49\\0x4a\\0x4b\\0x4c\\0x4d\\0x4e\\0x4f\\0x50\\0x51\\0x52\\0x53\\0x54\\0x55\\0x56\r\n\\0x57\\0x58\\0x59\\0x5a\\0x61\\0x62\\0x63\\0x64\\0x65\\0x66\\0x67\\0x68\\0x69\\0x6a\\0x6b\\0x6c\r\n\\0x6d\\0x6e\\0x6f\\0x70\\0x71\\0x72\\0x73\\0x74\\0x75\\0x76\\0x77\\0x78\\0x79\\0x7a\\0x30\\0x31\r\n\\0x32\\0x33\\0x34\\0x35\\0x36\\0x37\\0x38\\0x39\\0x41\\0x42\\0x43\\0x44\\0x45\\0x46\\0x47\\0x48\r\n\\0x49\\0x4a\\0x4b\\0x4c\\0x4d\\0x4e\\0x4f\\0x50\\0x51\\0x52\\0x53\\0x54\\0x55\\0x56\\0x57\\0x58\r\n\\0x59\\0x5a\\0x61\\0x62\\0x63\\0x64\\0x65\\0x66\\0x67\\0x68\\0x69\\0x6a\\0x6b\\0x6c\\0x6d\\0x6e\r\n\\0x6f\\0x70\\0x71\\0x72\\0x73\\0x74\\0x75\\0x76\\0x77\\0x78\\0x79\\0x7a\\0x30\\0x31\\0x32\\0x33\r\n\\0x34\\0x35\\0x36\\0x37\\0x38\\0x39\\0x41\\0x42\\0x43\\0x44\\0x45\\0x46\\0x47\\0x48\\0x49\\0x4a\r\n\\0x4b\\0x4c\\0x4d\\0x4e\\0x4f\\0x50\\0x51\\0x52\\0x53\\0x54\\0x55\\0x56\\0x57\\0x58\\0x59\\0x5a\r\n\\0x61\\0x62\\0x63\\0x64\\0x65\\0x66\\0x67\\0x68\\0x69\\0x6a\\0x6b\\0x6c\\0x6d\\0x6e\\0x6f\\0x70\r\n\\0x71\\0x72\\0x73\\0x74\\0x75\\0x76\\0x77\\0x78\\0x79\\0x7a\\0x30\\0x31\\0x32\\0x33\\0x34\\0x35\r\n\\0x36\\0x37\\0x38\\0x39\\0x41\\0x42\\0x43\\0x44\\0x45\\0x46\\0x47\\0x48\\0x49\\0x4a\\0x4b\\0x4c\r\n\\0x4d\\0x4e\\0x4f\\0x50\\0x51\\0x52\\0x53\\0x54\\0x55\\0x56\\0x57\\0x58\\0x59\\0x5a\\0x61\\0x62\r\n\\0x63\\0x64\\0x65\\0x66\\0x67\\0x68\\0x69\\0x6a\\0x6b\\0x6c\\0x6d\\0x6e\\0x6f\\0x70\\0x71\\0x72\r\n\\0x73\\0x74\\0x75\\0x76\\0x77\\0x78\\0x79\\0x7a\\0x30\\0x31\\0x32\\0x33\\0x34\\0x35\\0x36\\0x37\r\n\\0x38\\0x39\\0x41\\0x42\\0x43\\0x44\\0x45\\0x46\\0x47\\0x48\\0x49\\0x4a\\0x4b\\0x4c\\0x4d\\0x4e\r\n\\0x4f\\0x50\\0x51\\0x52\\0x53\\0x54\\0x55\\0x56\\0x57\\"
+				},
+				"url": {
+					"raw": "https://scc-60485-60492.azurewebsites.net/rest/blobs/{{walesShortID}}?token={{token}}",
+					"protocol": "https",
+					"host": [
+						"scc-60485-60492",
+						"azurewebsites",
+						"net"
+					],
+					"path": [
+						"rest",
+						"blobs",
+						"{{walesShortID}}"
+					],
+					"query": [
+						{
+							"key": "token",
+							"value": "{{token}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Short Liskov",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Parse the response body\r",
+							"let responseData = pm.response.json();\r",
+							"\r",
+							"// Save shortId to an environment variable\r",
+							"pm.environment.set(\"liskovShortID\", responseData.id);\r",
+							"\r",
+							"// Extract the blobUrl from the JSON response\r",
+							"let blobUrl = responseData.blobUrl;\r",
+							"\r",
+							"// Use a regular expression to extract the token part\r",
+							"let token = blobUrl.match(/token=([^&]+)/)[1];\r",
+							"\r",
+							"// Save token to an environment variable\r",
+							"pm.environment.set(\"token\", token);\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "https://scc-60485-60492.azurewebsites.net/rest/shorts/liskov?pwd=54321",
+					"protocol": "https",
+					"host": [
+						"scc-60485-60492",
+						"azurewebsites",
+						"net"
+					],
+					"path": [
+						"rest",
+						"shorts",
+						"liskov"
+					],
+					"query": [
+						{
+							"key": "pwd",
+							"value": "54321"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Upload Blob Liskov",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/octet-stream",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "\\0x4a\\0x6f\\0x68\\0x6e\\0x44\\0x6f\\0x65\\0x31\\0x32\\0x33\\0x34\\0x35\\0x36\\0x37\\0x38\\0x39\r\n\\0x41\\0x42\\0x43\\0x44\\0x45\\0x46\\0x47\\0x48\\0x49\\0x4a\\0x4b\\0x4c\\0x4d\\0x4e\\0x4f\\0x50\r\n\\0x51\\0x52\\0x53\\0x54\\0x55\\0x56\\0x57\\0x58\\0x59\\0x5a\\0x61\\0x62\\0x63\\0x64\\0x65\\0x66\r\n\\0x67\\0x68\\0x69\\0x6a\\0x6b\\0x6c\\0x6d\\0x6e\\0x6f\\0x70\\0x71\\0x72\\0x73\\0x74\\0x75\\0x76\r\n\\0x77\\0x78\\0x79\\0x7a\\0x30\\0x31\\0x32\\0x33\\0x34\\0x35\\0x36\\0x37\\0x38\\0x39\\0x41\\0x42\r\n\\0x43\\0x44\\0x45\\0x46\\0x47\\0x48\\0x49\\0x4a\\0x4b\\0x4c\\0x4d\\0x4e\\0x4f\\0x50\\0x51\\0x52\r\n\\0x53\\0x54\\0x55\\0x56\\0x57\\0x58\\0x59\\0x5a\\0x61\\0x62\\0x63\\0x64\\0x65\\0x66\\0x67\\0x68\r\n\\0x69\\0x6a\\0x6b\\0x6c\\0x6d\\0x6e\\0x6f\\0x70\\0x71\\0x72\\0x73\\0x74\\0x75\\0x76\\0x77\\0x78\r\n\\0x79\\0x7a\\0x30\\0x31\\0x32\\0x33\\0x34\\0x35\\0x36\\0x37\\0x38\\0x39\\0x41\\0x42\\0x43\\0x44\r\n\\0x45\\0x46\\0x47\\0x48\\0x49\\0x4a\\0x4b\\0x4c\\0x4d\\0x4e\\0x4f\\0x50\\0x51\\0x52\\0x53\\0x54\r\n\\0x55\\0x56\\0x57\\0x58\\0x59\\0x5a\\0x61\\0x62\\0x63\\0x64\\0x65\\0x66\\0x67\\0x68\\0x69\\0x6a\r\n\\0x6b\\0x6c\\0x6d\\0x6e\\0x6f\\0x70\\0x71\\0x72\\0x73\\0x74\\0x75\\0x76\\0x77\\0x78\\0x79\\0x7a\r\n\\0x30\\0x31\\0x32\\0x33\\0x34\\0x35\\0x36\\0x37\\0x38\\0x39\\0x41\\0x42\\0x43\\0x44\\0x45\\0x46\r\n\\0x47\\0x48\\0x49\\0x4a\\0x4b\\0x4c\\0x4d\\0x4e\\0x4f\\0x50\\0x51\\0x52\\0x53\\0x54\\0x55\\0x56\r\n\\0x57\\0x58\\0x59\\0x5a\\0x61\\0x62\\0x63\\0x64\\0x65\\0x66\\0x67\\0x68\\0x69\\0x6a\\0x6b\\0x6c\r\n\\0x6d\\0x6e\\0x6f\\0x70\\0x71\\0x72\\0x73\\0x74\\0x75\\0x76\\0x77\\0x78\\0x79\\0x7a\\0x30\\0x31\r\n\\0x32\\0x33\\0x34\\0x35\\0x36\\0x37\\0x38\\0x39\\0x41\\0x42\\0x43\\0x44\\0x45\\0x46\\0x47\\0x48\r\n\\0x49\\0x4a\\0x4b\\0x4c\\0x4d\\0x4e\\0x4f\\0x50\\0x51\\0x52\\0x53\\0x54\\0x55\\0x56\\0x57\\0x58\r\n\\0x59\\0x5a\\0x61\\0x62\\0x63\\0x64\\0x65\\0x66\\0x67\\0x68\\0x69\\0x6a\\0x6b\\0x6c\\0x6d\\0x6e\r\n\\0x6f\\0x70\\0x71\\0x72\\0x73\\0x74\\0x75\\0x76\\0x77\\0x78\\0x79\\0x7a\\0x30\\0x31\\0x32\\0x33\r\n\\0x34\\0x35\\0x36\\0x37\\0x38\\0x39\\0x41\\0x42\\0x43\\0x44\\0x45\\0x46\\0x47\\0x48\\0x49\\0x4a\r\n\\0x4b\\0x4c\\0x4d\\0x4e\\0x4f\\0x50\\0x51\\0x52\\0x53\\0x54\\0x55\\0x56\\0x57\\0x58\\0x59\\0x5a\r\n\\0x61\\0x62\\0x63\\0x64\\0x65\\0x66\\0x67\\0x68\\0x69\\0x6a\\0x6b\\0x6c\\0x6d\\0x6e\\0x6f\\0x70\r\n\\0x71\\0x72\\0x73\\0x74\\0x75\\0x76\\0x77\\0x78\\0x79\\0x7a\\0x30\\0x31\\0x32\\0x33\\0x34\\0x35\r\n\\0x36\\0x37\\0x38\\0x39\\0x41\\0x42\\0x43\\0x44\\0x45\\0x46\\0x47\\0x48\\0x49\\0x4a\\0x4b\\0x4c\r\n\\0x4d\\0x4e\\0x4f\\0x50\\0x51\\0x52\\0x53\\0x54\\0x55\\0x56\\0x57\\0x58\\0x59\\0x5a\\0x61\\0x62\r\n\\0x63\\0x64\\0x65\\0x66\\0x67\\0x68\\0x69\\0x6a\\0x6b\\0x6c\\0x6d\\0x6e\\0x6f\\0x70\\0x71\\0x72\r\n\\0x73\\0x74\\0x75\\0x76\\0x77\\0x78\\0x79\\0x7a\\0x30\\0x31\\0x32\\0x33\\0x34\\0x35\\0x36\\0x37\r\n\\0x38\\0x39\\0x41\\0x42\\0x43\\0x44\\0x45\\0x46\\0x47\\0x48\\0x49\\0x4a\\0x4b\\0x4c\\0x4d\\0x4e\r\n\\0x4f\\0x50\\0x51\\0x52\\0x53\\0x54\\0x55\\0x56\\0x57\\"
+				},
+				"url": {
+					"raw": "https://scc-60485-60492.azurewebsites.net/rest/blobs/{{liskovShortID}}?token={{token}}",
+					"protocol": "https",
+					"host": [
+						"scc-60485-60492",
+						"azurewebsites",
+						"net"
+					],
+					"path": [
+						"rest",
+						"blobs",
+						"{{liskovShortID}}"
+					],
+					"query": [
+						{
+							"key": "token",
+							"value": "{{token}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Liskov follows Wales",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "true",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://scc-60485.60492.azurewebsites.net/rest/shorts/liskov/wales/followers?pwd=54321",
+					"protocol": "https",
+					"host": [
+						"scc-60485",
+						"60492",
+						"azurewebsites",
+						"net"
+					],
+					"path": [
+						"rest",
+						"shorts",
+						"liskov",
+						"wales",
+						"followers"
+					],
+					"query": [
+						{
+							"key": "pwd",
+							"value": "54321"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Liskov likes Wales Short",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "true",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://scc-60485-60492.azurewebsites.net/rest/shorts/{{walesShortID}}/liskov/likes?pwd=54321",
+					"protocol": "https",
+					"host": [
+						"scc-60485-60492",
+						"azurewebsites",
+						"net"
+					],
+					"path": [
+						"rest",
+						"shorts",
+						"{{walesShortID}}",
+						"liskov",
+						"likes"
+					],
+					"query": [
+						{
+							"key": "pwd",
+							"value": "54321"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete All Blobs Wales",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "https://scc-60485-60492.azurewebsites.net/rest/blobs/wales/blobs?token={{token}}",
+					"protocol": "https",
+					"host": [
+						"scc-60485-60492",
+						"azurewebsites",
+						"net"
+					],
+					"path": [
+						"rest",
+						"blobs",
+						"wales",
+						"blobs"
+					],
+					"query": [
+						{
+							"key": "token",
+							"value": "{{token}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Wales Followers",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://scc-60485-60492.azurewebsites.net/rest/shorts/wales/followers?pwd=12345",
+					"protocol": "https",
+					"host": [
+						"scc-60485-60492",
+						"azurewebsites",
+						"net"
+					],
+					"path": [
+						"rest",
+						"shorts",
+						"wales",
+						"followers"
+					],
+					"query": [
+						{
+							"key": "pwd",
+							"value": "12345"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Wales Likes",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://scc-60485-60492.azurewebsites.net/rest/shorts/{{walesShortID}}/likes?pwd=12345",
+					"protocol": "https",
+					"host": [
+						"scc-60485-60492",
+						"azurewebsites",
+						"net"
+					],
+					"path": [
+						"rest",
+						"shorts",
+						"{{walesShortID}}",
+						"likes"
+					],
+					"query": [
+						{
+							"key": "pwd",
+							"value": "12345"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Liskov Feed",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://scc-60485-60492.azurewebsites.net/rest/shorts/liskov/feed?pwd=54321",
+					"protocol": "https",
+					"host": [
+						"scc-60485-60492",
+						"azurewebsites",
+						"net"
+					],
+					"path": [
+						"rest",
+						"shorts",
+						"liskov",
+						"feed"
+					],
+					"query": [
+						{
+							"key": "pwd",
+							"value": "54321"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete User Wales",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "https://scc-60485-60492.azurewebsites.net/rest/users/wales?pwd=12345",
+					"protocol": "https",
+					"host": [
+						"scc-60485-60492",
+						"azurewebsites",
+						"net"
+					],
+					"path": [
+						"rest",
+						"users",
+						"wales"
+					],
+					"query": [
+						{
+							"key": "pwd",
+							"value": "12345"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "id",
+			"value": "1"
+		},
+		{
+			"key": "base_url",
+			"value": "https://postman-rest-api-learner.glitch.me/"
+		}
+	]
+}

@@ -86,8 +86,7 @@ public class Hibernate implements Database {
 		else
 			query = format("DELETE FROM %s obj WHERE obj.%s = '%s' OR obj.%s = '%s'",
 					clazz.getSimpleName(), args[0], args[1], args[2], args[3]);
-
-		session.createQuery(query, clazz).executeUpdate();
+		session.createNativeQuery(query, clazz).executeUpdate();
 	}
 
 	@Override

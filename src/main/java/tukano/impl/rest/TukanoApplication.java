@@ -17,6 +17,7 @@ public class TukanoApplication extends Application {
 	public static final BlobsType BLOBS_TYPE = BlobsType.AZURE_BLOBS;
 	public static final DatabaseType USERS_DB_TYPE = DatabaseType.HIBERNATE;
 	public static final DatabaseType SHORTS_DB_TYPE = DatabaseType.HIBERNATE;
+	public static final boolean REDIS_CACHE_ON = true;
 
 
 	/** Service Base Uri */

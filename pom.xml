@@ -241,5 +241,13 @@
 			<version>2.43.0</version>
 		</dependency>
 
+		<!-- Azure Redis -->
+
+		<dependency>
+			<groupId>redis.clients</groupId>
+			<artifactId>jedis</artifactId>
+			<version>5.0.1</version>
+		</dependency>
+
 	</dependencies>
 </project>

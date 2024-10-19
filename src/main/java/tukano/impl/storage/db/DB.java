@@ -136,7 +136,7 @@ public class DB {
 				});
 			}
 			case COSMOS_DB_POSTGRESQL -> {
-				// TODO
+				shortsDB.deleteAll(null, null, SHORTS, "shortId", shortId);
 				return Result.ok();
 			}
 
@@ -157,7 +157,7 @@ public class DB {
 				});
 			}
 			case COSMOS_DB_POSTGRESQL -> {
-				// TODO
+				shortsDB.deleteAll(null, null, SHORTS, "ownerid", userId);
 				return Result.ok();
 			}
 
@@ -188,17 +188,12 @@ public class DB {
 			case COSMOS_DB_NOSQL -> {
 				return db.searchPattern(clazz, pattern, container, "id");
 			}
-			case HIBERNATE -> {
+			case HIBERNATE, COSMOS_DB_POSTGRESQL -> {
 				return db.searchPattern(clazz, pattern, container, attribute);
 			}
-			case COSMOS_DB_POSTGRESQL -> {
-				//TODO
-			}
-
-			default -> {
+            default -> {
 				return Result.error(NOT_IMPLEMENTED);}
 		}
-		return null;
 	}
 
 	public static <T> Result<List<T>> getAllByAttributeID(Class<T> clazz, String container, String attribute, String param, String match, Database db) {

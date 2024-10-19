@@ -61,9 +61,6 @@ public class JavaShorts implements Shorts {
 			return error(BAD_REQUEST);
 
 		var likes = DB.countAll(Long.class, LIKES, shortsDB, "shortId", shortId).value();
-
-		System.out.println(likes.get(0) + "LIKESSSSSSSSSSSSSSSS");
-
 		return errorOrValue(getOne(shortId, Short.class, shortsDB), shrt -> shrt.copyWithLikes_And_Token(likes.get(0)));
 	}
 

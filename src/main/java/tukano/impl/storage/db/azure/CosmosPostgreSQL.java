@@ -145,27 +145,41 @@ public class CosmosPostgreSQL implements Database {
         return Result.ok(obj);
     }
 
-    private <T> Result<T> delete(T obj) throws SQLException {
-        if (obj instanceof User u) {
-            String deleteUser = format("DELETE FROM users WHERE userId = '%s'", u.getUserId());
-            PreparedStatement insertUserStatement = connection.prepareStatement(deleteUser);
-            insertUserStatement.executeUpdate();
-        }
-        else if (obj instanceof Likes l) {
-            String deleteLikes = format("DELETE FROM likes WHERE id = '%s'", l.getId());
-            PreparedStatement insertLikesStatement = connection.prepareStatement(deleteLikes);
-            insertLikesStatement.executeUpdate();
-        }
-        else if (obj instanceof Following f) {
-            String deleteFollowing = format("DELETE FROM following WHERE id = '%s'", f.getId());
-            PreparedStatement insertFollowingStatement = connection.prepareStatement(deleteFollowing);
-            insertFollowingStatement.executeUpdate();
+    private void deleteAux(String table, String attribute, String id) throws SQLException {
+        String delete = format("DELETE FROM %s WHERE %s = '%s'", table, attribute, id);
+        System.out.println(delete + " OLAAAAAAAAA");
+        PreparedStatement deleteStatement = connection.prepareStatement(delete);
+        deleteStatement.executeUpdate();
+
+
+        String query = "SELECT * FROM public.shorts ;";
+        PreparedStatement readStatement = connection.prepareStatement(query);
+        ResultSet resultSet = readStatement.executeQuery();
+        if (!resultSet.next()) {
+            System.out.println("NADAAAAAAA");
         }
         else {
+            Short s = new Short();
+            s.setShortId(resultSet.getString("shortId"));
+            s.setOwnerId(resultSet.getString("ownerId"));
+            s.setBlobUrl(resultSet.getString("blobUrl"));
+            s.setTimestamp(resultSet.getLong("timestamp"));
+            s.setTotalLikes(resultSet.getInt("totalLikes"));
+            System.out.println(s.toString() + " MBAPPEEEEEEEEEEEEE");
+        }
+
+    }
+
+    private <T> Result<T> delete(T obj) throws SQLException {
+        if (obj instanceof User u)
+            deleteAux("users", "userId", u.getUserId());
+        else if (obj instanceof Likes l)
+            deleteAux("likes", "id", l.getId());
+        else if (obj instanceof Following f)
+            deleteAux("following", "id", f.getId());
+        else {
             Short s = (Short)obj;
-            String deleteShort = format("DELETE FROM shorts WHERE shortId = '%s'", s.getShortId());
-            PreparedStatement insertShortStatement = connection.prepareStatement(deleteShort);
-            insertShortStatement.executeUpdate();
+            deleteAux("shorts", "shortId", s.getShortId());
         }
         return Result.ok(obj);
     }
@@ -263,7 +277,12 @@ public class CosmosPostgreSQL implements Database {
 
     @Override
     public <T> void deleteAll(Class<T> clazz, Session s, String... args) {
-        // TODO
+        try {
+            deleteAux(args[0], args[1], args[2]);
+        }
+        catch (SQLException e ) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -305,7 +324,7 @@ public class CosmosPostgreSQL implements Database {
         }
     }
 
-    private <T> Result<List<T>> getAllByAttributeAux(Class<T> clazz, String container, String attribute, String param, String match) throws SQLException {
+    private <T> Result<List<T>> getAllByAttributeAux(String container, String attribute, String param, String match) throws SQLException {
         var query = format("SELECT %s FROM %s WHERE %s = '%s'", attribute, container, param, match);
         PreparedStatement readStatement = connection.prepareStatement(query);
         ResultSet resultSet = readStatement.executeQuery();
@@ -316,7 +335,6 @@ public class CosmosPostgreSQL implements Database {
             String result = resultSet.getString(1);
             resultList.add((T) result);
         }
-
         if(resultList.isEmpty()) return Result.error(NOT_FOUND);
 
         return Result.ok(resultList);
@@ -325,7 +343,7 @@ public class CosmosPostgreSQL implements Database {
     @Override
     public <T> Result<List<T>> getAllByAttribute(Class<T> clazz, String container, String attribute, String param, String match) {
         try {
-            return getAllByAttributeAux(clazz, container, attribute, param, match);
+            return getAllByAttributeAux(container, attribute, param, match);
         }
         catch (SQLException e) {
             e.printStackTrace();
@@ -349,8 +367,35 @@ public class CosmosPostgreSQL implements Database {
         return Result.error(NOT_IMPLEMENTED);
     }
 
+    private <T> Result<List<T>> searchPatternAux(Class<T> clazz, String pattern, String container, String attribute) throws SQLException {
+        String query = format("SELECT * FROM %s u WHERE UPPER(%s) LIKE '%%%s%%'", container, attribute, pattern.toUpperCase());
+        PreparedStatement readStatement = connection.prepareStatement(query);
+        ResultSet resultSet = readStatement.executeQuery();
+
+        List<T> resultList = new ArrayList<>();
+        while (resultSet.next()) {
+            String userId = resultSet.getString(1);
+            String pwd = resultSet.getString(2);
+            String email = resultSet.getString(3);
+            String displayName = resultSet.getString(4);
+            User u = new User(userId, pwd, email, displayName);
+            resultList.add((T) u);
+        }
+
+        if(resultList.isEmpty()) return Result.error(NOT_FOUND);
+
+
+        return Result.ok(resultList);
+    }
+
     @Override
     public <T> Result<List<T>> searchPattern(Class<T> clazz, String pattern, String container, String attribute) {
+        try {
+            return searchPatternAux(clazz, pattern, container, attribute);
+        }
+        catch (SQLException e) {
+            e.printStackTrace();
+        }
         return null;
     }
 }

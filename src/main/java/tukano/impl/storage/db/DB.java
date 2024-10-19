@@ -211,14 +211,12 @@ public class DB {
 				return getAllByAttribute(clazz, c, attribute, param, match, db);
 			}
 			case COSMOS_DB_POSTGRESQL -> {
-				// TODO
+				return getAllByAttribute(clazz, container, attribute, param, match, db);
 			}
 
 			default -> {
 				return Result.error(NOT_IMPLEMENTED);}
 		}
-
-        return null;
     }
 
 

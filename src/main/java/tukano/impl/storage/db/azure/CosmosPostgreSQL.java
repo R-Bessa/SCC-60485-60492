@@ -283,7 +283,6 @@ public class CosmosPostgreSQL implements Database {
 
     private <T> Result<List<T>> count(Class<T> clazz, String container, String attribute, String id) throws SQLException {
         String query = format("SELECT COUNT(%s) FROM %s WHERE %s = '%s'", attribute, container, attribute, id);
-        System.out.println(query + " AAAAAAAAAAAAAAAAAAAAAAAAAAA");
         PreparedStatement readStatement = connection.prepareStatement(query);
         ResultSet resultSet = readStatement.executeQuery();
         if (!resultSet.next()) {
@@ -291,10 +290,8 @@ public class CosmosPostgreSQL implements Database {
         }
 
         int count = resultSet.getInt(1);
-        System.out.println(count + " COOOOOOOOOOOOOUNT");
         List<T> resultList = new ArrayList<>();
         resultList.add(clazz.cast((long)count));
-        System.out.println(resultList.size() + " SIIIIIIIIIIZEEEEEEEE");
         return Result.ok(resultList);
     }
 
@@ -308,8 +305,31 @@ public class CosmosPostgreSQL implements Database {
         }
     }
 
+    private <T> Result<List<T>> getAllByAttributeAux(Class<T> clazz, String container, String attribute, String param, String match) throws SQLException {
+        var query = format("SELECT %s FROM %s WHERE %s = '%s'", attribute, container, param, match);
+        PreparedStatement readStatement = connection.prepareStatement(query);
+        ResultSet resultSet = readStatement.executeQuery();
+
+        List<T> resultList = new ArrayList<>();
+        while (resultSet.next()) {
+
+            String result = resultSet.getString(1);
+            resultList.add((T) result);
+        }
+
+        if(resultList.isEmpty()) return Result.error(NOT_FOUND);
+
+        return Result.ok(resultList);
+    }
+
     @Override
     public <T> Result<List<T>> getAllByAttribute(Class<T> clazz, String container, String attribute, String param, String match) {
+        try {
+            return getAllByAttributeAux(clazz, container, attribute, param, match);
+        }
+        catch (SQLException e) {
+            e.printStackTrace();
+        }
         return null;
     }
 

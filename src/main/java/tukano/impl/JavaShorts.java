@@ -115,7 +115,6 @@ public class JavaShorts implements Shorts {
 
 
 		return errorOrResult(getShort(shortId), shrt -> {
-			System.out.println("OLAAAAAAAAAAAAAAAA");
 			var l = new Likes(userId, shortId, shrt.getOwnerId());
 			return errorOrVoid(okUser(userId, password), isLiked ? DB.insertOne(l, shortsDB) : DB.deleteOne(l, shortsDB));
 		});

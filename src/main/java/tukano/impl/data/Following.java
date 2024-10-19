@@ -29,6 +29,8 @@ public class Following{
 		this.followee = followee;
 	}
 
+	public String getId() { return id; }
+
 	public String getFollower() {
 		return follower;
 	}

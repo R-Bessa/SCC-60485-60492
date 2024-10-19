@@ -85,10 +85,10 @@
 			                </resource>
 			            </resources>
 			        </deployment>
-			        <resourceGroup>scc-project-60485-rg</resourceGroup>
-			        <appName>scc-project-60485</appName>
-					<!--<resourceGroup>scc-rg-60485-60492</resourceGroup>
-					<appName>scc-60485-60492</appName>-->
+			        <!--<resourceGroup>scc-project-60485-rg</resourceGroup>
+			        <appName>scc-project-60485</appName>-->
+					<resourceGroup>scc-rg-60485-60492</resourceGroup>
+					<appName>scc-60485-60492</appName>
 			    </configuration>
 			</plugin>
 		</plugins>
@@ -239,6 +239,19 @@
 			<groupId>com.azure.resourcemanager</groupId>
 			<artifactId>azure-resourcemanager</artifactId>
 			<version>2.43.0</version>
+		</dependency>
+
+		<!-- CosmosDB PostgreSQL -->
+		<dependency>
+			<groupId>org.postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<version>42.7.3</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/com.zaxxer/HikariCP -->
+		<dependency>
+			<groupId>com.zaxxer</groupId>
+			<artifactId>HikariCP</artifactId>
+			<version>5.1.0</version>
 		</dependency>
 
 	</dependencies>

@@ -39,6 +39,8 @@ public class Likes {
 		this.ownerId = ownerId;
 	}
 
+	public String getId() { return id; }
+
 	public String getUserId() {
 		return userId;
 	}

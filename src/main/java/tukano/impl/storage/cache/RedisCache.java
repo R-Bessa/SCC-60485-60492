@@ -6,6 +6,8 @@ import tukano.api.Result;
 import tukano.api.User;
 import tukano.impl.data.Following;
 import tukano.impl.data.Likes;
+import utils.Hash;
+import utils.Hex;
 
 import java.util.List;
 
@@ -44,8 +46,11 @@ public class RedisCache {
 	}
 
 
-	//TODO store hash of pwd as key, value is the user and set a TTL
-	//TODO what logic for the tokens validity?
+	//TODO store hash of pwd as key or cookie-userId, value is the user and set a TTL
+	// TODO when access then call set TLL again to renew the lease
+	// TODO use the value to check pwd still
+	// TODO what about token?
+
 
 
 	public static <T> void put(String key_attribute, T obj) {
@@ -143,6 +148,18 @@ public class RedisCache {
 	public static void setTTL(String key, long ttl) {
 		try (var jedis = getCachePool().getResource()) {
 			jedis.expire(key, ttl); // seconds
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public static void createCookie(User u) {
+		try (var jedis = getCachePool().getResource()) {
+			byte[] pwd_hash = Hash.sha256(u.getPwd().getBytes());
+			String key = Hex.of(pwd_hash);
+			String value = JSON.encode(u);
+			jedis.set(key, value);
 
 		} catch (Exception e) {
 			e.printStackTrace();

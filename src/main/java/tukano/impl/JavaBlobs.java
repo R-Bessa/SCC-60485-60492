@@ -3,6 +3,8 @@ package tukano.impl;
 import static java.lang.String.format;
 import static tukano.api.Result.error;
 import static tukano.api.Result.ErrorCode.FORBIDDEN;
+import static tukano.api.Result.errorOrValue;
+import static tukano.impl.JavaShorts.okUser;
 import static tukano.impl.storage.blobs.BlobsType.AZURE_BLOBS;
 
 import java.util.function.Consumer;
@@ -14,16 +16,17 @@ import tukano.impl.rest.TukanoApplication;
 import tukano.impl.storage.blobs.BlobStorage;
 import tukano.impl.storage.blobs.AzureBlobStorage;
 import tukano.impl.storage.blobs.FilesystemStorage;
+import tukano.impl.storage.db.DB;
 import utils.Hash;
 import utils.Hex;
 
 public class JavaBlobs implements Blobs {
 	
 	private static Blobs instance;
-	private static Logger Log = Logger.getLogger(JavaBlobs.class.getName());
+	private static final Logger Log = Logger.getLogger(JavaBlobs.class.getName());
 
 	public static String baseURI;
-	private BlobStorage storage;
+	private final BlobStorage storage;
 	
 	synchronized public static Blobs getInstance() {
 		if( instance == null )
@@ -82,18 +85,14 @@ public class JavaBlobs implements Blobs {
 	}
 
 	@Override
-	public Result<Void> deleteAllBlobs(String userId, String token) {
-		Log.info(() -> format("deleteAllBlobs : userId = %s, token=%s\n", userId, token));
+	public Result<Void> deleteAllBlobs(String userId, String pwd) {
+		Log.info(() -> format("deleteAllBlobs : userId = %s, pwd=%s\n", userId, pwd));
 
-		if( ! Token.isValid( Token.get(userId), userId ) )
-			return error(FORBIDDEN);
-
-		return storage.delete( toPath(userId));
+		return errorOrValue(okUser(userId, pwd), storage.delete(toPath(userId)) );
 	}
 	
 	private boolean validBlobId(String blobId, String token) {
-		System.out.println( toURL(blobId));
-		return Token.isValid(token, toURL(blobId));
+		return Token.isValid(token, blobId);
 	}
 
 	private String toPath(String blobId) {

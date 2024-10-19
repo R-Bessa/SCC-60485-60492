@@ -1,4 +1,4 @@
-package tukano.impl.storage.db.azure;
+package tukano.impl.storage.db.azure.dao;
 
 import tukano.api.Short;
 

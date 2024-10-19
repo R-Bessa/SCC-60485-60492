@@ -132,7 +132,7 @@ public class JavaShorts implements Shorts {
 		return errorOrValue(okUser(userId, password), DB.getFeed(userId));
 	}
 
-	protected Result<User> okUser(String userId, String pwd) {
+	public static Result<User> okUser(String userId, String pwd) {
 		return JavaUsers.getInstance().getUser(userId, pwd);
 	}
 
@@ -145,12 +145,9 @@ public class JavaShorts implements Shorts {
 	}
 
 	@Override
-	public Result<Void> deleteAllShorts(String userId, String password, String token) {
-		Log.info(() -> format("deleteAllShorts : userId = %s, password = %s, token = %s\n", userId, password, token));
+	public Result<Void> deleteAllShorts(String userId, String password) {
+		Log.info(() -> format("deleteAllShorts : userId = %s, password = %s\n", userId, password));
 
-		if (!Token.isValid(Token.get(userId), userId))
-			return error(FORBIDDEN);
-
-		return DB.deleteAllShorts(userId);
+		return errorOrValue(okUser(userId, password), DB.deleteAllShorts(userId));
 	}
 }

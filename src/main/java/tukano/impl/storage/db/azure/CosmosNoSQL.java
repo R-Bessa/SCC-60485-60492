@@ -152,7 +152,6 @@ public class CosmosNoSQL implements Database {
     @Override
     public <T> Result<List<T>> getAllByAttribute(Class<T> clazz, String container, String attribute, String param, String match) {
         var query = format("SELECT VALUE %s.%s FROM %s WHERE %s.%s = \"%s\"", container, attribute, container, container, param, match);
-        System.out.println(query + " AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
         return sql(query, clazz);
     }
 

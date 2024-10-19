@@ -102,28 +102,20 @@ public class CosmosPostgreSQL implements Database {
             insertUserStatement.executeUpdate();
         }
         else if (obj instanceof Likes l) {
-            PreparedStatement insertStatement = connection.prepareStatement("INSERT INTO likes VALUES (?, ?, ?, ?)");
-            insertStatement.setString(1, l.getId());
-            insertStatement.setString(2, l.getUserId());
-            insertStatement.setString(3, l.getShortId());
-            insertStatement.setString(4, l.getOwnerId());
-            insertStatement.executeUpdate();
+            String insertLike = format("INSERT INTO likes VALUES ('%s', '%s', '%s', '%s');", l.getId(), l.getUserId(), l.getShortId(), l.getOwnerId());
+            PreparedStatement insertLikeStatement = connection.prepareStatement(insertLike);
+            insertLikeStatement.executeUpdate();
         }
         else if (obj instanceof Following f) {
-            PreparedStatement insertStatement = connection.prepareStatement("INSERT INTO following VALUES (?, ?, ?)");
-            insertStatement.setString(1, f.getId());
-            insertStatement.setString(2, f.getFollower());
-            insertStatement.setString(3, f.getFollowee());
-            insertStatement.executeUpdate();
+            String insertLike = format("INSERT INTO following VALUES ('%s', '%s', '%s');", f.getId(), f.getFollower(), f.getFollowee());
+            PreparedStatement insertLikeStatement = connection.prepareStatement(insertLike);
+            insertLikeStatement.executeUpdate();
         }
         else {
             Short s = (Short)obj;
-            PreparedStatement insertStatement = connection.prepareStatement("INSERT INTO shorts VALUES (?, ?, ?, ?, ?)");
-            insertStatement.setString(1, s.getShortId());
-            insertStatement.setString(2, s.getOwnerId());
-            insertStatement.setString(3, s.getBlobUrl());
-            insertStatement.setLong(4, s.getTimestamp());
-            insertStatement.setInt(5, s.getTotalLikes());
+            String insertShort = format("INSERT INTO shorts VALUES ('%s', '%s', '%s', '%s', '%s');", s.getShortId(), s.getOwnerId(), s.getBlobUrl(), s.getTimestamp(), s.getTotalLikes());
+            PreparedStatement insertShortStatement = connection.prepareStatement(insertShort);
+            insertShortStatement.executeUpdate();
         }
         return Result.ok(obj);
     }
@@ -180,8 +172,8 @@ public class CosmosPostgreSQL implements Database {
 
     private <T> Result<?> getById(String id, Class<T> clazz) throws SQLException {
         if(clazz.equals(User.class)) {
-            String getUser = format("SELECT * FROM users WHERE userId = '%s';", id);
-            PreparedStatement readStatement = connection.prepareStatement(getUser);
+            PreparedStatement readStatement = connection.prepareStatement("SELECT * FROM users WHERE userId = ?;");
+            readStatement.setString(1, id);
             ResultSet resultSet = readStatement.executeQuery();
             if (!resultSet.next()) {
                 return Result.error(NOT_FOUND);
@@ -194,8 +186,8 @@ public class CosmosPostgreSQL implements Database {
             return Result.ok(u);
         }
         else if (clazz.equals(Likes.class)) {
-            String getLikes = format("SELECT * FROM likes WHERE id = '%s';", id);
-            PreparedStatement readStatement = connection.prepareStatement(getLikes);
+            PreparedStatement readStatement = connection.prepareStatement("SELECT * FROM likes WHERE id = ?;");
+            readStatement.setString(1, id);
             ResultSet resultSet = readStatement.executeQuery();
             if (!resultSet.next()) {
                 return Result.error(NOT_FOUND);
@@ -207,8 +199,8 @@ public class CosmosPostgreSQL implements Database {
             return Result.ok(l);
         }
         else if(clazz.equals(Following.class)) {
-            String getFollowing = format("SELECT * FROM following WHERE id = '%s';", id);
-            PreparedStatement readStatement = connection.prepareStatement(getFollowing);
+            PreparedStatement readStatement = connection.prepareStatement("SELECT * FROM following WHERE id = ?;");
+            readStatement.setString(1, id);
             ResultSet resultSet = readStatement.executeQuery();
             if (!resultSet.next()) {
                 return Result.error(NOT_FOUND);
@@ -219,8 +211,8 @@ public class CosmosPostgreSQL implements Database {
             return Result.ok(f);
         }
         else {
-            String getFollowing = format("SELECT * FROM shorts WHERE shortId = '%s';", id);
-            PreparedStatement readStatement = connection.prepareStatement(getFollowing);
+            String query = format("SELECT * FROM public.shorts WHERE shortId = '%s';", id);
+            PreparedStatement readStatement = connection.prepareStatement(query);
             ResultSet resultSet = readStatement.executeQuery();
             if (!resultSet.next()) {
                 return Result.error(NOT_FOUND);
@@ -298,11 +290,11 @@ public class CosmosPostgreSQL implements Database {
             return Result.error(NOT_FOUND);
         }
 
-        //BUG ALGURES AQUI
-
         int count = resultSet.getInt(1);
+        System.out.println(count + " COOOOOOOOOOOOOUNT");
         List<T> resultList = new ArrayList<>();
-        resultList.add(clazz.cast(count));
+        resultList.add(clazz.cast((long)count));
+        System.out.println(resultList.size() + " SIIIIIIIIIIZEEEEEEEE");
         return Result.ok(resultList);
     }
 
@@ -310,11 +302,10 @@ public class CosmosPostgreSQL implements Database {
     @Override
     public <T> Result<List<T>> countAll(Class<T> clazz, String container, String attribute, String id) {
         try {
-            count(clazz, container, attribute, id);
+            return count(clazz, container, attribute, id);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-        return null;
     }
 
     @Override

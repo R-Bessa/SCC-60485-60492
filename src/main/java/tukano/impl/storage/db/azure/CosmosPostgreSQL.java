@@ -351,9 +351,31 @@ public class CosmosPostgreSQL implements Database {
         return null;
     }
 
+    private <T> Result<List<T>> sqlAux(String query) throws SQLException {
+        PreparedStatement readStatement = connection.prepareStatement(query);
+        ResultSet resultSet = readStatement.executeQuery();
+
+        List<T> resultList = new ArrayList<>();
+        while (resultSet.next()) {
+            String result1 = resultSet.getString(1);
+            String result2 = resultSet.getString(2);
+
+            resultList.add((T) result1);
+            resultList.add((T) result2);
+        }
+        if(resultList.isEmpty()) return Result.error(NOT_FOUND);
+
+        return Result.ok(resultList);
+    }
+
     @Override
     public <T> Result<List<T>> sql(String sqlStatement, Class<T> clazz) {
-        // TODO
+        try {
+            return sqlAux(sqlStatement);
+        }
+        catch (SQLException e) {
+            e.printStackTrace();
+        }
         return null;
     }
 

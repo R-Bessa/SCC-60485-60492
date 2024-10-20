@@ -78,7 +78,15 @@ public class DB {
 	public static Result<List<String>> getFeed(String userId) {
 		switch (TukanoApplication.SHORTS_DB_TYPE) {
 			case COSMOS_DB_POSTGRESQL -> {
-				return Result.error(NOT_IMPLEMENTED);
+				String query_fmt =
+						"""
+                        SELECT shortId, timestamp FROM shorts WHERE ownerId = '%s'
+                        UNION
+                        SELECT s.shortId, s.timestamp FROM shorts s, following f
+                        WHERE f.followee = s.ownerId AND f.follower = '%s'
+                        ORDER BY s.timestamp DESC
+                        """;
+				return Result.ok(sql(String.class, query_fmt, shortsDB, userId, userId));
 			}
 			case HIBERNATE -> {
 				String query_fmt =

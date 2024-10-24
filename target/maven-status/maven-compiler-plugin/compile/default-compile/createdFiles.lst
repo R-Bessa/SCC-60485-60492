@@ -1,9 +1,7 @@
 utils\Sleep.class
-tukano\impl\storage\db\azure\DemoApplication.class
 tukano\impl\rest\RestResource$1.class
 tukano\impl\Token.class
 tukano\impl\rest\utils\CustomLoggingFilter.class
-tukano\impl\storage\db\azure\DButil.class
 utils\Random.class
 utils\TLS.class
 tukano\impl\rest\RestResource.class

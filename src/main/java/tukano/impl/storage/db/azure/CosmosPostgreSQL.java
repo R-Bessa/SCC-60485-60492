@@ -1,9 +1,9 @@
 package tukano.impl.storage.db.azure;
 
 
-import com.azure.cosmos.CosmosContainer;
 import com.zaxxer.hikari.HikariDataSource;
 import org.hibernate.Session;
+import org.postgresql.util.PSQLException;
 import tukano.api.Result;
 import tukano.api.Short;
 import tukano.api.User;
@@ -12,7 +12,6 @@ import tukano.impl.data.Likes;
 import tukano.impl.storage.db.Database;
 
 import javax.sql.DataSource;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,9 +24,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import static java.lang.String.format;
-import static tukano.api.Result.ErrorCode.NOT_FOUND;
-import static tukano.api.Result.ErrorCode.NOT_IMPLEMENTED;
-import static tukano.impl.storage.db.DB.*;
+import static tukano.api.Result.ErrorCode.*;
 
 public class CosmosPostgreSQL implements Database {
 
@@ -95,27 +92,28 @@ public class CosmosPostgreSQL implements Database {
         return null;
     }
 
-    private <T> Result<T> insertOne(T obj) throws SQLException {
+    private void executeQuery(String query) throws SQLException {
+        PreparedStatement statement = connection.prepareStatement(query);
+        statement.executeUpdate();
+    }
+
+    private <T> Result<T> insertOne(T obj) throws PSQLException, SQLException {
         if (obj instanceof User u) {
             String insertUser = format("INSERT INTO users VALUES ('%s', '%s', '%s', '%s');", u.getUserId(), u.getPwd(), u.getEmail(), u.getDisplayName());
-            PreparedStatement insertUserStatement = connection.prepareStatement(insertUser);
-            insertUserStatement.executeUpdate();
+            executeQuery(insertUser);
         }
         else if (obj instanceof Likes l) {
             String insertLike = format("INSERT INTO likes VALUES ('%s', '%s', '%s', '%s');", l.getId(), l.getUserId(), l.getShortId(), l.getOwnerId());
-            PreparedStatement insertLikeStatement = connection.prepareStatement(insertLike);
-            insertLikeStatement.executeUpdate();
+            executeQuery(insertLike);
         }
         else if (obj instanceof Following f) {
             String insertLike = format("INSERT INTO following VALUES ('%s', '%s', '%s');", f.getId(), f.getFollower(), f.getFollowee());
-            PreparedStatement insertLikeStatement = connection.prepareStatement(insertLike);
-            insertLikeStatement.executeUpdate();
+            executeQuery(insertLike);
         }
         else {
             Short s = (Short)obj;
             String insertShort = format("INSERT INTO shorts VALUES ('%s', '%s', '%s', '%s', '%s');", s.getShortId(), s.getOwnerId(), s.getBlobUrl(), s.getTimestamp(), s.getTotalLikes());
-            PreparedStatement insertShortStatement = connection.prepareStatement(insertShort);
-            insertShortStatement.executeUpdate();
+            executeQuery(insertShort);
         }
         return Result.ok(obj);
     }
@@ -123,51 +121,28 @@ public class CosmosPostgreSQL implements Database {
     private <T> Result<T> update(T obj) throws SQLException {
         if (obj instanceof User u) {
             String updateUser = format("UPDATE users SET pwd = '%s', email= '%s', displayName = '%s' WHERE userId = '%s'" , u.getPwd(), u.getEmail(), u.getDisplayName(), u.getUserId());
-            PreparedStatement insertUserStatement = connection.prepareStatement(updateUser);
-            insertUserStatement.executeUpdate();
+            executeQuery(updateUser);
         }
         else if (obj instanceof Likes l) {
             String updateLikes = format("UPDATE likes SET userid = '%s', shortId = '%s', ownerId = '%s' WHERE id='%s'", l.getUserId(), l.getShortId(), l.getOwnerId(), l.getId());
-            PreparedStatement insertLikesStatement = connection.prepareStatement(updateLikes);
-            insertLikesStatement.executeUpdate();
+            executeQuery(updateLikes);
         }
         else if (obj instanceof Following f) {
             String updateFollowing = format("UPDATE following SET follower = '%s', followee = '%s' WHERE id = '%s'", f.getFollower(), f.getFollowee(), f.getId());
-            PreparedStatement insertFollowingStatement = connection.prepareStatement(updateFollowing);
-            insertFollowingStatement.executeUpdate();
+            executeQuery(updateFollowing);
         }
         else {
             Short s = (Short)obj;
             String updateShort = format("UPDATE shorts SET ownerId = '%s', blobUrl = '%s', timestamp = '%s', totalLikes = '%s' WHERE shortId = '%s'", s.getOwnerId(), s.getBlobUrl(), s.getTimestamp(), s.getTotalLikes(), s.getShortId());
-            PreparedStatement insertShortStatement = connection.prepareStatement(updateShort);
-            insertShortStatement.executeUpdate();
+            executeQuery(updateShort);
         }
         return Result.ok(obj);
     }
 
     private void deleteAux(String table, String attribute, String id) throws SQLException {
         String delete = format("DELETE FROM %s WHERE %s = '%s'", table, attribute, id);
-        System.out.println(delete + " OLAAAAAAAAA");
         PreparedStatement deleteStatement = connection.prepareStatement(delete);
         deleteStatement.executeUpdate();
-
-
-        String query = "SELECT * FROM public.shorts ;";
-        PreparedStatement readStatement = connection.prepareStatement(query);
-        ResultSet resultSet = readStatement.executeQuery();
-        if (!resultSet.next()) {
-            System.out.println("NADAAAAAAA");
-        }
-        else {
-            Short s = new Short();
-            s.setShortId(resultSet.getString("shortId"));
-            s.setOwnerId(resultSet.getString("ownerId"));
-            s.setBlobUrl(resultSet.getString("blobUrl"));
-            s.setTimestamp(resultSet.getLong("timestamp"));
-            s.setTotalLikes(resultSet.getInt("totalLikes"));
-            System.out.println(s.toString() + " MBAPPEEEEEEEEEEEEE");
-        }
-
     }
 
     private <T> Result<T> delete(T obj) throws SQLException {
@@ -247,7 +222,12 @@ public class CosmosPostgreSQL implements Database {
         try {
             return insertOne(obj);
         }
-        catch (SQLException e) {
+        catch (PSQLException e) {
+            if (e.getSQLState().equals("23505")) {
+                System.out.println("Duplicate key error: " + e.getMessage());
+                return Result.error(CONFLICT);
+            }
+        } catch (SQLException e) {
             e.printStackTrace();
         }
         return null;
@@ -297,7 +277,7 @@ public class CosmosPostgreSQL implements Database {
 
     @Override
     public <T> Result<List<T>> getAll(Class<T> clazz, String container, String... args) {
-        return null;
+        return Result.error(NOT_IMPLEMENTED);
     }
 
     private <T> Result<List<T>> count(Class<T> clazz, String container, String attribute, String id) throws SQLException {
@@ -335,7 +315,6 @@ public class CosmosPostgreSQL implements Database {
             String result = resultSet.getString(1);
             resultList.add((T) result);
         }
-        if(resultList.isEmpty()) return Result.error(NOT_FOUND);
 
         return Result.ok(resultList);
     }
@@ -352,6 +331,7 @@ public class CosmosPostgreSQL implements Database {
     }
 
     private <T> Result<List<T>> sqlAux(String query) throws SQLException {
+
         PreparedStatement readStatement = connection.prepareStatement(query);
         ResultSet resultSet = readStatement.executeQuery();
 
@@ -363,7 +343,6 @@ public class CosmosPostgreSQL implements Database {
             resultList.add((T) result1);
             resultList.add((T) result2);
         }
-        if(resultList.isEmpty()) return Result.error(NOT_FOUND);
 
         return Result.ok(resultList);
     }
@@ -403,9 +382,6 @@ public class CosmosPostgreSQL implements Database {
             User u = new User(userId, pwd, email, displayName);
             resultList.add((T) u);
         }
-
-        if(resultList.isEmpty()) return Result.error(NOT_FOUND);
-
 
         return Result.ok(resultList);
     }

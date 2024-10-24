@@ -82,9 +82,9 @@ public class DB {
 						"""
                         SELECT shortId, timestamp FROM shorts WHERE ownerId = '%s'
                         UNION
-                        SELECT s.shortId, s.timestamp FROM shorts s, following f
-                        WHERE f.followee = s.ownerId AND f.follower = '%s'
-                        ORDER BY s.timestamp DESC
+                        SELECT shortId, timestamp FROM shorts, following
+                        WHERE followee = ownerId AND follower = '%s'
+                        ORDER BY timestamp DESC
                         """;
 				return Result.ok(sql(String.class, query_fmt, shortsDB, userId, userId));
 			}

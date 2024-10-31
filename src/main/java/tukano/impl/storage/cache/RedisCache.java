@@ -4,27 +4,37 @@ import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 import tukano.api.Result;
 import tukano.api.User;
-import tukano.impl.data.Following;
-import tukano.impl.data.Likes;
+import tukano.impl.rest.TukanoApplication;
 import utils.Hash;
 import utils.Hex;
 
 import java.util.List;
 
 public class RedisCache {
-	private static final String RedisHostname = "scc-cache-60485.redis.cache.windows.net";
-	private static final String RedisKey = "R28kzYBcQ2NZXUavt5kJsUvXOJAsYplXYAzCaJqByS4=";
+	private static final String RedisHostname = "cache-60485.redis.cache.windows.net";
+	private static final String RedisKey = "eMGOKN6778QAoYCnYVsPUiX0NsApmcwIPAzCaHRAPQs=";
 	private static final int REDIS_PORT = 6380;
 	private static final int REDIS_TIMEOUT = 1000;
 	private static final boolean Redis_USE_TLS = true;
 	private static final String USER_KEY_PREFIX = "user-";
 	private static final String SHORT_KEY_PREFIX = "short-";
-	private static final String BLOB_KEY_PREFIX = "blob-";
-	private static final String LIKE_KEY_PREFIX = "like-";
-	private static final String FOLLOWING_KEY_PREFIX = "following-";
-	private static final String LIST = "myList";
-	private static final int LIST_MAX_SIZE = 5;
-	private static final String COUNTER = "myCounter";
+	private static final int COOKIE_VALIDITY = 900;
+
+	// write through: slower but easier to implement, write back is put in cache and only update db when the cache entry
+	// is invalidated
+
+
+	// sorted set recent users ranked by
+	// sorted set recent shorts ranked by timestamp
+	// entries for recent blobs
+	// entries for  patterns searches
+	// getShorts per user
+	// getFollowers per user
+	// likes per user
+	// feeds per user
+	// cookies
+	// consistency
+	// counter of likes per short or hyper log per short
 	
 	private static JedisPool instance;
 	
@@ -46,16 +56,58 @@ public class RedisCache {
 	}
 
 
-	//TODO store hash of pwd as key or cookie-userId, value is the user and set a TTL
-	// TODO when access then call set TLL again to renew the lease
-	// TODO use the value to check pwd still
-	// TODO what about token?
 
+	public static void generateCookie(User u) {
+		if(!TukanoApplication.REDIS_CACHE_ON)
+			return;
 
-
-	public static <T> void put(String key_attribute, T obj) {
 		try (var jedis = getCachePool().getResource()) {
-			String key = generateKey(key_attribute, obj.getClass());
+			String key = getCookieKey(u.getPwd());
+			System.out.println("COOKIE: " + key);
+			String value = JSON.encode(u);
+			jedis.set(key, value);
+			jedis.expire(key, COOKIE_VALIDITY);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public static String getCookieKey(String pwd) {
+		return Hex.of(Hash.sha256(pwd.getBytes()));
+	}
+
+	public static User checkCookie(String pwd) {
+		System.out.println("Check Cookie");
+		if(!TukanoApplication.REDIS_CACHE_ON)
+			return null;
+
+		try (var jedis = getCachePool().getResource()) {
+			String key = getCookieKey(pwd);
+			String jsonValue = jedis.get(key);
+			if(jsonValue == null)
+				return null;
+
+			User u = JSON.decode( jedis.get(key), User.class);
+			jedis.expire(key, COOKIE_VALIDITY);
+
+			return u;
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+
+	}
+
+
+
+	public static <T> void putValue(String key_attribute, T obj) {
+		if(!TukanoApplication.REDIS_CACHE_ON)
+			return;
+
+		try (var jedis = getCachePool().getResource()) {
+			String key = getKey(key_attribute, obj.getClass());
 			String value = JSON.encode(obj);
 
 			jedis.set(key, value);
@@ -67,10 +119,17 @@ public class RedisCache {
 		}
 	}
 
-	public static Result<Object> get(String key) {
-		try (var jedis = getCachePool().getResource()) {
-			Object value = JSON.decode( jedis.get(key), getClassByPrefix(key.split("-")[0]));
+	public static <T> Result<Object> getValue(String id, Class<T> clazz) {
+		if(!TukanoApplication.REDIS_CACHE_ON)
+			return  Result.ok(null);
 
+		try (var jedis = getCachePool().getResource()) {
+			String key = getKey(id, clazz);
+			String jsonValue = jedis.get(key);
+			if(jsonValue == null)
+				return Result.ok(null);
+
+			Object value = JSON.decode( jedis.get(key), getClassByPrefix(key));
 			System.out.println("Get key " + key);
 			System.out.println("Put value " + value);
 			return Result.ok(value);
@@ -79,14 +138,29 @@ public class RedisCache {
 			e.printStackTrace();
 		}
 
-		return null;
+		return Result.ok(null);
 	}
 
-	public static <T> void addList(String list_name, T obj) {
+
+	public static void invalidate(String pwd) {
+		if(!TukanoApplication.REDIS_CACHE_ON)
+			return;
+
+		String key = getCookieKey(pwd);
+		try (var jedis = getCachePool().getResource()) {
+			jedis.del(key);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+
+	private static <T> void addList(String list_name, int max_size, T obj) {
 		try (var jedis = getCachePool().getResource()) {
 			var cnt = jedis.lpush(list_name, JSON.encode(obj) );
-			if (cnt > LIST_MAX_SIZE)
-				jedis.ltrim(list_name, 0, LIST_MAX_SIZE - 1);
+			if (cnt > max_size)
+				jedis.ltrim(list_name, 0, max_size - 1);
 
 			System.out.println("Add to the list " + list_name + " the obj " + obj.toString());
 
@@ -95,9 +169,8 @@ public class RedisCache {
 		}
 	}
 
-	public static Result<List<?>> getList(String list_name) {
+	private static <T> Result<List<?>> getList(String list_name, Class<T> clazz) {
 		try (var jedis = getCachePool().getResource()) {
-			Class<?> clazz = User.class;
 			var jsonList = jedis.lrange(list_name, 0, -1);
 			var list = jsonList.stream().map(obj -> JSON.decode(obj, clazz)).toList();
 
@@ -113,6 +186,7 @@ public class RedisCache {
 
 		return null;
 	}
+
 
 	public static long incrCounter(String key) {
 		try (var jedis = getCachePool().getResource()) {
@@ -136,73 +210,25 @@ public class RedisCache {
 		return 0;
 	}
 
-	public static void invalidate(String key) {
-		try (var jedis = getCachePool().getResource()) {
-			jedis.del(key);
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-
-	public static void setTTL(String key, long ttl) {
-		try (var jedis = getCachePool().getResource()) {
-			jedis.expire(key, ttl); // seconds
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-
-	public static void createCookie(User u) {
-		try (var jedis = getCachePool().getResource()) {
-			byte[] pwd_hash = Hash.sha256(u.getPwd().getBytes());
-			String key = Hex.of(pwd_hash);
-			String value = JSON.encode(u);
-			jedis.set(key, value);
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
 
 
 
-	private static <T> String generateKey(String id, Class<T> clazz) {
-		String key_prefix;
+	private static <T> String getKey(String id, Class<T> clazz) {
+		String key_prefix = "";
 		if (clazz.equals(User.class))
 			key_prefix = USER_KEY_PREFIX;
-		else if (clazz.equals(Likes.class) || clazz.equals(Long.class))
-			key_prefix = LIKE_KEY_PREFIX;
-		else if (clazz.equals(Following.class))
-			key_prefix = FOLLOWING_KEY_PREFIX;
-		else if (clazz.equals(byte[].class))
-			key_prefix = BLOB_KEY_PREFIX;
-		else
+		else if (clazz.equals(Short.class))
 			key_prefix = SHORT_KEY_PREFIX;
 
 		return key_prefix + id;
 	}
 
-	private static Class<?> getClassByPrefix(String prefix) {
-		switch (prefix) {
-			case USER_KEY_PREFIX -> {
-				return User.class;
-			}
-			case LIKE_KEY_PREFIX -> {
-				return Likes.class;
-			}
-			case FOLLOWING_KEY_PREFIX -> {
-				return Following.class;
-			}
-			case BLOB_KEY_PREFIX -> {
-				return byte[].class;
-			}
-			default -> {
-				return Short.class;
-			}
-		}
-	}
+	private static Class<?> getClassByPrefix(String key) {
+		if(key.contains(USER_KEY_PREFIX))
+			return User.class;
+		else
+			return Short.class;
 
+	}
 
 }

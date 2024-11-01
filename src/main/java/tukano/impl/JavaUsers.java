@@ -83,35 +83,28 @@ public class JavaUsers implements Users {
 		if (badUpdateUserInfo(userId, pwd, other))
 			return error(BAD_REQUEST);
 
-		User updatedUser, oldUser = RedisCache.checkCookie(pwd);
-		if(oldUser != null) {
-			var res = DB.updateOne( oldUser.updateFrom(other), usersDB);
-			if(!res.isOK())
+		User oldUser = RedisCache.checkCookie(pwd);
+		if (oldUser == null) {
+			var res = DB.getOne(userId, User.class, usersDB);
+			if (!res.isOK())
 				return  res;
 
-			updatedUser = res.value();
-			RedisCache.putValue(getCookieKey(pwd), updatedUser);
+			if(!res.value().getPwd().equals(pwd))
+				return error(FORBIDDEN);
 
-			return Result.ok(updatedUser);
+			oldUser = res.value();
 		}
 
-		var res = DB.getOne( userId, User.class, usersDB);
-		if(!res.isOK())
+		var res = DB.updateOne(oldUser.updateFrom(other), usersDB);
+		if (!res.isOK())
 			return res;
-		oldUser = res.value();
 
-		if(!oldUser.getPwd().equals(pwd))
-			return error(FORBIDDEN);
-
-		res = DB.updateOne( oldUser.updateFrom(other), usersDB);
-		if(!res.isOK())
-			return  res;
-
-		updatedUser = res.value();
-		RedisCache.putValue(getCookieKey(pwd), updatedUser);
+		User updatedUser = res.value();
+		RedisCache.generateCookie(updatedUser);
 
 		return Result.ok(updatedUser);
 	}
+
 
 	@SuppressWarnings("unchecked")
 	@Override
@@ -122,7 +115,6 @@ public class JavaUsers implements Users {
 			return error(BAD_REQUEST);
 
 		User user = RedisCache.checkCookie(pwd);
-
 		if(user == null) {
 			var res = DB.getOne(userId, User.class, usersDB);
 			if (!res.isOK())
@@ -160,14 +152,7 @@ public class JavaUsers implements Users {
 		return ok(hits);
 	}
 
-	
-	public static Result<User> validatedUserOrError( Result<User> res, String pwd ) {
-		if( res.isOK())
-			return res.value().getPwd().equals( pwd ) ? res : error(FORBIDDEN);
-		else
-			return res;
-	}
-	
+
 	private boolean badUserInfo( User user) {
 		return (user.userId() == null || user.pwd() == null || user.displayName() == null || user.email() == null);
 	}

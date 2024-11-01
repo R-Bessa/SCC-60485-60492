@@ -102,12 +102,11 @@ public class RedisCache {
 
 
 
-	public static <T> void putValue(String key_attribute, T obj) {
+	public static <T> void putValue(String key, T obj) {
 		if(!TukanoApplication.REDIS_CACHE_ON)
 			return;
 
 		try (var jedis = getCachePool().getResource()) {
-			String key = getKey(key_attribute, obj.getClass());
 			String value = JSON.encode(obj);
 
 			jedis.set(key, value);

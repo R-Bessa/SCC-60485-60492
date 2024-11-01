@@ -6,11 +6,11 @@ import java.nio.ByteBuffer;
 import java.util.Random;
 
 import tukano.api.Result;
-import tukano.api.User;
+import tukano.impl.data.User;
 import tukano.clients.rest.RestBlobsClient;
 import tukano.clients.rest.RestShortsClient;
 import tukano.clients.rest.RestUsersClient;
-import tukano.impl.rest.TukanoApplication;
+import tukano.impl.data.Short;
 
 public class Test {
 	
@@ -74,7 +74,7 @@ public class Test {
 		show(users.searchUsers(""));
 
 
-		Result<tukano.api.Short> s1, s2;
+		Result<Short> s1, s2;
 
 		show(s2 = shorts.createShort("liskov", "54321"));
 		show(s1 = shorts.createShort("wales", "12345"));
@@ -122,7 +122,7 @@ public class Test {
 		show(users.createUser( new User("wales", "12345", "jimmy@wikipedia.pt", "Jimmy Wales") ));
 		show(shorts.follow("wales", "liskov", true, "12345"));
 
-		Result<tukano.api.Short> s1, s2;
+		Result<Short> s1, s2;
 		show(s1 = shorts.createShort("liskov", "54321"));
 		show(s2 = shorts.createShort("liskov", "54321"));
 

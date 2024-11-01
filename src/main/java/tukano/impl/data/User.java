@@ -1,4 +1,4 @@
-package tukano.api;
+package tukano.impl.data;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonCreator;

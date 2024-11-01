@@ -6,7 +6,6 @@ import static tukano.api.Result.error;
 import static tukano.api.Result.errorOrResult;
 import static tukano.api.Result.errorOrValue;
 import static tukano.api.Result.ok;
-import static tukano.impl.storage.cache.RedisCache.getCookieKey;
 import static tukano.impl.storage.db.DB.USERS;
 import static tukano.impl.storage.db.DB.usersDB;
 
@@ -15,7 +14,7 @@ import java.util.concurrent.Executors;
 import java.util.logging.Logger;
 
 import tukano.api.Result;
-import tukano.api.User;
+import tukano.impl.data.User;
 import tukano.api.Users;
 import tukano.impl.storage.cache.RedisCache;
 import tukano.impl.storage.db.DB;
@@ -125,8 +124,11 @@ public class JavaUsers implements Users {
 				return error(FORBIDDEN);
 		}
 
+		System.out.println("remove user " + RedisCache.getCookieKey(pwd));
 		RedisCache.invalidate(RedisCache.getCookieKey(pwd));
 		RedisCache.invalidate("feed-" + userId);
+		RedisCache.removeRecentShorts(userId);
+		RedisCache.removeCounterByUser(userId);
 
 		return errorOrResult(DB.getOne( userId, User.class, usersDB), u -> {
 

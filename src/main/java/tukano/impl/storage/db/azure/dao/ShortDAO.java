@@ -1,6 +1,6 @@
 package tukano.impl.storage.db.azure.dao;
 
-import tukano.api.Short;
+import tukano.impl.data.Short;
 
 
 /**

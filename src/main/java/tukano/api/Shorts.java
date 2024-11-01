@@ -1,5 +1,7 @@
 package tukano.api;
 
+import tukano.impl.data.Short;
+
 import java.util.List;
 
 /**

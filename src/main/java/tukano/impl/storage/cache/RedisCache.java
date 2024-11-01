@@ -3,8 +3,8 @@ package tukano.impl.storage.cache;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 import tukano.api.Result;
-import tukano.api.Short;
-import tukano.api.User;
+import tukano.impl.data.Short;
+import tukano.impl.data.User;
 import tukano.impl.rest.TukanoApplication;
 import tukano.impl.storage.blobs.Blob;
 import utils.Hash;
@@ -18,9 +18,9 @@ public class RedisCache {
 	private static final int REDIS_PORT = 6380;
 	private static final int REDIS_TIMEOUT = 1000;
 	private static final boolean Redis_USE_TLS = true;
-	private static final String USER_KEY_PREFIX = "user-";
-	private static final String SHORT_KEY_PREFIX = "short-";
+
 	private static final String FEED_KEY_PREFIX = "feed-";
+	private static final String COUNTER_KEY_PREFIX = "likes-";
 	private static final int COOKIE_VALIDITY = 900; // 15 min
 	private static final int FEED_VALIDITY = 300; // 5 min
 	private static final String RECENT_SHORTS = "recent_shorts_list";
@@ -29,11 +29,8 @@ public class RedisCache {
 	private static final int RECENT_BLOBS_SIZE = 50;
 
 
-	// getFollowers per user
-	// getLikes
-	// blobs cdn
-	// counter of likes per short or hyper log per short
 
+	// counter of likes per short
 	// consistency
 
 	
@@ -233,7 +230,7 @@ public class RedisCache {
 		return null;
 	}
 
-	public static <T> void removeShortsFromFeed(String userId) {
+	public static void removeShortsFromFeed(String userId) {
 		if(!TukanoApplication.REDIS_CACHE_ON)
 			return;
 
@@ -261,7 +258,7 @@ public class RedisCache {
 		}
 	}
 
-	public static <T> void removeFromList(String list_name, String value) {
+	public static void removeFromList(String list_name, String value) {
 		if(!TukanoApplication.REDIS_CACHE_ON)
 			return;
 
@@ -296,100 +293,75 @@ public class RedisCache {
 	}
 
 
+	public static long incrCounter(String shortId) {
+		if(!TukanoApplication.REDIS_CACHE_ON)
+			return -1;
 
+		try (var jedis = getCachePool().getResource()) {
+			return jedis.incr(COUNTER_KEY_PREFIX + shortId);
 
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 
+		return -1;
+	}
 
+	public static long decrCounter(String shortId) {
+		if(!TukanoApplication.REDIS_CACHE_ON)
+			return -1;
 
+		try (var jedis = getCachePool().getResource()) {
+			return jedis.decr(COUNTER_KEY_PREFIX + shortId);
 
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 
+		return -1;
+	}
 
-	public static <T> void putValue(String key, T obj) {
+	public static long getCounter(String shortId) {
+		if(!TukanoApplication.REDIS_CACHE_ON)
+			return -1;
+
+		try (var jedis = getCachePool().getResource()) {
+			return Long.parseLong(jedis.get(COUNTER_KEY_PREFIX + shortId));
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return -1;
+	}
+
+	public static void setCounter(String shortId, long likes) {
 		if(!TukanoApplication.REDIS_CACHE_ON)
 			return;
 
 		try (var jedis = getCachePool().getResource()) {
-			String value = JSON.encode(obj);
-
-			jedis.set(key, value);
-			System.out.println("Put key " + key);
-			System.out.println("Put value " + value);
+			jedis.set(COUNTER_KEY_PREFIX + shortId, String.valueOf(likes));
 
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+
 	}
 
-	public static <T> Result<Object> getValue(String id, Class<T> clazz) {
+	public static void removeCounterByUser(String userId) {
 		if(!TukanoApplication.REDIS_CACHE_ON)
-			return  Result.ok(null);
+			return;
 
 		try (var jedis = getCachePool().getResource()) {
-			String key = getKey(id, clazz);
-			String jsonValue = jedis.get(key);
-			if(jsonValue == null)
-				return Result.ok(null);
-
-			Object value = JSON.decode( jedis.get(key), getClassByPrefix(key));
-			System.out.println("Get key " + key);
-			System.out.println("Put value " + value);
-			return Result.ok(value);
+			var keys = jedis.keys(COUNTER_KEY_PREFIX + userId);
+			for (String key : keys) {
+				System.out.println("key to delete " + key);
+				jedis.del(key);
+			}
 
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
-		return Result.ok(null);
-	}
-
-
-
-
-
-
-
-
-	public static long incrCounter(String key) {
-		try (var jedis = getCachePool().getResource()) {
-			return jedis.incr(key);
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-		return 0;
-	}
-
-	public static long getCounter(String key) {
-		try (var jedis = getCachePool().getResource()) {
-			return Long.parseLong(jedis.get(key));
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-		return 0;
-	}
-
-
-
-
-	private static <T> String getKey(String id, Class<T> clazz) {
-		String key_prefix = "";
-		if (clazz.equals(User.class))
-			key_prefix = USER_KEY_PREFIX;
-		else if (clazz.equals(Short.class))
-			key_prefix = SHORT_KEY_PREFIX;
-
-		return key_prefix + id;
-	}
-
-	private static Class<?> getClassByPrefix(String key) {
-		if(key.contains(USER_KEY_PREFIX))
-			return User.class;
-		else
-			return Short.class;
-
 	}
 
 }

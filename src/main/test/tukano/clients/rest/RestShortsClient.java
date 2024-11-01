@@ -6,7 +6,7 @@ import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.core.GenericType;
 import jakarta.ws.rs.core.MediaType;
 import tukano.api.Result;
-import tukano.api.Short;
+import tukano.impl.data.Short;
 import tukano.api.Shorts;
 import tukano.api.rest.RestShorts;
 

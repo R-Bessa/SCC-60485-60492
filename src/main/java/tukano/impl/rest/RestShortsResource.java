@@ -3,7 +3,7 @@ package tukano.impl.rest;
 import java.util.List;
 
 import jakarta.inject.Singleton;
-import tukano.api.Short;
+import tukano.impl.data.Short;
 import tukano.api.Shorts;
 import tukano.api.rest.RestShorts;
 import tukano.impl.JavaShorts;

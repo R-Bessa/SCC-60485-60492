@@ -10,7 +10,7 @@ import org.hibernate.Session;
 
 import org.hsqldb.rights.User;
 import tukano.api.Result;
-import tukano.api.Short;
+import tukano.impl.data.Short;
 import tukano.impl.data.Following;
 import tukano.impl.data.Likes;
 import tukano.impl.rest.TukanoApplication;

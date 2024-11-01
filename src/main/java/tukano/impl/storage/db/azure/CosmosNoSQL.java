@@ -5,7 +5,7 @@ import com.azure.cosmos.models.*;
 import org.hibernate.Session;
 import tukano.api.Result;
 import tukano.api.Result.ErrorCode;
-import tukano.api.User;
+import tukano.impl.data.User;
 import tukano.impl.data.Following;
 import tukano.impl.data.Likes;
 import tukano.impl.rest.TukanoApplication;

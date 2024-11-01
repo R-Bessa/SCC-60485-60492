@@ -14,9 +14,9 @@ import java.util.logging.Logger;
 
 import tukano.api.Blobs;
 import tukano.api.Result;
-import tukano.api.Short;
+import tukano.impl.data.Short;
 import tukano.api.Shorts;
-import tukano.api.User;
+import tukano.impl.data.User;
 import tukano.impl.data.Following;
 import tukano.impl.data.Likes;
 import tukano.impl.rest.TukanoApplication;
@@ -62,10 +62,15 @@ public class JavaShorts implements Shorts {
 		if (shortId == null)
 			return error(BAD_REQUEST);
 
-		var likes = DB.countAll(Long.class, LIKES, shortsDB, "shortId", shortId).value();
+		var likes = RedisCache.getCounter(shortId);
+		if(likes == -1) {
+			likes = DB.countAll(Long.class, LIKES, shortsDB, "shortId", shortId).value().get(0);
+			RedisCache.setCounter(shortId, likes);
+		}
+
 		var shrt = RedisCache.getRecentShort(shortId);
 		if(shrt != null)
-			return Result.ok(shrt.copyWithLikes_And_Token(likes.get(0)));
+			return Result.ok(shrt.copyWithLikes_And_Token(likes));
 
 		var res = getOne(shortId, Short.class, shortsDB);
 		if (!res.isOK())
@@ -74,7 +79,7 @@ public class JavaShorts implements Shorts {
 		shrt = res.value();
 		RedisCache.addRecentShort(shrt);
 
-		return Result.ok(shrt.copyWithLikes_And_Token(likes.get(0)));
+		return Result.ok(shrt.copyWithLikes_And_Token(likes));
 	}
 
 
@@ -95,8 +100,10 @@ public class JavaShorts implements Shorts {
 		String queryParam = "token=";
 		String token = blobUrl.substring(blobUrl.indexOf(queryParam) + queryParam.length());
 		JavaBlobs.getInstance().delete(shortId, token);
+
 		RedisCache.removeRecentShort(shrt);
 		RedisCache.removeFromList("feed-" + shrt.getOwnerId(), shortId);
+		RedisCache.invalidate("likes-" + shortId);
 
 		return DB.deleteShort(shortId);
 	}
@@ -148,6 +155,16 @@ public class JavaShorts implements Shorts {
 		var likeRes = isLiked ? DB.insertOne(l, shortsDB) : DB.deleteOne(l, shortsDB);
 		if(!likeRes.isOK())
 			return Result.error(likeRes.error());
+
+		var likes = RedisCache.getCounter(shortId);
+		if(likes == -1) {
+			likes = DB.countAll(Long.class, LIKES, shortsDB, "shortId", shortId).value().get(0);
+			RedisCache.setCounter(shortId, likes);
+		}
+		else if(isLiked)
+			RedisCache.incrCounter(shortId);
+		else
+			RedisCache.decrCounter(shortId);
 
 		return Result.ok();
 	}
@@ -201,6 +218,7 @@ public class JavaShorts implements Shorts {
 
 		RedisCache.removeRecentShorts(userId);
 		RedisCache.removeShortsFromFeed(userId);
+		RedisCache.removeCounterByUser(userId);
 
 		return DB.deleteAllShorts(userId);
 	}

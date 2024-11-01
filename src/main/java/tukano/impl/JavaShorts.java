@@ -49,7 +49,8 @@ public class JavaShorts implements Shorts {
 		var shortId = format("%s+%s", userId, UUID.randomUUID());
 		var blobUrl = format("%s/%s/%s", TukanoApplication.BASE_URI, Blobs.NAME, shortId);
 		var shrt = new Short(shortId, userId, blobUrl);
-		RedisCache.addShort(shrt);
+		RedisCache.addRecentShort(shrt);
+		RedisCache.addShortToFeed(userId, shortId);
 
 		return errorOrValue(DB.insertOne(shrt, shortsDB), s -> s.copyWithLikes_And_Token(0));
 	}
@@ -62,7 +63,7 @@ public class JavaShorts implements Shorts {
 			return error(BAD_REQUEST);
 
 		var likes = DB.countAll(Long.class, LIKES, shortsDB, "shortId", shortId).value();
-		var shrt = RedisCache.getShort(shortId);
+		var shrt = RedisCache.getRecentShort(shortId);
 		if(shrt != null)
 			return Result.ok(shrt.copyWithLikes_And_Token(likes.get(0)));
 
@@ -71,7 +72,7 @@ public class JavaShorts implements Shorts {
 			return res;
 
 		shrt = res.value();
-		RedisCache.addShort(shrt);
+		RedisCache.addRecentShort(shrt);
 
 		return Result.ok(shrt.copyWithLikes_And_Token(likes.get(0)));
 	}
@@ -94,7 +95,8 @@ public class JavaShorts implements Shorts {
 		String queryParam = "token=";
 		String token = blobUrl.substring(blobUrl.indexOf(queryParam) + queryParam.length());
 		JavaBlobs.getInstance().delete(shortId, token);
-		RedisCache.removeShort(shrt);
+		RedisCache.removeRecentShort(shrt);
+		RedisCache.removeFromList("feed-" + shrt.getOwnerId(), shortId);
 
 		return DB.deleteShort(shortId);
 	}
@@ -174,7 +176,19 @@ public class JavaShorts implements Shorts {
 		if(!res.isOK())
 			return Result.error(res.error());
 
-		return DB.getFeed(userId);
+		var feedRes = RedisCache.getFeed(userId);
+		if(feedRes != null && !feedRes.value().isEmpty())
+			return feedRes;
+
+		feedRes = DB.getFeed(userId);
+		if(!feedRes.isOK())
+			return feedRes;
+
+		var feed = feedRes.value();
+		if(!feed.isEmpty())
+			RedisCache.addFeed(userId, feedRes.value());
+
+		return feedRes;
 	}
 
 	@Override
@@ -185,7 +199,8 @@ public class JavaShorts implements Shorts {
 		if(!res.isOK())
 			return Result.error(res.error());
 
-		RedisCache.removeShorts(userId);
+		RedisCache.removeRecentShorts(userId);
+		RedisCache.removeShortsFromFeed(userId);
 
 		return DB.deleteAllShorts(userId);
 	}

@@ -125,7 +125,8 @@ public class JavaUsers implements Users {
 				return error(FORBIDDEN);
 		}
 
-		RedisCache.invalidate(pwd);
+		RedisCache.invalidate(RedisCache.getCookieKey(pwd));
+		RedisCache.invalidate("feed-" + userId);
 
 		return errorOrResult(DB.getOne( userId, User.class, usersDB), u -> {
 

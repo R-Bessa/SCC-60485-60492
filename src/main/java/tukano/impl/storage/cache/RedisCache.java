@@ -19,7 +19,9 @@ public class RedisCache {
 	private static final boolean Redis_USE_TLS = true;
 	private static final String USER_KEY_PREFIX = "user-";
 	private static final String SHORT_KEY_PREFIX = "short-";
-	private static final int COOKIE_VALIDITY = 900;
+	private static final String FEED_KEY_PREFIX = "feed-";
+	private static final int COOKIE_VALIDITY = 900; // 15 min
+	private static final int FEED_VALIDITY = 300; // 5 min
 	private static final String RECENT_SHORTS = "recent_shorts_list";
 	private static final int RECENT_SHORTS_SIZE = 100;
 
@@ -97,11 +99,10 @@ public class RedisCache {
 
 	}
 
-	public static void invalidate(String pwd) {
+	public static void invalidate(String key) {
 		if(!TukanoApplication.REDIS_CACHE_ON)
 			return;
 
-		String key = getCookieKey(pwd);
 		try (var jedis = getCachePool().getResource()) {
 			jedis.del(key);
 
@@ -110,11 +111,11 @@ public class RedisCache {
 		}
 	}
 
-	public static void addShort(Short shrt) {
+	public static void addRecentShort(Short shrt) {
 		addToList(RECENT_SHORTS, RECENT_SHORTS_SIZE, shrt);
 	}
 
-	public static Short getShort(String shortId) {
+	public static Short getRecentShort(String shortId) {
 		var res = getList(RECENT_SHORTS, Short.class);
 		if(res != null) {
 			for(var obj: res.value()) {
@@ -127,18 +128,75 @@ public class RedisCache {
 		return null;
 	}
 
-	public static void removeShort(Short shrt) {
+	public static void removeRecentShort(Short shrt) {
 		removeFromList(RECENT_SHORTS, JSON.encode(shrt));
 	}
 
-	public static void removeShorts(String userId) {
+	public static void removeRecentShorts(String userId) {
 		var res = getList(RECENT_SHORTS, Short.class);
 		if(res != null) {
 			for(var obj: res.value()) {
 				var shrt = (Short) obj;
 				if(shrt.getOwnerId().equals(userId))
-					removeShort(shrt);
+					removeRecentShort(shrt);
 			}
+		}
+	}
+
+	public static void addShortToFeed(String userId, String shortId) {
+		if(!TukanoApplication.REDIS_CACHE_ON)
+			return;
+
+		try (var jedis = getCachePool().getResource()) {
+			String key = FEED_KEY_PREFIX + userId;
+			var res = getFeed(userId);
+			if(res != null && !res.value().isEmpty())
+				jedis.lpush(key, shortId);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public static void addFeed(String userId, List<String> feed) {
+		if(!TukanoApplication.REDIS_CACHE_ON)
+			return;
+
+		try (var jedis = getCachePool().getResource()) {
+			String feed_key = FEED_KEY_PREFIX + userId;
+			for(String shortId: feed)
+				jedis.lpush(feed_key, shortId);
+
+			jedis.expire(feed_key, FEED_VALIDITY);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public static Result<List<String>> getFeed(String userId) {
+		if(!TukanoApplication.REDIS_CACHE_ON)
+			return null;
+
+		try (var jedis = getCachePool().getResource()) {
+			return Result.ok(jedis.lrange(FEED_KEY_PREFIX + userId, 0, -1));
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return null;
+	}
+
+	public static <T> void removeShortsFromFeed(String userId) {
+		if(!TukanoApplication.REDIS_CACHE_ON)
+			return;
+
+		var feed = getFeed(userId);
+		if (feed != null && !feed.value().isEmpty()) {
+			feed.value().stream()
+					.filter(shortId -> shortId.startsWith(userId + "+"))
+					.forEach(shortId -> removeFromList(FEED_KEY_PREFIX + userId, shortId));
 		}
 	}
 
@@ -158,7 +216,7 @@ public class RedisCache {
 		}
 	}
 
-	private static <T> void removeFromList(String list_name, String value) {
+	public static <T> void removeFromList(String list_name, String value) {
 		if(!TukanoApplication.REDIS_CACHE_ON)
 			return;
 

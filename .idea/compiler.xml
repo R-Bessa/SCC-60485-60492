@@ -9,5 +9,9 @@
         <module name="tukano" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="azure-functions" target="17" />
+      <module name="tukano-main" target="17" />
+    </bytecodeTargetLevel>
   </component>
 </project>

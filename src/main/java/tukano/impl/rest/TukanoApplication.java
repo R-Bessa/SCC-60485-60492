@@ -15,8 +15,8 @@ public class TukanoApplication extends Application {
 	public static final String TUKANO_SECRET = "tukano_app_secret";
 	public static final long MAX_TOKEN_AGE = 1000000;
 	public static final BlobsType BLOBS_TYPE = BlobsType.AZURE_BLOBS;
-	public static final DatabaseType USERS_DB_TYPE = DatabaseType.COSMOS_DB_POSTGRESQL;
-	public static final DatabaseType SHORTS_DB_TYPE = DatabaseType.COSMOS_DB_POSTGRESQL;
+	public static final DatabaseType USERS_DB_TYPE = DatabaseType.HIBERNATE;
+	public static final DatabaseType SHORTS_DB_TYPE = DatabaseType.HIBERNATE;
 
 
 	/** Service Base Uri */
@@ -27,8 +27,8 @@ public class TukanoApplication extends Application {
 
 	/** Blobs Configs */
 
-	//public static final String BLOB_STORAGE_KEY = "DefaultEndpointsProtocol=https;AccountName=scc60492;AccountKey=2lddvpV/kKYzpiUq6yOzg52AyB599d1OyeJQf694VGMrr0UbRjIj6Rp3Ns/bsm7htNWCmmwkcDSl+AStQ1GPyg==;EndpointSuffix=core.windows.net";
-	public static final String BLOB_STORAGE_KEY = "DefaultEndpointsProtocol=https;AccountName=scc60485;AccountKey=tRBfHsTj0Fe+vayowI6sGxu24UuVGf1rjY1p9OIL+0jMOP+P6DKzdXX7XSfbNapuL/2ygbMTRxpF+AStL9Ho9A==;EndpointSuffix=core.windows.net";
+	public static final String BLOB_STORAGE_KEY = "DefaultEndpointsProtocol=https;AccountName=scc60492;AccountKey=2lddvpV/kKYzpiUq6yOzg52AyB599d1OyeJQf694VGMrr0UbRjIj6Rp3Ns/bsm7htNWCmmwkcDSl+AStQ1GPyg==;EndpointSuffix=core.windows.net";
+	//public static final String BLOB_STORAGE_KEY = "DefaultEndpointsProtocol=https;AccountName=scc60485;AccountKey=tRBfHsTj0Fe+vayowI6sGxu24UuVGf1rjY1p9OIL+0jMOP+P6DKzdXX7XSfbNapuL/2ygbMTRxpF+AStL9Ho9A==;EndpointSuffix=core.windows.net";
 
 	/** DB Configs */
 

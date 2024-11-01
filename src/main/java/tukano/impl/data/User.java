@@ -1,10 +1,12 @@
-package tukano.api;
+package tukano.impl.data;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+
+import java.util.Objects;
 
 @Entity
 public class User {
@@ -83,5 +85,17 @@ public class User {
 				other.pwd != null ? other.pwd : pwd,
 				other.email != null ? other.email : email, 
 				other.displayName != null ? other.displayName : displayName);
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (!(o instanceof User user)) return false;
+		return Objects.equals(getUserId(), user.getUserId());
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(getUserId());
 	}
 }

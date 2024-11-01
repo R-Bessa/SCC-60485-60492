@@ -12,7 +12,7 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
-import tukano.api.User;
+import tukano.impl.data.User;
 
 @Path(RestUsers.PATH)
 public interface RestUsers {

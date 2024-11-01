@@ -13,10 +13,11 @@ public class TukanoApplication extends Application {
 	private Set<Object> singletons = new HashSet<>();
 
 	public static final String TUKANO_SECRET = "tukano_app_secret";
-	public static final long MAX_TOKEN_AGE = 1000000;
+	public static final long MAX_TOKEN_AGE = 300000;
 	public static final BlobsType BLOBS_TYPE = BlobsType.AZURE_BLOBS;
-	public static final DatabaseType USERS_DB_TYPE = DatabaseType.HIBERNATE;
-	public static final DatabaseType SHORTS_DB_TYPE = DatabaseType.HIBERNATE;
+	public static final DatabaseType USERS_DB_TYPE = DatabaseType.COSMOS_DB_POSTGRESQL;
+	public static final DatabaseType SHORTS_DB_TYPE = DatabaseType.COSMOS_DB_POSTGRESQL;
+	public static final boolean REDIS_CACHE_ON = false;
 
 
 	/** Service Base Uri */
@@ -32,11 +33,11 @@ public class TukanoApplication extends Application {
 
 	/** DB Configs */
 
-	public static final String CONNECTION_URL = "https://scc-60485.documents.azure.com:443/";
-	public static final String DB_KEY = "B5LnefSMMe43Sj4qhyypdhgmGluUJvJ1RMvGOXSxvpoE1jatxFQnaWD2gl10JIJXkRMUegUPy8jNACDbLMwTNQ==";
+	//public static final String CONNECTION_URL = "https://scc-60485.documents.azure.com:443/";
+	//public static final String DB_KEY = "B5LnefSMMe43Sj4qhyypdhgmGluUJvJ1RMvGOXSxvpoE1jatxFQnaWD2gl10JIJXkRMUegUPy8jNACDbLMwTNQ==";
 
-	//public static final String CONNECTION_URL = "https://scc-60485-60492.documents.azure.com:443/";
-	//public static final String DB_KEY = "gZGjVKxBMJF8fSwF2s3UBmsfdSk9k1vOZq6ziCkCBBsEJYx9wBr1ZRH4tncG5YYh5fW3hoDv0nSdACDbosz4Fg==";
+	public static final String CONNECTION_URL = "https://scc-60485-60492.documents.azure.com:443/";
+	public static final String DB_KEY = "gZGjVKxBMJF8fSwF2s3UBmsfdSk9k1vOZq6ziCkCBBsEJYx9wBr1ZRH4tncG5YYh5fW3hoDv0nSdACDbosz4Fg==";
 
 
 

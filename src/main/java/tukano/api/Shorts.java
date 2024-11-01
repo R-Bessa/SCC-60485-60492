@@ -1,5 +1,7 @@
 package tukano.api;
 
+import tukano.impl.data.Short;
+
 import java.util.List;
 
 /**
@@ -122,5 +124,5 @@ public interface Shorts {
 	 */
 	Result<List<String>> getFeed(String userId, String password);
 
-	Result<Void> deleteAllShorts(String userId, String password, String token);
+	Result<Void> deleteAllShorts(String userId, String password);
 }

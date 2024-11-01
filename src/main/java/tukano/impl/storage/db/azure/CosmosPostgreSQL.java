@@ -5,10 +5,10 @@ import com.zaxxer.hikari.HikariDataSource;
 import org.hibernate.Session;
 import org.postgresql.util.PSQLException;
 import tukano.api.Result;
-import tukano.api.Short;
-import tukano.api.User;
 import tukano.impl.data.Following;
 import tukano.impl.data.Likes;
+import tukano.impl.data.User;
+import tukano.impl.data.Short;
 import tukano.impl.storage.db.Database;
 
 import javax.sql.DataSource;

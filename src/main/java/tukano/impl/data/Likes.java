@@ -39,8 +39,6 @@ public class Likes {
 		this.ownerId = ownerId;
 	}
 
-	public String getId() { return id; }
-
 	public String getUserId() {
 		return userId;
 	}
@@ -55,6 +53,14 @@ public class Likes {
 
 	public void setShortId(String shortId) {
 		this.shortId = shortId;
+	}
+
+	public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
 	}
 
 	@Override

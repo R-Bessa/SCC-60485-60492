@@ -3,7 +3,7 @@ package tukano.impl.rest;
 import java.util.List;
 
 import jakarta.inject.Singleton;
-import tukano.api.Short;
+import tukano.impl.data.Short;
 import tukano.api.Shorts;
 import tukano.api.rest.RestShorts;
 import tukano.impl.JavaShorts;
@@ -58,7 +58,7 @@ public class RestShortsResource extends RestResource implements RestShorts {
 	}
 
 	@Override
-	public void deleteAllShorts(String userId, String password, String token) {
-		super.resultOrThrow( impl.deleteAllShorts(userId, password, token));
+	public void deleteAllShorts(String userId, String password) {
+		super.resultOrThrow( impl.deleteAllShorts(userId, password));
 	}	
 }

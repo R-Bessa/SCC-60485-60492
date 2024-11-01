@@ -19,6 +19,7 @@ import com.azure.storage.blob.models.BlobStorageException;
 import com.azure.storage.blob.models.PublicAccessType;
 import tukano.api.Result;
 import tukano.impl.rest.TukanoApplication;
+import tukano.impl.storage.cache.RedisCache;
 
 public class AzureBlobStorage implements BlobStorage {
 	private static final int CHUNK_SIZE = 4096;
@@ -48,6 +49,10 @@ public class AzureBlobStorage implements BlobStorage {
 		try {
 			blob.upload(data);
 
+			var blobId = path.replace("/", "+");
+			var owner = path.split("/")[0];
+			RedisCache.addRecentBlob(new Blob(blobId, owner, bytes));
+
 		} catch(BlobStorageException e) {
 
 			if (e.getStatusCode() == BLOB_CONFLICT)
@@ -66,12 +71,19 @@ public class AzureBlobStorage implements BlobStorage {
 		if (path == null)
 			return error(BAD_REQUEST);
 
+		var blobId = path.replace("/", "+");
+		var owner = path.split("/")[0];
+		var blobData = RedisCache.getRecentBlob(blobId);
+		if(blobData != null)
+			return Result.ok(blobData.getBytes());
+
 		byte[] bytes = null;
 		var blob = containerClient.getBlobClient(path);
 
 		try {
 			BinaryData data = blob.downloadContent();
 			bytes = data.toBytes();
+			RedisCache.addRecentBlob(new Blob(blobId, owner, bytes));
 		}
 		catch(BlobStorageException e) {
 			if(e.getStatusCode() == BLOB_NOT_FOUND)
@@ -116,9 +128,13 @@ public class AzureBlobStorage implements BlobStorage {
 			return error(BAD_REQUEST);
 
 		var blob = containerClient.getBlobClient(path);
+		var blobId = path.replace("/", "+");
+		var owner = path.split("/")[0];
 
-		if(blob.deleteIfExists())
+		if(blob.deleteIfExists()) {
+			RedisCache.removeBlobById(blobId);
 			return ok();
+		}
 
 		else {
 			var blobs = containerClient.listBlobsByHierarchy(path + "/");
@@ -132,6 +148,7 @@ public class AzureBlobStorage implements BlobStorage {
 					containerClient.getBlobClient(blobName).delete();
 				});
 
+				RedisCache.removeBlobsByOwner(owner);
 				return ok();
 			}
 		}

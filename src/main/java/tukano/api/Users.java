@@ -1,5 +1,7 @@
 package tukano.api;
 
+import tukano.impl.data.User;
+
 import java.util.List;
 
 public interface Users {

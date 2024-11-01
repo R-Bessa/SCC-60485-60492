@@ -11,7 +11,7 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
-import tukano.api.Short;
+import tukano.impl.data.Short;
 
 @Path(RestShorts.PATH)
 public interface RestShorts {
@@ -75,6 +75,6 @@ public interface RestShorts {
 	
 	@DELETE
 	@Path("/{" + USER_ID + "}" + SHORTS)
-	void deleteAllShorts(@PathParam(USER_ID) String userId, @QueryParam(PWD) String password, @QueryParam(TOKEN) String token);
+	void deleteAllShorts(@PathParam(USER_ID) String userId, @QueryParam(PWD) String password);
 
 }

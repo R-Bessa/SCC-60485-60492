@@ -54,5 +54,5 @@ public interface Blobs {
 	
 	Result<Void> delete( String blobId, String token );
 	
-	Result<Void> deleteAllBlobs( String userId, String token );
+	Result<Void> deleteAllBlobs( String userId, String pwd );
 }

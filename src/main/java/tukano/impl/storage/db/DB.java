@@ -5,15 +5,12 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import com.azure.cosmos.models.CosmosQueryRequestOptions;
-import com.azure.cosmos.models.SqlParameter;
-import com.azure.cosmos.models.SqlQuerySpec;
-import com.azure.cosmos.util.CosmosPagedIterable;
+import com.azure.cosmos.models.*;
 import org.hibernate.Session;
 
 import org.hsqldb.rights.User;
 import tukano.api.Result;
-import tukano.api.Short;
+import tukano.impl.data.Short;
 import tukano.impl.data.Following;
 import tukano.impl.data.Likes;
 import tukano.impl.rest.TukanoApplication;
@@ -21,7 +18,6 @@ import tukano.impl.storage.db.azure.CosmosNoSQL;
 import tukano.impl.storage.db.azure.CosmosPostgreSQL;
 import tukano.impl.storage.db.hibernate.Hibernate;
 
-import static java.lang.String.format;
 import static tukano.api.Result.ErrorCode.NOT_IMPLEMENTED;
 import static tukano.impl.rest.TukanoApplication.USERS_DB_TYPE;
 import static tukano.impl.storage.db.azure.CosmosNoSQL.shorts_container;

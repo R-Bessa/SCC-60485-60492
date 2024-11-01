@@ -5,7 +5,7 @@ import com.azure.cosmos.models.*;
 import org.hibernate.Session;
 import tukano.api.Result;
 import tukano.api.Result.ErrorCode;
-import tukano.api.User;
+import tukano.impl.data.User;
 import tukano.impl.data.Following;
 import tukano.impl.data.Likes;
 import tukano.impl.rest.TukanoApplication;
@@ -100,7 +100,7 @@ public class CosmosNoSQL implements Database {
 
 
     @Override
-    public <T> Result<T>  persistOne(T obj) {
+    public <T> Result<T> persistOne(T obj) {
         var container = getContainerByObj(obj).value();
         return tryCatch( () -> container.createItem(obj).getItem());
     }

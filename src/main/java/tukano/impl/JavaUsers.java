@@ -1,12 +1,11 @@
 package tukano.impl;
 
 import static java.lang.String.format;
+import static tukano.api.Result.ErrorCode.*;
 import static tukano.api.Result.error;
 import static tukano.api.Result.errorOrResult;
 import static tukano.api.Result.errorOrValue;
 import static tukano.api.Result.ok;
-import static tukano.api.Result.ErrorCode.BAD_REQUEST;
-import static tukano.api.Result.ErrorCode.FORBIDDEN;
 import static tukano.impl.storage.db.DB.USERS;
 import static tukano.impl.storage.db.DB.usersDB;
 
@@ -15,9 +14,11 @@ import java.util.concurrent.Executors;
 import java.util.logging.Logger;
 
 import tukano.api.Result;
-import tukano.api.User;
+import tukano.impl.data.User;
 import tukano.api.Users;
+import tukano.impl.storage.cache.RedisCache;
 import tukano.impl.storage.db.DB;
+
 
 public class JavaUsers implements Users {
 	
@@ -38,9 +39,16 @@ public class JavaUsers implements Users {
 		Log.info(() -> format("createUser : %s\n", user));
 
 		if( badUserInfo( user ) )
-				return error(BAD_REQUEST);
+			return error(BAD_REQUEST);
 
-		return errorOrValue( DB.insertOne( user, usersDB), user.getUserId() );
+		if (RedisCache.checkCookie(user.getPwd()) != null)
+			return error(CONFLICT);
+
+		var res = errorOrValue( DB.insertOne( user, usersDB), user.getUserId() );
+		if (res.isOK())
+			RedisCache.generateCookie(user);
+
+		return res;
 	}
 
 	@Override
@@ -49,8 +57,22 @@ public class JavaUsers implements Users {
 
 		if (userId == null)
 			return error(BAD_REQUEST);
-		
-		return validatedUserOrError( DB.getOne( userId, User.class, usersDB), pwd);
+
+		User user = RedisCache.checkCookie(pwd);
+		if(user != null)
+			return Result.ok(user);
+
+		var res = DB.getOne(userId, User.class, usersDB);
+		if (!res.isOK())
+			return res;
+
+		user = res.value();
+		if(!user.getPwd().equals(pwd))
+			return error(FORBIDDEN);
+
+		RedisCache.generateCookie(user);
+
+		return Result.ok(user);
 	}
 
 	@Override
@@ -60,8 +82,28 @@ public class JavaUsers implements Users {
 		if (badUpdateUserInfo(userId, pwd, other))
 			return error(BAD_REQUEST);
 
-		return errorOrResult( validatedUserOrError(DB.getOne( userId, User.class, usersDB), pwd), user -> DB.updateOne( user.updateFrom(other), usersDB));
+		User oldUser = RedisCache.checkCookie(pwd);
+		if (oldUser == null) {
+			var res = DB.getOne(userId, User.class, usersDB);
+			if (!res.isOK())
+				return  res;
+
+			if(!res.value().getPwd().equals(pwd))
+				return error(FORBIDDEN);
+
+			oldUser = res.value();
+		}
+
+		var res = DB.updateOne(oldUser.updateFrom(other), usersDB);
+		if (!res.isOK())
+			return res;
+
+		User updatedUser = res.value();
+		RedisCache.generateCookie(updatedUser);
+
+		return Result.ok(updatedUser);
 	}
+
 
 	@SuppressWarnings("unchecked")
 	@Override
@@ -71,15 +113,32 @@ public class JavaUsers implements Users {
 		if (userId == null || pwd == null )
 			return error(BAD_REQUEST);
 
-		return errorOrResult( validatedUserOrError(DB.getOne( userId, User.class, usersDB), pwd), user -> {
+		User user = RedisCache.checkCookie(pwd);
+		if(user == null) {
+			var res = DB.getOne(userId, User.class, usersDB);
+			if (!res.isOK())
+				return res;
+
+			user = res.value();
+			if (!user.getPwd().equals(pwd))
+				return error(FORBIDDEN);
+		}
+
+		System.out.println("remove user " + RedisCache.getCookieKey(pwd));
+		RedisCache.invalidate(RedisCache.getCookieKey(pwd));
+		RedisCache.invalidate("feed-" + userId);
+		RedisCache.removeRecentShorts(userId);
+		RedisCache.removeCounterByUser(userId);
+
+		return errorOrResult(DB.getOne( userId, User.class, usersDB), u -> {
 
 			// Delete user shorts and related info asynchronously in a separate thread
 			Executors.defaultThreadFactory().newThread( () -> {
-				JavaShorts.getInstance().deleteAllShorts(userId, pwd, Token.get(userId));
-				JavaBlobs.getInstance().deleteAllBlobs(userId, Token.get(userId));
+				JavaShorts.getInstance().deleteAllShorts(userId, pwd);
+				JavaBlobs.getInstance().deleteAllBlobs(userId, pwd);
 			}).start();
 
-			return (Result<User>) DB.deleteOne(user, usersDB);
+			return (Result<User>) DB.deleteOne(u, usersDB);
 		});
 	}
 
@@ -96,14 +155,7 @@ public class JavaUsers implements Users {
 		return ok(hits);
 	}
 
-	
-	private Result<User> validatedUserOrError( Result<User> res, String pwd ) {
-		if( res.isOK())
-			return res.value().getPwd().equals( pwd ) ? res : error(FORBIDDEN);
-		else
-			return res;
-	}
-	
+
 	private boolean badUserInfo( User user) {
 		return (user.userId() == null || user.pwd() == null || user.displayName() == null || user.email() == null);
 	}

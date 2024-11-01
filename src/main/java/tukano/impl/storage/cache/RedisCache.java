@@ -6,6 +6,7 @@ import tukano.api.Result;
 import tukano.api.Short;
 import tukano.api.User;
 import tukano.impl.rest.TukanoApplication;
+import tukano.impl.storage.blobs.Blob;
 import utils.Hash;
 import utils.Hex;
 
@@ -23,15 +24,14 @@ public class RedisCache {
 	private static final int COOKIE_VALIDITY = 900; // 15 min
 	private static final int FEED_VALIDITY = 300; // 5 min
 	private static final String RECENT_SHORTS = "recent_shorts_list";
+	private static final String RECENT_BLOBS = "recent_blobs_list";
 	private static final int RECENT_SHORTS_SIZE = 100;
+	private static final int RECENT_BLOBS_SIZE = 50;
 
 
-
-	// getShorts per user
 	// getFollowers per user
+	// getLikes
 	// blobs cdn
-
-	// feeds per user
 	// counter of likes per short or hyper log per short
 
 	// consistency
@@ -139,6 +139,51 @@ public class RedisCache {
 				var shrt = (Short) obj;
 				if(shrt.getOwnerId().equals(userId))
 					removeRecentShort(shrt);
+			}
+		}
+	}
+
+	public static void addRecentBlob(Blob blob) {
+		addToList(RECENT_BLOBS, RECENT_BLOBS_SIZE, blob);
+	}
+
+	public static Blob getRecentBlob(String blobId) {
+		var res = getList(RECENT_BLOBS, Blob.class);
+		if(res != null) {
+			for(var obj: res.value()) {
+				var blob = (Blob) obj;
+				if(blob.getBlobId().equals(blobId))
+					return blob;
+			}
+		}
+
+		return null;
+	}
+
+	private static void removeRecentBlob(Blob blob) {
+		removeFromList(RECENT_BLOBS, JSON.encode(blob));
+	}
+
+	public static void removeBlobsByOwner(String userId) {
+		var res = getList(RECENT_BLOBS, Blob.class);
+		if(res != null) {
+			for(var obj: res.value()) {
+				var blob = (Blob) obj;
+				if(blob.getOwner().equals(userId))
+					removeRecentBlob(blob);
+			}
+		}
+	}
+
+	public static void removeBlobById(String blobId) {
+		var res = getList(RECENT_BLOBS, Blob.class);
+		if(res != null) {
+			for(var obj: res.value()) {
+				var blob = (Blob) obj;
+				if(blob.getBlobId().equals(blobId)) {
+					removeRecentBlob(blob);
+					break;
+				}
 			}
 		}
 	}

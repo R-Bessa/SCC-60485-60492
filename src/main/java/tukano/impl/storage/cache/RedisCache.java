@@ -13,8 +13,8 @@ import utils.Hex;
 import java.util.List;
 
 public class RedisCache {
-	private static final String RedisHostname = "cache-60485.redis.cache.windows.net";
-	private static final String RedisKey = "indFkAIB2FbuyrwJ49FjHqTdYmrtMIBKLAzCaIA8luI=";
+	private static final String RedisHostname = "scc-60485-60492.redis.cache.windows.net";
+	private static final String RedisKey = "Pxl7UikK1rb8CfLI20nu7q4NJLsUh3W1kAzCaBuBBrc=";
 	private static final int REDIS_PORT = 6380;
 	private static final int REDIS_TIMEOUT = 1000;
 	private static final boolean Redis_USE_TLS = true;

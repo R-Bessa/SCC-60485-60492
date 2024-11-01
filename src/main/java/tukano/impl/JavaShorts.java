@@ -49,6 +49,7 @@ public class JavaShorts implements Shorts {
 		var shortId = format("%s+%s", userId, UUID.randomUUID());
 		var blobUrl = format("%s/%s/%s", TukanoApplication.BASE_URI, Blobs.NAME, shortId);
 		var shrt = new Short(shortId, userId, blobUrl);
+		RedisCache.addShort(shrt);
 
 		return errorOrValue(DB.insertOne(shrt, shortsDB), s -> s.copyWithLikes_And_Token(0));
 	}
@@ -61,7 +62,18 @@ public class JavaShorts implements Shorts {
 			return error(BAD_REQUEST);
 
 		var likes = DB.countAll(Long.class, LIKES, shortsDB, "shortId", shortId).value();
-		return errorOrValue(getOne(shortId, Short.class, shortsDB), shrt -> shrt.copyWithLikes_And_Token(likes.get(0)));
+		var shrt = RedisCache.getShort(shortId);
+		if(shrt != null)
+			return Result.ok(shrt.copyWithLikes_And_Token(likes.get(0)));
+
+		var res = getOne(shortId, Short.class, shortsDB);
+		if (!res.isOK())
+			return res;
+
+		shrt = res.value();
+		RedisCache.addShort(shrt);
+
+		return Result.ok(shrt.copyWithLikes_And_Token(likes.get(0)));
 	}
 
 
@@ -82,6 +94,7 @@ public class JavaShorts implements Shorts {
 		String queryParam = "token=";
 		String token = blobUrl.substring(blobUrl.indexOf(queryParam) + queryParam.length());
 		JavaBlobs.getInstance().delete(shortId, token);
+		RedisCache.removeShort(shrt);
 
 		return DB.deleteShort(shortId);
 	}
@@ -171,6 +184,8 @@ public class JavaShorts implements Shorts {
 		var res = checkCookie(userId, password);
 		if(!res.isOK())
 			return Result.error(res.error());
+
+		RedisCache.removeShorts(userId);
 
 		return DB.deleteAllShorts(userId);
 	}

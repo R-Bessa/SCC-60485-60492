@@ -1,0 +1,14 @@
+<component name="libraryTable">
+  <library name="Maven: com.nimbusds:oauth2-oidc-sdk:10.7.1" type="java-imported" external-system-id="Maven">
+    <properties groupId="com.nimbusds" artifactId="oauth2-oidc-sdk" version="10.7.1" />
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/nimbusds/oauth2-oidc-sdk/10.7.1/oauth2-oidc-sdk-10.7.1.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/com/nimbusds/oauth2-oidc-sdk/10.7.1/oauth2-oidc-sdk-10.7.1-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/nimbusds/oauth2-oidc-sdk/10.7.1/oauth2-oidc-sdk-10.7.1-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

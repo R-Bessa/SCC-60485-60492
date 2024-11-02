@@ -1,0 +1,14 @@
+<component name="libraryTable">
+  <library name="Maven: org.jboss.resteasy:resteasy-servlet-initializer:6.2.10.Final" type="java-imported" external-system-id="Maven">
+    <properties groupId="org.jboss.resteasy" artifactId="resteasy-servlet-initializer" version="6.2.10.Final" />
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/jboss/resteasy/resteasy-servlet-initializer/6.2.10.Final/resteasy-servlet-initializer-6.2.10.Final.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/org/jboss/resteasy/resteasy-servlet-initializer/6.2.10.Final/resteasy-servlet-initializer-6.2.10.Final-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/jboss/resteasy/resteasy-servlet-initializer/6.2.10.Final/resteasy-servlet-initializer-6.2.10.Final-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

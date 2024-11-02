@@ -7,6 +7,10 @@ import static tukano.api.Result.ErrorCode.BAD_REQUEST;
 import static tukano.api.Result.ErrorCode.CONFLICT;
 import static tukano.api.Result.ErrorCode.INTERNAL_ERROR;
 import static tukano.api.Result.ErrorCode.NOT_FOUND;
+import static tukano.impl.storage.cache.RedisCache.LIKES_KEY_PREFIX;
+import static tukano.impl.storage.cache.RedisCache.VIEWS_KEY_PREFIX;
+import static tukano.impl.storage.db.DB.LIKES;
+import static tukano.impl.storage.db.DB.shortsDB;
 
 import java.io.*;
 import java.util.function.Consumer;
@@ -18,8 +22,10 @@ import com.azure.storage.blob.models.BlobRange;
 import com.azure.storage.blob.models.BlobStorageException;
 import com.azure.storage.blob.models.PublicAccessType;
 import tukano.api.Result;
+import tukano.impl.data.Blob;
 import tukano.impl.rest.TukanoApplication;
 import tukano.impl.storage.cache.RedisCache;
+import tukano.impl.storage.db.DB;
 
 public class AzureBlobStorage implements BlobStorage {
 	private static final int CHUNK_SIZE = 4096;
@@ -74,8 +80,13 @@ public class AzureBlobStorage implements BlobStorage {
 		var blobId = path.replace("/", "+");
 		var owner = path.split("/")[0];
 		var blobData = RedisCache.getRecentBlob(blobId);
-		if(blobData != null)
+		if(blobData != null) {
+			if(!TukanoApplication.REDIS_CACHE_ON)
+				DB.updateViews(blobId, 1);
+			else
+				RedisCache.incrCounter(VIEWS_KEY_PREFIX, blobId);
 			return Result.ok(blobData.getBytes());
+		}
 
 		byte[] bytes = null;
 		var blob = containerClient.getBlobClient(path);
@@ -90,7 +101,15 @@ public class AzureBlobStorage implements BlobStorage {
 				return error(NOT_FOUND);
 		}
 
-		return bytes != null ? ok( bytes ) : error( INTERNAL_ERROR );
+		if(bytes == null)
+			return error( INTERNAL_ERROR );
+
+		if(!TukanoApplication.REDIS_CACHE_ON)
+			DB.updateViews(blobId, 1);
+		else
+			RedisCache.incrCounter(VIEWS_KEY_PREFIX, blobId);
+
+		return ok( bytes );
 	}
 
 	@Override

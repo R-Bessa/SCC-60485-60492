@@ -7,10 +7,12 @@ import tukano.api.Result;
 import tukano.impl.data.Short;
 import tukano.impl.data.User;
 import tukano.impl.rest.TukanoApplication;
-import tukano.impl.storage.blobs.Blob;
+import tukano.impl.data.Blob;
+import tukano.impl.storage.db.DB;
 import utils.Hash;
 import utils.Hex;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class RedisCache {
@@ -21,7 +23,8 @@ public class RedisCache {
 	private static final boolean Redis_USE_TLS = true;
 
 	private static final String FEED_KEY_PREFIX = "feed-";
-	private static final String COUNTER_KEY_PREFIX = "likes-";
+	public static final String LIKES_KEY_PREFIX = "likes-";
+	public static final String VIEWS_KEY_PREFIX = "views-";
 	private static final int COOKIE_VALIDITY = 900; // 15 min
 	private static final int FEED_VALIDITY = 300; // 5 min
 	private static final String RECENT_SHORTS = "recent_shorts_list";
@@ -132,6 +135,17 @@ public class RedisCache {
 			for(var obj: res.value()) {
 				var shrt = (Short) obj;
 				if(shrt.getOwnerId().equals(userId))
+					removeRecentShort(shrt);
+			}
+		}
+	}
+
+	public static void removeRecentShortsByIds(List<String> shortIds) {
+		var res = getList(RECENT_SHORTS, Short.class);
+		if(res != null) {
+			for(var obj: res.value()) {
+				var shrt = (Short) obj;
+				if(shortIds.contains(shrt.getShortId()))
 					removeRecentShort(shrt);
 			}
 		}
@@ -283,12 +297,12 @@ public class RedisCache {
 	}
 
 
-	public static void incrCounter(String shortId) {
+	public static void incrCounter(String prefix, String key) {
 		if(!TukanoApplication.REDIS_CACHE_ON)
 			return;
 
 		try (var jedis = getCachePool().getResource()) {
-			jedis.incr(COUNTER_KEY_PREFIX + shortId);
+			jedis.incr(prefix + key);
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -296,12 +310,12 @@ public class RedisCache {
 
 	}
 
-	public static void decrCounter(String shortId) {
+	public static void decrCounter(String prefix, String key) {
 		if(!TukanoApplication.REDIS_CACHE_ON)
 			return;
 
 		try (var jedis = getCachePool().getResource()) {
-			jedis.decr(COUNTER_KEY_PREFIX + shortId);
+			jedis.decr(prefix + key);
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -309,12 +323,15 @@ public class RedisCache {
 
 	}
 
-	public static long getCounter(String shortId) {
+	public static long getCounter(String prefix, String key) {
 		if(!TukanoApplication.REDIS_CACHE_ON)
 			return -1;
 
 		try (var jedis = getCachePool().getResource()) {
-			return Long.parseLong(jedis.get(COUNTER_KEY_PREFIX + shortId));
+			var res = jedis.get(prefix + key);
+			if(res == null)
+				return -1;
+			return Long.parseLong(res);
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -323,12 +340,12 @@ public class RedisCache {
 		return -1;
 	}
 
-	public static void setCounter(String shortId, long likes) {
+	public static void setCounter(String prefix, String key, long count) {
 		if(!TukanoApplication.REDIS_CACHE_ON)
 			return;
 
 		try (var jedis = getCachePool().getResource()) {
-			jedis.set(COUNTER_KEY_PREFIX + shortId, String.valueOf(likes));
+			jedis.set(prefix + key, String.valueOf(count));
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -336,13 +353,13 @@ public class RedisCache {
 
 	}
 
-	public static void removeCounterByUser(String userId) {
+	public static void removeCounterByKey(String prefix, String name) {
 		if(!TukanoApplication.REDIS_CACHE_ON)
 			return;
 
 		try (var jedis = getCachePool().getResource()) {
 			String cursor = "0";
-			String pattern = COUNTER_KEY_PREFIX + userId + "*";
+			String pattern = prefix + name + "*";
 
 			do {
 				var scanResult = jedis.scan(cursor, new ScanParams().match(pattern).count(100));
@@ -351,6 +368,39 @@ public class RedisCache {
 				cursor = scanResult.getCursor();
 
 			} while (!cursor.equals("0"));
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public static void writeBackViews() {
+		if(!TukanoApplication.REDIS_CACHE_ON)
+			return;
+
+		try (var jedis = getCachePool().getResource()) {
+			String cursor = "0";
+			String pattern = VIEWS_KEY_PREFIX  + "*";
+			List<String> recentShorts = new ArrayList<>();
+
+			do {
+				var scanResult = jedis.scan(cursor, new ScanParams().match(pattern).count(100));
+				for (String key : scanResult.getResult()) {
+					String shortId = key.split("-")[1];
+					int views = Integer.parseInt(jedis.get(key));
+					jedis.del(key);
+					DB.updateViews(shortId, views);
+					recentShorts.add(shortId);
+				}
+
+				cursor = scanResult.getCursor();
+
+			} while (!cursor.equals("0"));
+
+			if(!recentShorts.isEmpty())
+				removeRecentShortsByIds(recentShorts);
+
+			//TODO tukano recommends
 
 		} catch (Exception e) {
 			e.printStackTrace();

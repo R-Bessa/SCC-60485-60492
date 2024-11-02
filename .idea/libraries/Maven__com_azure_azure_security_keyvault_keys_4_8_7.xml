@@ -1,0 +1,14 @@
+<component name="libraryTable">
+  <library name="Maven: com.azure:azure-security-keyvault-keys:4.8.7" type="java-imported" external-system-id="Maven">
+    <properties groupId="com.azure" artifactId="azure-security-keyvault-keys" version="4.8.7" />
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/azure/azure-security-keyvault-keys/4.8.7/azure-security-keyvault-keys-4.8.7.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/com/azure/azure-security-keyvault-keys/4.8.7/azure-security-keyvault-keys-4.8.7-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/azure/azure-security-keyvault-keys/4.8.7/azure-security-keyvault-keys-4.8.7-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

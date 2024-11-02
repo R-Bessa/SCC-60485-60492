@@ -20,6 +20,9 @@ import scc.utils.Token;
 
 import java.util.Optional;
 
+import static scc.utils.RedisCache.REDIS_CACHE_ON;
+import static scc.utils.RedisCache.VIEWS_KEY_PREFIX;
+
 public class HttpFunction {
     public static final String TUKANO_SECRET = "tukano_app_secret";
     public static String baseURI;
@@ -136,8 +139,13 @@ public class HttpFunction {
             return request.createResponseBuilder(HttpStatus.BAD_REQUEST).build();
 
         var blobData = RedisCache.getRecentBlob(blobId);
-        if(blobData != null)
+        if(blobData != null) {
+            if(!REDIS_CACHE_ON)
+                System.out.println(); // TODO DB.updateViews(blobId, 1);
+            else
+                RedisCache.incrCounter(VIEWS_KEY_PREFIX, blobId);
             return request.createResponseBuilder(HttpStatus.OK).body(blobData.getBytes()).build();
+        }
 
         String path = toPath(blobId);
         byte[] bytes = null;
@@ -154,8 +162,15 @@ public class HttpFunction {
                 return request.createResponseBuilder(HttpStatus.NOT_FOUND).build();
         }
 
-        if (bytes != null)
+        if (bytes != null) {
+            if(!REDIS_CACHE_ON)
+                System.out.println(); // TODO DB.updateViews(blobId, 1);
+            else
+                RedisCache.incrCounter(VIEWS_KEY_PREFIX, blobId);
+
             return request.createResponseBuilder(HttpStatus.OK).body(bytes).build();
+        }
+
         else
             return request.createResponseBuilder(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }

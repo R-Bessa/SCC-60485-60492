@@ -1,0 +1,14 @@
+<component name="libraryTable">
+  <library name="Maven: com.azure:azure-cosmos:4.63.3" type="java-imported" external-system-id="Maven">
+    <properties groupId="com.azure" artifactId="azure-cosmos" version="4.63.3" />
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/azure/azure-cosmos/4.63.3/azure-cosmos-4.63.3.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/com/azure/azure-cosmos/4.63.3/azure-cosmos-4.63.3-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/azure/azure-cosmos/4.63.3/azure-cosmos-4.63.3-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

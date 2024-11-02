@@ -2,39 +2,39 @@ package scc.utils;
 
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
+import redis.clients.jedis.params.ScanParams;
 import scc.data.Blob;
 import scc.data.User;
 import scc.data.Short;
+
+import java.util.ArrayList;
 import java.util.List;
 
 public class RedisCache {
-	private static final String RedisHostname = "scc-60485-60492.redis.cache.windows.net";
-	private static final String RedisKey = "Pxl7UikK1rb8CfLI20nu7q4NJLsUh3W1kAzCaBuBBrc=";
+	private static final String RedisHostname = "scc-cache-60485.redis.cache.windows.net";
+	private static final String RedisKey = "yZt5Qyb9dvDdbNL19eReZQNtzHdWaS0BSAzCaOpUZ9k=";
 	private static final int REDIS_PORT = 6380;
 	private static final int REDIS_TIMEOUT = 1000;
 	private static final boolean Redis_USE_TLS = true;
 
 	private static final String FEED_KEY_PREFIX = "feed-";
-	private static final String COUNTER_KEY_PREFIX = "likes-";
+	public static final String LIKES_KEY_PREFIX = "likes-";
+	public static final String VIEWS_KEY_PREFIX = "views-";
 	private static final int COOKIE_VALIDITY = 900; // 15 min
 	private static final int FEED_VALIDITY = 300; // 5 min
 	private static final String RECENT_SHORTS = "recent_shorts_list";
 	private static final String RECENT_BLOBS = "recent_blobs_list";
 	private static final int RECENT_SHORTS_SIZE = 100;
 	private static final int RECENT_BLOBS_SIZE = 50;
-
 	public static final boolean REDIS_CACHE_ON = true;
 
-	// counter of likes per short
-	// consistency
 
-	
 	private static JedisPool instance;
-	
+
 	public synchronized static JedisPool getCachePool() {
 		if( instance != null)
 			return instance;
-		
+
 		var poolConfig = new JedisPoolConfig();
 		poolConfig.setMaxTotal(128);
 		poolConfig.setMaxIdle(128);
@@ -135,6 +135,17 @@ public class RedisCache {
 		}
 	}
 
+	public static void removeRecentShortsByIds(List<String> shortIds) {
+		var res = getList(RECENT_SHORTS, Short.class);
+		if(res != null) {
+			for(var obj: res.value()) {
+				var shrt = (Short) obj;
+				if(shortIds.contains(shrt.getShortId()))
+					removeRecentShort(shrt);
+			}
+		}
+	}
+
 	public static void addRecentBlob(Blob blob) {
 		addToList(RECENT_BLOBS, RECENT_BLOBS_SIZE, blob);
 	}
@@ -181,7 +192,7 @@ public class RedisCache {
 	}
 
 	public static void addShortToFeed(String userId, String shortId) {
-		if(REDIS_CACHE_ON)
+		if(!REDIS_CACHE_ON)
 			return;
 
 		try (var jedis = getCachePool().getResource()) {
@@ -196,7 +207,7 @@ public class RedisCache {
 	}
 
 	public static void addFeed(String userId, List<String> feed) {
-		if(REDIS_CACHE_ON)
+		if(!REDIS_CACHE_ON)
 			return;
 
 		try (var jedis = getCachePool().getResource()) {
@@ -212,7 +223,7 @@ public class RedisCache {
 	}
 
 	public static Result<List<String>> getFeed(String userId) {
-		if(REDIS_CACHE_ON)
+		if(!REDIS_CACHE_ON)
 			return null;
 
 		try (var jedis = getCachePool().getResource()) {
@@ -226,7 +237,7 @@ public class RedisCache {
 	}
 
 	public static void removeShortsFromFeed(String userId) {
-		if(REDIS_CACHE_ON)
+		if(!REDIS_CACHE_ON)
 			return;
 
 		var feed = getFeed(userId);
@@ -238,7 +249,7 @@ public class RedisCache {
 	}
 
 	private static <T> void addToList(String list_name, int max_size, T obj) {
-		if(REDIS_CACHE_ON)
+		if(!REDIS_CACHE_ON)
 			return;
 
 		try (var jedis = getCachePool().getResource()) {
@@ -246,20 +257,17 @@ public class RedisCache {
 			if (cnt > max_size)
 				jedis.ltrim(list_name, 0, max_size - 1);
 
-			System.out.println("Add to the list " + list_name + " the obj " + obj.toString());
-
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 
 	public static void removeFromList(String list_name, String value) {
-		if(REDIS_CACHE_ON)
+		if(!REDIS_CACHE_ON)
 			return;
 
 		try (var jedis = getCachePool().getResource()) {
 			jedis.lrem(list_name, 1, value);
-			System.out.println("Remove from the list " + list_name + " the obj " + value);
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -267,16 +275,12 @@ public class RedisCache {
 	}
 
 	private static <T> Result<List<?>> getList(String list_name, Class<T> clazz) {
-		if(REDIS_CACHE_ON)
+		if(!REDIS_CACHE_ON)
 			return null;
 
 		try (var jedis = getCachePool().getResource()) {
 			var jsonList = jedis.lrange(list_name, 0, -1);
 			var list = jsonList.stream().map(obj -> JSON.decode(obj, clazz)).toList();
-
-			System.out.println(list_name);
-			for( Object obj : list)
-				System.out.println(obj.toString());
 
 			return Result.ok(list);
 
@@ -288,54 +292,12 @@ public class RedisCache {
 	}
 
 
-	public static long incrCounter(String shortId) {
-		if(REDIS_CACHE_ON)
-			return -1;
-
-		try (var jedis = getCachePool().getResource()) {
-			return jedis.incr(COUNTER_KEY_PREFIX + shortId);
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-		return -1;
-	}
-
-	public static long decrCounter(String shortId) {
-		if(REDIS_CACHE_ON)
-			return -1;
-
-		try (var jedis = getCachePool().getResource()) {
-			return jedis.decr(COUNTER_KEY_PREFIX + shortId);
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-		return -1;
-	}
-
-	public static long getCounter(String shortId) {
-		if(REDIS_CACHE_ON)
-			return -1;
-
-		try (var jedis = getCachePool().getResource()) {
-			return Long.parseLong(jedis.get(COUNTER_KEY_PREFIX + shortId));
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-		return -1;
-	}
-
-	public static void setCounter(String shortId, long likes) {
-		if(REDIS_CACHE_ON)
+	public static void incrCounter(String prefix, String key) {
+		if(!REDIS_CACHE_ON)
 			return;
 
 		try (var jedis = getCachePool().getResource()) {
-			jedis.set(COUNTER_KEY_PREFIX + shortId, String.valueOf(likes));
+			jedis.incr(prefix + key);
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -343,16 +305,97 @@ public class RedisCache {
 
 	}
 
-	public static void removeCounterByUser(String userId) {
-		if(REDIS_CACHE_ON)
+	public static void decrCounter(String prefix, String key) {
+		if(!REDIS_CACHE_ON)
 			return;
 
 		try (var jedis = getCachePool().getResource()) {
-			var keys = jedis.keys(COUNTER_KEY_PREFIX + userId);
-			for (String key : keys) {
-				System.out.println("key to delete " + key);
-				jedis.del(key);
-			}
+			jedis.decr(prefix + key);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+	}
+
+	public static long getCounter(String prefix, String key) {
+		if(!REDIS_CACHE_ON)
+			return -1;
+
+		try (var jedis = getCachePool().getResource()) {
+			var res = jedis.get(prefix + key);
+			if(res == null)
+				return -1;
+			return Long.parseLong(res);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return -1;
+	}
+
+	public static void setCounter(String prefix, String key, long count) {
+		if(!REDIS_CACHE_ON)
+			return;
+
+		try (var jedis = getCachePool().getResource()) {
+			jedis.set(prefix + key, String.valueOf(count));
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+	}
+
+	public static void removeCounterByKey(String prefix, String name) {
+		if(!REDIS_CACHE_ON)
+			return;
+
+		try (var jedis = getCachePool().getResource()) {
+			String cursor = "0";
+			String pattern = prefix + name + "*";
+
+			do {
+				var scanResult = jedis.scan(cursor, new ScanParams().match(pattern).count(100));
+				for (String key : scanResult.getResult())
+					jedis.del(key);
+				cursor = scanResult.getCursor();
+
+			} while (!cursor.equals("0"));
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public static void writeBackViews() {
+		if(!REDIS_CACHE_ON)
+			return;
+
+		try (var jedis = getCachePool().getResource()) {
+			String cursor = "0";
+			String pattern = VIEWS_KEY_PREFIX  + "*";
+			List<String> recentShorts = new ArrayList<>();
+
+			do {
+				var scanResult = jedis.scan(cursor, new ScanParams().match(pattern).count(100));
+				for (String key : scanResult.getResult()) {
+					String shortId = key.split("-")[1];
+					int views = Integer.parseInt(jedis.get(key));
+					jedis.del(key);
+					// TODO DB.updateViews(shortId, views);
+					recentShorts.add(shortId);
+				}
+
+				cursor = scanResult.getCursor();
+
+			} while (!cursor.equals("0"));
+
+			if(!recentShorts.isEmpty())
+				removeRecentShortsByIds(recentShorts);
+
+			//TODO tukano recommends
 
 		} catch (Exception e) {
 			e.printStackTrace();

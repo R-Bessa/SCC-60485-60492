@@ -1,0 +1,14 @@
+<component name="ArtifactManager">
+  <artifact type="war" external-system-id="Maven" name="tukano:war">
+    <output-path>$PROJECT_DIR$/target</output-path>
+    <properties id="maven-jee-properties">
+      <options>
+        <module>tukano</module>
+        <packaging>war</packaging>
+      </options>
+    </properties>
+    <root id="archive" name="tukano-1.war">
+      <element id="artifact" artifact-name="tukano:war exploded" />
+    </root>
+  </artifact>
+</component>

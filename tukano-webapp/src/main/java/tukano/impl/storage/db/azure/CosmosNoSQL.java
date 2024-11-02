@@ -93,8 +93,8 @@ public class CosmosNoSQL implements Database {
 
         ThroughputProperties throughputProperties = ThroughputProperties.createManualThroughput(400);
         db.createContainerIfNotExists(
-            containerProperties,
-            throughputProperties
+                containerProperties,
+                throughputProperties
         );
     }
 
@@ -226,9 +226,5 @@ public class CosmosNoSQL implements Database {
         else
             return Result.ok(shorts_container);
     }
-
-
-
-
 
 }

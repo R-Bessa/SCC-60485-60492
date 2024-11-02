@@ -14,6 +14,9 @@ public class TimerFunction {
 	  @TimerTrigger(name = TIMER_TRIGGER_NAME, schedule = TIMER_TRIGGER_SCHEDULE) String timerInfo,
 	      ExecutionContext context
 	 ) {
+
+
+
 	     context.getLogger().info("Timer was triggered: " + timerInfo);
 	}
 }

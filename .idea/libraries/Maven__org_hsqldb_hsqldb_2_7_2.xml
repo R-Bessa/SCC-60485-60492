@@ -1,0 +1,14 @@
+<component name="libraryTable">
+  <library name="Maven: org.hsqldb:hsqldb:2.7.2" type="java-imported" external-system-id="Maven">
+    <properties groupId="org.hsqldb" artifactId="hsqldb" version="2.7.2" />
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/hsqldb/hsqldb/2.7.2/hsqldb-2.7.2.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/org/hsqldb/hsqldb/2.7.2/hsqldb-2.7.2-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/hsqldb/hsqldb/2.7.2/hsqldb-2.7.2-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

@@ -10,15 +10,16 @@ import org.hibernate.Session;
 
 import org.hsqldb.rights.User;
 import tukano.api.Result;
+import tukano.impl.JavaShorts;
 import tukano.impl.data.Short;
 import tukano.impl.data.Following;
 import tukano.impl.data.Likes;
-import tukano.impl.rest.TukanoApplication;
 import tukano.impl.storage.db.azure.CosmosNoSQL;
 import tukano.impl.storage.db.azure.CosmosPostgreSQL;
 import tukano.impl.storage.db.hibernate.Hibernate;
 
 import static tukano.api.Result.ErrorCode.NOT_IMPLEMENTED;
+import static tukano.impl.rest.TukanoApplication.SHORTS_DB_TYPE;
 import static tukano.impl.rest.TukanoApplication.USERS_DB_TYPE;
 import static tukano.impl.storage.db.azure.CosmosNoSQL.shorts_container;
 
@@ -30,7 +31,7 @@ public class DB {
 	public static final String FOLLOWING = "following";
 	public static final String LIKES = "likes";
 	public static final Database usersDB = initDB(USERS_DB_TYPE, USERS);
-	public static final Database shortsDB = initDB(TukanoApplication.SHORTS_DB_TYPE, SHORTS);
+	public static final Database shortsDB = initDB(SHORTS_DB_TYPE, SHORTS);
 
 	private static Database initDB(DatabaseType db_type, String container) {
 		switch (db_type) {
@@ -72,7 +73,7 @@ public class DB {
 	}
 
 	public static Result<List<String>> getFeed(String userId) {
-		switch (TukanoApplication.SHORTS_DB_TYPE) {
+		switch (SHORTS_DB_TYPE) {
 			case COSMOS_DB_POSTGRESQL -> {
 				String query_fmt =
 						"""
@@ -129,7 +130,7 @@ public class DB {
 	}
 
 	public static Result<Void> deleteShort(String shortId) {
-		switch (TukanoApplication.SHORTS_DB_TYPE) {
+		switch (SHORTS_DB_TYPE) {
 			case COSMOS_DB_NOSQL -> {
 				DB.processDeleteShort(shortId, null);
 				return Result.ok();
@@ -150,7 +151,7 @@ public class DB {
 	}
 
 	public static Result<Void> deleteAllShorts(String userId) {
-		switch (TukanoApplication.SHORTS_DB_TYPE) {
+		switch (SHORTS_DB_TYPE) {
 			case COSMOS_DB_NOSQL -> {
 				DB.processDeleteAllShorts(userId, null);
 				return Result.ok();
@@ -170,6 +171,18 @@ public class DB {
 		}
 	}
 
+	public static Result<Short> updateViews(String shortId, int views) {
+		var shortRes = JavaShorts.getInstance().getShort(shortId);
+		if (!shortRes.isOK())
+			return shortRes;
+
+		Short shrt = shortRes.value();
+		shrt.updateViews(views);
+		return updateOne(shrt, shortsDB);
+	}
+
+
+
 	public static <T> Result<T> updateOne(T obj, Database db) {
 		return db.updateOne(obj);
 	}
@@ -188,7 +201,7 @@ public class DB {
 
 	public static <T> Result<List<T>> searchPattern(Database db, Class<T> clazz, String pattern, String container, String attribute) {
 
-		switch (TukanoApplication.SHORTS_DB_TYPE) {
+		switch (SHORTS_DB_TYPE) {
 			case COSMOS_DB_NOSQL -> {
 				return db.searchPattern(clazz, pattern, container, "id");
 			}
@@ -201,7 +214,7 @@ public class DB {
 	}
 
 	public static <T> Result<List<T>> getAllByAttributeID(Class<T> clazz, String container, String attribute, String param, String match, Database db) {
-		switch (TukanoApplication.SHORTS_DB_TYPE) {
+		switch (SHORTS_DB_TYPE) {
 			case COSMOS_DB_NOSQL -> {
 				return getAllByAttribute(clazz, container, "id", param, match, db);
 			}

@@ -1,4 +1,4 @@
-package tukano.impl.storage.blobs;
+package tukano.impl.data;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;

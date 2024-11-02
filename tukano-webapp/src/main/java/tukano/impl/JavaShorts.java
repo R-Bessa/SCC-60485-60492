@@ -6,6 +6,8 @@ import static tukano.api.Result.error;
 import static tukano.api.Result.errorOrValue;
 import static tukano.api.Result.errorOrVoid;
 import static tukano.api.Result.ok;
+import static tukano.impl.storage.cache.RedisCache.LIKES_KEY_PREFIX;
+import static tukano.impl.storage.cache.RedisCache.VIEWS_KEY_PREFIX;
 import static tukano.impl.storage.db.DB.*;
 
 import java.util.List;
@@ -62,10 +64,10 @@ public class JavaShorts implements Shorts {
 		if (shortId == null)
 			return error(BAD_REQUEST);
 
-		var likes = RedisCache.getCounter(shortId);
+		var likes = RedisCache.getCounter(LIKES_KEY_PREFIX, shortId);
 		if(likes == -1) {
 			likes = DB.countAll(Long.class, LIKES, shortsDB, "shortId", shortId).value().get(0);
-			RedisCache.setCounter(shortId, likes);
+			RedisCache.setCounter(LIKES_KEY_PREFIX, shortId, likes);
 		}
 
 		var shrt = RedisCache.getRecentShort(shortId);
@@ -156,15 +158,15 @@ public class JavaShorts implements Shorts {
 		if(!likeRes.isOK())
 			return Result.error(likeRes.error());
 
-		var likes = RedisCache.getCounter(shortId);
+		var likes = RedisCache.getCounter(LIKES_KEY_PREFIX, shortId);
 		if(likes == -1) {
 			likes = DB.countAll(Long.class, LIKES, shortsDB, "shortId", shortId).value().get(0);
-			RedisCache.setCounter(shortId, likes);
+			RedisCache.setCounter(LIKES_KEY_PREFIX, shortId, likes);
 		}
 		else if(isLiked)
-			RedisCache.incrCounter(shortId);
+			RedisCache.incrCounter(LIKES_KEY_PREFIX, shortId);
 		else
-			RedisCache.decrCounter(shortId);
+			RedisCache.decrCounter(LIKES_KEY_PREFIX, shortId);
 
 		return Result.ok();
 	}
@@ -218,7 +220,8 @@ public class JavaShorts implements Shorts {
 
 		RedisCache.removeRecentShorts(userId);
 		RedisCache.removeShortsFromFeed(userId);
-		RedisCache.removeCounterByUser(userId);
+		RedisCache.removeCounterByKey(LIKES_KEY_PREFIX, userId);
+		RedisCache.removeCounterByKey(VIEWS_KEY_PREFIX, userId);
 
 		return DB.deleteAllShorts(userId);
 	}

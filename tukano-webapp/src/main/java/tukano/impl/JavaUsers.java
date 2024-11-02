@@ -126,7 +126,6 @@ public class JavaUsers implements Users {
 
 		RedisCache.invalidate("feed-" + userId);
 		RedisCache.removeRecentShorts(userId);
-		RedisCache.removeCounterByUser(userId);
 
 		return errorOrResult(DB.getOne( userId, User.class, usersDB), u -> {
 

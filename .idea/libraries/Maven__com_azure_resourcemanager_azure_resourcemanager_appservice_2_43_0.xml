@@ -1,0 +1,14 @@
+<component name="libraryTable">
+  <library name="Maven: com.azure.resourcemanager:azure-resourcemanager-appservice:2.43.0" type="java-imported" external-system-id="Maven">
+    <properties groupId="com.azure.resourcemanager" artifactId="azure-resourcemanager-appservice" version="2.43.0" />
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/azure/resourcemanager/azure-resourcemanager-appservice/2.43.0/azure-resourcemanager-appservice-2.43.0.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/com/azure/resourcemanager/azure-resourcemanager-appservice/2.43.0/azure-resourcemanager-appservice-2.43.0-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/azure/resourcemanager/azure-resourcemanager-appservice/2.43.0/azure-resourcemanager-appservice-2.43.0-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

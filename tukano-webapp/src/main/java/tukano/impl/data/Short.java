@@ -27,22 +27,24 @@ public class Short {
 	String blobUrl;
 	long timestamp;
 	int totalLikes;
+	int views;
 
 	public Short() {}
 
 	@JsonCreator
 	public Short(@JsonProperty("id") @JsonAlias("shortId") String shortId, @JsonProperty("ownerId") String ownerId,
 				 @JsonProperty("blobUrl") String blobUrl, @JsonProperty("timestamp") long timestamp,
-				 @JsonProperty("totalLikes") int totalLikes) {
+				 @JsonProperty("totalLikes") int totalLikes, @JsonProperty("views") int views) {
 		this.shortId = shortId;
 		this.ownerId = ownerId;
 		this.blobUrl = blobUrl;
 		this.timestamp = timestamp;
 		this.totalLikes = totalLikes;
+		this.views = views;
 	}
 
 	public Short(String shortId, String ownerId, String blobUrl) {
-		this(shortId, ownerId, blobUrl, System.currentTimeMillis(), 0);
+		this(shortId, ownerId, blobUrl, System.currentTimeMillis(), 0, 0);
 	}
 	
 	public String getShortId() {
@@ -85,14 +87,23 @@ public class Short {
 		this.totalLikes = totalLikes;
 	}
 
+	public int getViews() {
+		return views;
+	}
+
+	public void updateViews(int views) {
+		this.views += views;
+	}
+
 	@Override
 	public String toString() {
 		return "Short [shortId=" + shortId + ", ownerId=" + ownerId + ", blobUrl=" + blobUrl + ", timestamp="
 				+ timestamp + ", totalLikes=" + totalLikes + "]";
 	}
-	
-	public Short copyWithLikes_And_Token( long totLikes) {
-		var urlWithToken = String.format("%s?token=%s", blobUrl, Token.get(shortId));
-		return new Short( shortId, ownerId, urlWithToken, timestamp, (int)totLikes);
-	}	
+
+	public Short copyWithLikes_And_Token(long totLikes) {
+		String urlWithToken = blobUrl.contains("?token=") ? blobUrl : String.format("%s?token=%s", blobUrl, Token.get(shortId));
+		return new Short(shortId, ownerId, urlWithToken, timestamp, (int) totLikes, views);
+	}
+
 }

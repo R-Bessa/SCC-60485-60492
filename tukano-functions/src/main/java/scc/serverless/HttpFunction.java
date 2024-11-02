@@ -140,10 +140,7 @@ public class HttpFunction {
 
         var blobData = RedisCache.getRecentBlob(blobId);
         if(blobData != null) {
-            if(!REDIS_CACHE_ON)
-                System.out.println(); // TODO DB.updateViews(blobId, 1);
-            else
-                RedisCache.incrCounter(VIEWS_KEY_PREFIX, blobId);
+            RedisCache.incrCounter(VIEWS_KEY_PREFIX, blobId);
             return request.createResponseBuilder(HttpStatus.OK).body(blobData.getBytes()).build();
         }
 

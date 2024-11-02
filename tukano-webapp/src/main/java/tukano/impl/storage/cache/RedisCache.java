@@ -400,8 +400,6 @@ public class RedisCache {
 			if(!recentShorts.isEmpty())
 				removeRecentShortsByIds(recentShorts);
 
-			//TODO tukano recommends
-
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

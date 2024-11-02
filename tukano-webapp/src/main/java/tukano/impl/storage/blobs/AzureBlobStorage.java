@@ -81,10 +81,7 @@ public class AzureBlobStorage implements BlobStorage {
 		var owner = path.split("/")[0];
 		var blobData = RedisCache.getRecentBlob(blobId);
 		if(blobData != null) {
-			if(!TukanoApplication.REDIS_CACHE_ON)
-				DB.updateViews(blobId, 1);
-			else
-				RedisCache.incrCounter(VIEWS_KEY_PREFIX, blobId);
+			RedisCache.incrCounter(VIEWS_KEY_PREFIX, blobId);
 			return Result.ok(blobData.getBytes());
 		}
 

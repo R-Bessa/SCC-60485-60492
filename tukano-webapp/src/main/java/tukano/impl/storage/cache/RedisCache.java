@@ -2,6 +2,7 @@ package tukano.impl.storage.cache;
 
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
+import redis.clients.jedis.params.ScanParams;
 import tukano.api.Result;
 import tukano.impl.data.Short;
 import tukano.impl.data.User;
@@ -13,8 +14,8 @@ import utils.Hex;
 import java.util.List;
 
 public class RedisCache {
-	private static final String RedisHostname = "scc-60485-60492.redis.cache.windows.net";
-	private static final String RedisKey = "Pxl7UikK1rb8CfLI20nu7q4NJLsUh3W1kAzCaBuBBrc=";
+	private static final String RedisHostname = "scc-cache-60485.redis.cache.windows.net";
+	private static final String RedisKey = "yZt5Qyb9dvDdbNL19eReZQNtzHdWaS0BSAzCaOpUZ9k=";
 	private static final int REDIS_PORT = 6380;
 	private static final int REDIS_TIMEOUT = 1000;
 	private static final boolean Redis_USE_TLS = true;
@@ -28,10 +29,6 @@ public class RedisCache {
 	private static final int RECENT_SHORTS_SIZE = 100;
 	private static final int RECENT_BLOBS_SIZE = 50;
 
-
-
-	// counter of likes per short
-	// consistency
 
 	
 	private static JedisPool instance;
@@ -251,8 +248,6 @@ public class RedisCache {
 			if (cnt > max_size)
 				jedis.ltrim(list_name, 0, max_size - 1);
 
-			System.out.println("Add to the list " + list_name + " the obj " + obj.toString());
-
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -264,7 +259,6 @@ public class RedisCache {
 
 		try (var jedis = getCachePool().getResource()) {
 			jedis.lrem(list_name, 1, value);
-			System.out.println("Remove from the list " + list_name + " the obj " + value);
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -279,10 +273,6 @@ public class RedisCache {
 			var jsonList = jedis.lrange(list_name, 0, -1);
 			var list = jsonList.stream().map(obj -> JSON.decode(obj, clazz)).toList();
 
-			System.out.println(list_name);
-			for( Object obj : list)
-				System.out.println(obj.toString());
-
 			return Result.ok(list);
 
 		} catch (Exception e) {
@@ -293,32 +283,30 @@ public class RedisCache {
 	}
 
 
-	public static long incrCounter(String shortId) {
+	public static void incrCounter(String shortId) {
 		if(!TukanoApplication.REDIS_CACHE_ON)
-			return -1;
+			return;
 
 		try (var jedis = getCachePool().getResource()) {
-			return jedis.incr(COUNTER_KEY_PREFIX + shortId);
+			jedis.incr(COUNTER_KEY_PREFIX + shortId);
 
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 
-		return -1;
 	}
 
-	public static long decrCounter(String shortId) {
+	public static void decrCounter(String shortId) {
 		if(!TukanoApplication.REDIS_CACHE_ON)
-			return -1;
+			return;
 
 		try (var jedis = getCachePool().getResource()) {
-			return jedis.decr(COUNTER_KEY_PREFIX + shortId);
+			jedis.decr(COUNTER_KEY_PREFIX + shortId);
 
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 
-		return -1;
 	}
 
 	public static long getCounter(String shortId) {
@@ -353,11 +341,16 @@ public class RedisCache {
 			return;
 
 		try (var jedis = getCachePool().getResource()) {
-			var keys = jedis.keys(COUNTER_KEY_PREFIX + userId);
-			for (String key : keys) {
-				System.out.println("key to delete " + key);
-				jedis.del(key);
-			}
+			String cursor = "0";
+			String pattern = COUNTER_KEY_PREFIX + userId + "*";
+
+			do {
+				var scanResult = jedis.scan(cursor, new ScanParams().match(pattern).count(100));
+				for (String key : scanResult.getResult())
+					jedis.del(key);
+				cursor = scanResult.getCursor();
+
+			} while (!cursor.equals("0"));
 
 		} catch (Exception e) {
 			e.printStackTrace();

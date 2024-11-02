@@ -124,8 +124,6 @@ public class JavaUsers implements Users {
 				return error(FORBIDDEN);
 		}
 
-		System.out.println("remove user " + RedisCache.getCookieKey(pwd));
-		RedisCache.invalidate(RedisCache.getCookieKey(pwd));
 		RedisCache.invalidate("feed-" + userId);
 		RedisCache.removeRecentShorts(userId);
 		RedisCache.removeCounterByUser(userId);
@@ -136,6 +134,7 @@ public class JavaUsers implements Users {
 			Executors.defaultThreadFactory().newThread( () -> {
 				JavaShorts.getInstance().deleteAllShorts(userId, pwd);
 				JavaBlobs.getInstance().deleteAllBlobs(userId, pwd);
+				RedisCache.invalidate(RedisCache.getCookieKey(pwd));
 			}).start();
 
 			return (Result<User>) DB.deleteOne(u, usersDB);

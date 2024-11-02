@@ -1,0 +1,293 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="78038aeb-9147-4dfa-a7f2-787247dafd00" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.classpath" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/encodings.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/jarRepositories.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/project.iml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/uiDesigner.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.project" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.settings/org.eclipse.core.resources.prefs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.settings/org.eclipse.jdt.core.prefs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.settings/org.eclipse.m2e.core.prefs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/tukano/api/Blobs.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/tukano/api/Result.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/tukano/api/Shorts.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/tukano/api/Users.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/tukano/api/rest/RestBlobs.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/tukano/api/rest/RestShorts.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/tukano/api/rest/RestUsers.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/tukano/impl/JavaBlobs.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/tukano/impl/JavaShorts.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/tukano/impl/JavaUsers.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/tukano/impl/Token.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/tukano/impl/data/Following.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/tukano/impl/data/Likes.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/tukano/impl/data/Short.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/tukano/impl/data/User.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/tukano/impl/rest/RestBlobsResource.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/tukano/impl/rest/RestResource.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/tukano/impl/rest/RestShortsResource.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/tukano/impl/rest/RestUsersResource.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/tukano/impl/rest/TukanoApplication.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/tukano/impl/rest/TukanoRestServer.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/tukano/impl/rest/utils/CustomLoggingFilter.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/tukano/impl/rest/utils/GenericExceptionMapper.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/tukano/impl/storage/blobs/AzureBlobStorage.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/tukano/impl/storage/blobs/Blob.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/tukano/impl/storage/blobs/BlobStorage.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/tukano/impl/storage/blobs/BlobsType.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/tukano/impl/storage/blobs/FilesystemStorage.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/tukano/impl/storage/cache/JSON.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/tukano/impl/storage/cache/RedisCache.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/tukano/impl/storage/db/DB.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/tukano/impl/storage/db/Database.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/tukano/impl/storage/db/DatabaseType.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/tukano/impl/storage/db/azure/CosmosNoSQL.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/tukano/impl/storage/db/azure/CosmosPostgreSQL.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/tukano/impl/storage/db/azure/dao/ShortDAO.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/tukano/impl/storage/db/azure/dao/UserDAO.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/tukano/impl/storage/db/hibernate/Hibernate.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/utils/Args.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/utils/Hash.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/utils/Hex.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/utils/IO.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/utils/IP.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/utils/Props.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/utils/Queues.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/utils/Random.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/utils/Sleep.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/utils/TLS.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/utils/TryCatch.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/application.properties" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/hibernate.cfg.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/schema.sql" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/test/DB.postman_collection.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/test/SCC Blobs.postman_collection.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/test/SCC General.postman_collection.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/test/test/Test.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/test/tukano/clients/rest/RestBlobsClient.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/test/tukano/clients/rest/RestClient.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/test/tukano/clients/rest/RestShortsClient.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/test/tukano/clients/rest/RestUsersClient.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/webapp/META-INF/MANIFEST.MF" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/webapp/WEB-INF/lib/Icon_" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/webapp/WEB-INF/web.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/webapp/index.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tukano.iml" beforeDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Class" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;NeelDB&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/R-Bessa/SCC-60485-60492.git&quot;,
+    &quot;accountId&quot;: &quot;71e0f6db-742a-493b-8ce1-ad76270a6c5e&quot;
+  }
+}</component>
+  <component name="KubernetesApiPersistence">{}</component>
+  <component name="KubernetesApiProvider">{
+  &quot;isMigrated&quot;: true
+}</component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 0
+}</component>
+  <component name="ProjectId" id="2miWaCL9pXrwNUJj04uWPKk35BI" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Application.DemoApplication.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "azure-functions.wasFacetEverAdded": "true",
+    "git-widget-placeholder": "main",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "C:/Users/neelb/Documents/5Ano/SCC/SCC-60485-60492/tukano-webapp",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "tukano-main.wasFacetEverAdded": "true",
+    "vue.rearranger.settings.migration": "true"
+  }
+}]]></component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\neelb\Documents\5Ano\SCC\SCC-60485-60492" />
+      <recent name="C:\Users\neelb\Documents\5Ano\SCC\SCC-60485-60492\src\main\java\tukano\impl\storage\blobs\serverless" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\neelb\Documents\5Ano\SCC\SCC-60485-60492\src\main\java\tukano\impl\rest" />
+      <recent name="C:\Users\neelb\Documents\5Ano\SCC\SCC-60485-60492\src\main\test" />
+    </key>
+  </component>
+  <component name="RunManager">
+    <configuration default="true" type="AZURE_FUNCTION_SUPPORT" factoryName="Run Functions">
+      <option name="appName" />
+      <option name="appServicePlanName" />
+      <option name="appServicePlanResourceGroup" />
+      <option name="appSettingsKey" value="ce5a7f20-e766-46a6-b76f-3504a85ad677" />
+      <option name="artifact" />
+      <option name="debugOptions" />
+      <option name="deployment" />
+      <option name="deploymentStagingDirectoryPath" />
+      <option name="funcPath" />
+      <option name="functionHostArguments" />
+      <option name="hostJsonPath" />
+      <option name="insightsName" />
+      <option name="instrumentationKey" />
+      <option name="javaVersion" />
+      <option name="localSettingsJsonPath" />
+      <option name="moduleName" />
+      <option name="os" />
+      <option name="pricingTier" />
+      <option name="providerMap">
+        <map />
+      </option>
+      <option name="region" />
+      <option name="resourceGroup" />
+      <option name="stagingFolder" />
+      <option name="subscription" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="AZURE_FUNCTION_SUPPORT" factoryName="Run Functions">
+      <option name="appName" />
+      <option name="appServicePlanName" />
+      <option name="appServicePlanResourceGroup" />
+      <option name="appSettingsKey" value="ce5a7f20-e766-46a6-b76f-3504a85ad677" />
+      <option name="artifact" />
+      <option name="debugOptions" />
+      <option name="deployment" />
+      <option name="deploymentStagingDirectoryPath" />
+      <option name="funcPath" />
+      <option name="functionHostArguments" />
+      <option name="hostJsonPath" />
+      <option name="insightsName" />
+      <option name="instrumentationKey" />
+      <option name="javaVersion" />
+      <option name="localSettingsJsonPath" />
+      <option name="moduleName" />
+      <option name="os" />
+      <option name="pricingTier" />
+      <option name="providerMap">
+        <map />
+      </option>
+      <option name="region" />
+      <option name="resourceGroup" />
+      <option name="stagingFolder" />
+      <option name="subscription" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-jdk-9823dce3aa75-28b599e66164-intellij.indexing.shared.core-IU-242.22855.74" />
+        <option value="bundled-js-predefined-d6986cc7102b-5c90d61e3bab-JavaScript-IU-242.22855.74" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="78038aeb-9147-4dfa-a7f2-787247dafd00" name="Changes" comment="" />
+      <created>1727559937700</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1727559937700</updated>
+      <workItem from="1727559938871" duration="1989000" />
+      <workItem from="1727619033612" duration="5064000" />
+      <workItem from="1727645506018" duration="3341000" />
+      <workItem from="1727731569824" duration="3602000" />
+      <workItem from="1727803625076" duration="5984000" />
+      <workItem from="1727856351029" duration="51000" />
+      <workItem from="1727891321554" duration="3530000" />
+      <workItem from="1727905467604" duration="3308000" />
+      <workItem from="1727950088757" duration="483000" />
+      <workItem from="1728039537461" duration="18132000" />
+      <workItem from="1728133548091" duration="74000" />
+      <workItem from="1728151380056" duration="4413000" />
+      <workItem from="1728233418659" duration="5164000" />
+      <workItem from="1728422256868" duration="4969000" />
+      <workItem from="1728508967598" duration="4343000" />
+      <workItem from="1728549275714" duration="10563000" />
+      <workItem from="1728637405083" duration="9891000" />
+      <workItem from="1728652799776" duration="26000" />
+      <workItem from="1728658383228" duration="1762000" />
+      <workItem from="1728752655845" duration="1292000" />
+      <workItem from="1728845902174" duration="10502000" />
+      <workItem from="1728914772024" duration="3075000" />
+      <workItem from="1728932848325" duration="10017000" />
+      <workItem from="1728980441636" duration="6254000" />
+      <workItem from="1729012405850" duration="20000" />
+      <workItem from="1729029940178" duration="6156000" />
+      <workItem from="1729066235674" duration="27000" />
+      <workItem from="1729093560684" duration="11486000" />
+      <workItem from="1729159664666" duration="6286000" />
+      <workItem from="1729179374177" duration="14026000" />
+      <workItem from="1729245219263" duration="22014000" />
+      <workItem from="1729349691744" duration="23502000" />
+      <workItem from="1729465155684" duration="925000" />
+      <workItem from="1729632189770" duration="3117000" />
+      <workItem from="1729671017979" duration="2686000" />
+      <workItem from="1729763103213" duration="8090000" />
+      <workItem from="1729783252901" duration="372000" />
+      <workItem from="1729868476306" duration="706000" />
+      <workItem from="1730366578849" duration="5299000" />
+      <workItem from="1730398922645" duration="10382000" />
+      <workItem from="1730410229960" duration="1963000" />
+      <workItem from="1730462325126" duration="13706000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+</project>

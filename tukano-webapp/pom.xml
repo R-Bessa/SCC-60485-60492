@@ -248,12 +248,15 @@
 		</dependency>
 
 		<!-- CosmosDB PostgreSQL -->
+
 		<dependency>
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
 			<version>42.7.3</version>
 		</dependency>
+
 		<!-- https://mvnrepository.com/artifact/com.zaxxer/HikariCP -->
+
 		<dependency>
 			<groupId>com.zaxxer</groupId>
 			<artifactId>HikariCP</artifactId>

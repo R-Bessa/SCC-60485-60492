@@ -6,6 +6,7 @@ import static tukano.api.Result.error;
 import static tukano.api.Result.errorOrResult;
 import static tukano.api.Result.errorOrValue;
 import static tukano.api.Result.ok;
+import static tukano.impl.rest.TukanoApplication.TUKANO_RECOMMENDS;
 import static tukano.impl.storage.db.DB.USERS;
 import static tukano.impl.storage.db.DB.usersDB;
 
@@ -16,6 +17,7 @@ import java.util.logging.Logger;
 import tukano.api.Result;
 import tukano.impl.data.User;
 import tukano.api.Users;
+import tukano.impl.rest.TukanoApplication;
 import tukano.impl.storage.cache.RedisCache;
 import tukano.impl.storage.db.DB;
 
@@ -47,6 +49,9 @@ public class JavaUsers implements Users {
 		var res = errorOrValue( DB.insertOne( user, usersDB), user.getUserId() );
 		if (res.isOK())
 			RedisCache.generateCookie(user);
+
+		if(!user.getUserId().equals(TUKANO_RECOMMENDS))
+			JavaShorts.getInstance().follow(user.getUserId(), TUKANO_RECOMMENDS, true, user.getPwd());
 
 		return res;
 	}

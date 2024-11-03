@@ -4,7 +4,9 @@ import java.util.HashSet;
 import java.util.Set;
 
 import jakarta.ws.rs.core.Application;
+import tukano.impl.JavaUsers;
 import tukano.impl.Token;
+import tukano.impl.data.User;
 import tukano.impl.storage.blobs.BlobsType;
 import tukano.impl.storage.db.DatabaseType;
 
@@ -17,7 +19,7 @@ public class TukanoApplication extends Application {
 	public static final BlobsType BLOBS_TYPE = BlobsType.AZURE_BLOBS;
 	public static final DatabaseType USERS_DB_TYPE = DatabaseType.HIBERNATE;
 	public static final DatabaseType SHORTS_DB_TYPE = DatabaseType.HIBERNATE;
-	public static final boolean REDIS_CACHE_ON = true;
+	public static final boolean REDIS_CACHE_ON = false;
 
 
 	/** Service Base Uri */
@@ -39,7 +41,7 @@ public class TukanoApplication extends Application {
 	//public static final String CONNECTION_URL = "https://scc-60485-60492.documents.azure.com:443/";
 	//public static final String DB_KEY = "gZGjVKxBMJF8fSwF2s3UBmsfdSk9k1vOZq6ziCkCBBsEJYx9wBr1ZRH4tncG5YYh5fW3hoDv0nSdACDbosz4Fg==";
 
-
+	public static final String TUKANO_RECOMMENDS = "tukano-recommends-id";
 
 	public TukanoApplication() {
 		singletons.add( new RestUsersResource());
@@ -49,6 +51,7 @@ public class TukanoApplication extends Application {
 			singletons.add( new RestBlobsResource());
 
 		Token.setSecret(TUKANO_SECRET);
+		JavaUsers.getInstance().createUser(new User(TUKANO_RECOMMENDS, "tukano-pwd", "tukano-email", "tukano-recommends"));
 	}
 
 	@Override

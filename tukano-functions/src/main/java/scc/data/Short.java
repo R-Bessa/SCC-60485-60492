@@ -94,5 +94,9 @@ public class Short {
 	public Short copyWithLikes_And_Token( long totLikes) {
 		var urlWithToken = String.format("%s?token=%s", blobUrl, Token.get(shortId));
 		return new Short( shortId, ownerId, urlWithToken, timestamp, (int)totLikes);
-	}	
+	}
+
+	public void updateViews(int views) {
+
+	}
 }

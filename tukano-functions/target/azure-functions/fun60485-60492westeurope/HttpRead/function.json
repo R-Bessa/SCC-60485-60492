@@ -1,0 +1,16 @@
+{
+  "scriptFile" : "../scc2425-functions-1.0.jar",
+  "entryPoint" : "scc.serverless.HttpFunction.read",
+  "bindings" : [ {
+    "type" : "httpTrigger",
+    "direction" : "in",
+    "name" : "readReq",
+    "route" : "serverlessBlobs/{blobId}",
+    "methods" : [ "GET" ],
+    "authLevel" : "ANONYMOUS"
+  }, {
+    "type" : "http",
+    "direction" : "out",
+    "name" : "$return"
+  } ]
+}

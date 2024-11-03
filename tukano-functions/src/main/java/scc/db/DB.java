@@ -218,7 +218,7 @@ public class DB {
 			}
 
 			case COSMOS_DB_NOSQL -> {
-				String query_fmt = format("SELECT * FROM shorts WHERE timestamp >= %d ORDER BY (totalLikes + views) DESC LIMIT 1", fiveMinutesAgo);
+				String query_fmt = String.format("SELECT TOP 1 * FROM shorts WHERE timestamp >= %d ORDER BY (totalLikes + views) DESC", fiveMinutesAgo);
 				return Result.ok(sql(Short.class, query_fmt, shortsDB));
 			}
 

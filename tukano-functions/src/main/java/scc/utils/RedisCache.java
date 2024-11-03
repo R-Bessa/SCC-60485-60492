@@ -383,8 +383,6 @@ public class RedisCache {
 				var scanResult = jedis.scan(cursor, new ScanParams().match(pattern).count(100));
 				for (String key : scanResult.getResult()) {
 					String shortId = key.replaceFirst("^" + VIEWS_KEY_PREFIX, "");
-					System.out.println("WRITE KEY " + key);
-					System.out.println("WRITE BACK " + shortId);
 					int views = Integer.parseInt(jedis.get(key));
 					jedis.del(key);
 					DB.updateViews(shortId, views);
@@ -395,10 +393,8 @@ public class RedisCache {
 
 			} while (!cursor.equals("0"));
 
-			if(!recentShorts.isEmpty()) {
-				System.out.println("DELETE RECENT " + recentShorts.get(0));
+			if(!recentShorts.isEmpty())
 				removeRecentShortsByIds(recentShorts);
-			}
 
 		} catch (Exception e) {
 			e.printStackTrace();

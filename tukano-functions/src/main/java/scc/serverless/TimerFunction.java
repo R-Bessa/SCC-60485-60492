@@ -31,7 +31,6 @@ public class TimerFunction {
 		var res = DB.getPopular();
 		if(res.isOK()) {
 			var shrt = res.value().get(0);
-			System.out.println("TUKANO: " + shrt.getShortId());
 			shrt.setShortId("tukano+" + shrt.getShortId());
 			errorOrValue(DB.insertOne(res.value().get(0), shortsDB), s -> s.copyWithLikes_And_Token(0));
 		}

@@ -12,8 +12,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class RedisCache {
-	private static final String RedisHostname = "scc-cache-60485.redis.cache.windows.net";
-	private static final String RedisKey = "yZt5Qyb9dvDdbNL19eReZQNtzHdWaS0BSAzCaOpUZ9k=";
+	private static final String RedisHostname = "cache-60485.redis.cache.windows.net";
+	private static final String RedisKey = "49XRFLpuEfPNa9vhAcVpeD4nAwUbW59AVAzCaJUXAmA=";
 	private static final int REDIS_PORT = 6380;
 	private static final int REDIS_TIMEOUT = 1000;
 	private static final boolean Redis_USE_TLS = true;
@@ -22,7 +22,7 @@ public class RedisCache {
 	public static final String LIKES_KEY_PREFIX = "likes-";
 	public static final String VIEWS_KEY_PREFIX = "views-";
 	private static final int COOKIE_VALIDITY = 900; // 15 min
-	private static final int FEED_VALIDITY = 300; // 5 min
+	private static final int FEED_VALIDITY = 1; // 1 min
 	private static final String RECENT_SHORTS = "recent_shorts_list";
 	private static final String RECENT_BLOBS = "recent_blobs_list";
 	private static final int RECENT_SHORTS_SIZE = 100;

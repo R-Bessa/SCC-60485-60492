@@ -5,7 +5,6 @@ import com.azure.cosmos.models.SqlParameter;
 import com.azure.cosmos.models.SqlQuerySpec;
 import scc.JavaShorts;
 import scc.db.azure.CosmosNoSQL;
-import scc.db.azure.CosmosPostgreSQL;
 import org.hibernate.Session;
 import scc.data.Following;
 import scc.data.Short;
@@ -33,23 +32,9 @@ public class DB {
 	public static final Database shortsDB = initDB(SHORTS_DB_TYPE, SHORTS);
 
 	private static Database initDB(DatabaseType db_type, String container) {
-		switch (db_type) {
-			case COSMOS_DB_NOSQL -> {
-				CosmosNoSQL instance = CosmosNoSQL.getInstance();
-				instance.init(container);
-				return instance;
-			}
-			case COSMOS_DB_POSTGRESQL -> {
-				CosmosPostgreSQL instance = CosmosPostgreSQL.getInstance();
-				instance.init();
-				return instance;
-			}
-			default -> {
-				CosmosNoSQL instance = CosmosNoSQL.getInstance();
-				instance.init(container);
-				return instance;
-			}
-		}
+		CosmosNoSQL instance = CosmosNoSQL.getInstance();
+		instance.init(container);
+		return instance;
 	}
 
 
@@ -74,40 +59,19 @@ public class DB {
 	}
 
 	public static Result<List<String>> getFeed(String userId) {
-		switch (SHORTS_DB_TYPE) {
-			case COSMOS_DB_POSTGRESQL -> {
-				String query_fmt =
-						"""
-                        SELECT shortId, timestamp FROM shorts WHERE ownerId = '%s'
-                        UNION
-                        SELECT shortId, timestamp FROM shorts, following
-                        WHERE followee = ownerId AND follower = '%s'
-                        ORDER BY timestamp DESC
-                        """;
-				return Result.ok(sql(String.class, query_fmt, shortsDB, userId, userId));
-			}
+		List<Short> ownShorts = shortsDB.getAll(Short.class, "shorts", "ownerId", userId).value();
+		List<String> userFollowee = shortsDB.getAllByAttribute(String.class, "following", "followee", "follower", userId).value();
 
-			case COSMOS_DB_NOSQL -> {
-				List<Short> ownShorts = shortsDB.getAll(Short.class, "shorts", "ownerId", userId).value();
-				List<String> userFollowee = shortsDB.getAllByAttribute(String.class, "following", "followee", "follower", userId).value();
+		String q3_fmt = "SELECT * FROM shorts WHERE ARRAY_CONTAINS(@userFollowee, shorts.ownerId)";
+		SqlQuerySpec querySpec = new SqlQuerySpec(q3_fmt, List.of(new SqlParameter("@userFollowee", userFollowee)));
+		List<Short> followeeShorts = shorts_container.queryItems(querySpec, new CosmosQueryRequestOptions(), Short.class).stream().toList();
 
-				String q3_fmt = "SELECT * FROM shorts WHERE ARRAY_CONTAINS(@userFollowee, shorts.ownerId)";
-				SqlQuerySpec querySpec = new SqlQuerySpec(q3_fmt, List.of(new SqlParameter("@userFollowee", userFollowee)));
-				List<Short> followeeShorts = shorts_container.queryItems(querySpec, new CosmosQueryRequestOptions(), Short.class).stream().toList();
+		List<Short> feed = new ArrayList<>();
+		feed.addAll(ownShorts);
+		feed.addAll(followeeShorts);
+		feed.sort((s1, s2) -> Long.compare(s2.getTimestamp(), s1.getTimestamp()));
 
-				List<Short> feed = new ArrayList<>();
-				feed.addAll(ownShorts);
-				feed.addAll(followeeShorts);
-				feed.sort((s1, s2) -> Long.compare(s2.getTimestamp(), s1.getTimestamp()));
-
-				return Result.ok(feed.stream().map(Short::getShortId).toList());
-			}
-
-			default -> {
-				return Result.error(NOT_IMPLEMENTED);
-			}
-		}
-
+		return Result.ok(feed.stream().map(Short::getShortId).toList());
 	}
 
 	public static <T> Result<List<T>> getAllByAttribute(Class<T> clazz, String container, String attribute, String param, String match, Database db) {
@@ -119,35 +83,13 @@ public class DB {
 	}
 
 	public static Result<Void> deleteShort(String shortId) {
-		switch (SHORTS_DB_TYPE) {
-			case COSMOS_DB_NOSQL -> {
-				DB.processDeleteShort(shortId, null);
-				return Result.ok();
-			}
-			case COSMOS_DB_POSTGRESQL -> {
-				shortsDB.deleteAll(null, null, SHORTS, "shortId", shortId);
-				return Result.ok();
-			}
-
-			default -> {
-				return Result.error(NOT_IMPLEMENTED);}
-		}
+		DB.processDeleteShort(shortId, null);
+		return Result.ok();
 	}
 
 	public static Result<Void> deleteAllShorts(String userId) {
-		switch (SHORTS_DB_TYPE) {
-			case COSMOS_DB_NOSQL -> {
-				DB.processDeleteAllShorts(userId, null);
-				return Result.ok();
-			}
-			case COSMOS_DB_POSTGRESQL -> {
-				shortsDB.deleteAll(null, null, SHORTS, "ownerid", userId);
-				return Result.ok();
-			}
-
-			default -> {
-				return Result.error(NOT_IMPLEMENTED);}
-		}
+		DB.processDeleteAllShorts(userId, null);
+		return Result.ok();
 	}
 
 	public static Result<Short> updateViews(String shortId, int views) {
@@ -179,53 +121,19 @@ public class DB {
 	}
 
 	public static <T> Result<List<T>> searchPattern(Database db, Class<T> clazz, String pattern, String container, String attribute) {
-
-		switch (SHORTS_DB_TYPE) {
-			case COSMOS_DB_NOSQL -> {
-				return db.searchPattern(clazz, pattern, container, "id");
-			}
-			case COSMOS_DB_POSTGRESQL -> {
-				return db.searchPattern(clazz, pattern, container, attribute);
-			}
-            default -> {
-				return Result.error(NOT_IMPLEMENTED);}
-		}
+		return db.searchPattern(clazz, pattern, container, "id");
 	}
 
 	public static <T> Result<List<T>> getAllByAttributeID(Class<T> clazz, String container, String attribute, String param, String match, Database db) {
-		switch (SHORTS_DB_TYPE) {
-			case COSMOS_DB_NOSQL -> {
-				return getAllByAttribute(clazz, container, "id", param, match, db);
-			}
-
-			case COSMOS_DB_POSTGRESQL -> {
-				return getAllByAttribute(clazz, container, attribute, param, match, db);
-			}
-
-			default -> {
-				return Result.error(NOT_IMPLEMENTED);}
-		}
+		return getAllByAttribute(clazz, container, "id", param, match, db);
     }
 
-	public static <T> Result<List<Short>> getPopular() {
-
+	public static Result<List<Short>> getPopular() {
 		long fiveMinutesAgo = System.currentTimeMillis() - (5 * 60 * 1000);
-
-		switch (SHORTS_DB_TYPE) {
-			case COSMOS_DB_POSTGRESQL -> {
-				String query_fmt = format("SELECT * FROM shorts WHERE timestamp >= %d ORDER BY (totalLikes + views) DESC LIMIT 1", fiveMinutesAgo);
-				return Result.ok(sql(Short.class, query_fmt, shortsDB));
-			}
-
-			case COSMOS_DB_NOSQL -> {
-				String query_fmt = String.format("SELECT TOP 1 * FROM shorts WHERE timestamp >= %d ORDER BY (totalLikes + views) DESC", fiveMinutesAgo);
-				return Result.ok(sql(Short.class, query_fmt, shortsDB));
-			}
-
-			default -> {
-				return Result.error(NOT_IMPLEMENTED);
-			}
-		}
+		String query_fmt = String.format(
+				"SELECT TOP 1 * FROM shorts WHERE shorts.timestamp >= %d AND NOT STARTSWITH(shorts.id, \"tukano+\") ORDER BY shorts.views DESC",
+				fiveMinutesAgo);
+		return Result.ok(sql(Short.class, query_fmt, shortsDB));
 	}
 
 

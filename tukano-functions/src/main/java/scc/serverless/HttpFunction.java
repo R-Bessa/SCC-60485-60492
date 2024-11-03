@@ -36,7 +36,7 @@ public class HttpFunction {
     /** DB Configs */
 
     public static final String CONNECTION_URL = "https://cosmos-60485.documents.azure.com:443/";
-    public static final String DB_KEY = "9PIVUUuSqzCT4HfNinIEEJ1oE3caU1G1pHsNkT8cWlKT7IzMp7bdEUZiL3sFvEoVIujTETOAdxGHACDbCVroNQ==";
+    public static final String DB_KEY = "b3MQzL5IUay43ec9YOhrStxS4tzRdEwJz25c2knzdiIksbRlYJIgvHPBAnBxhsZ7gu9NR141WJ2HACDbDYFZ9w==";
 
     //public static final String CONNECTION_URL = "https://scc-60485-60492.documents.azure.com:443/";
     //public static final String DB_KEY = "gZGjVKxBMJF8fSwF2s3UBmsfdSk9k1vOZq6ziCkCBBsEJYx9wBr1ZRH4tncG5YYh5fW3hoDv0nSdACDbosz4Fg==";

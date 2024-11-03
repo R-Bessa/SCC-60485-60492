@@ -17,7 +17,6 @@ import java.util.logging.Logger;
 import tukano.api.Result;
 import tukano.impl.data.User;
 import tukano.api.Users;
-import tukano.impl.rest.TukanoApplication;
 import tukano.impl.storage.cache.RedisCache;
 import tukano.impl.storage.db.DB;
 

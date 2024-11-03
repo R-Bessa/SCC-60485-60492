@@ -6,9 +6,7 @@ import com.azure.cosmos.models.SqlQuerySpec;
 import scc.JavaShorts;
 import scc.db.azure.CosmosNoSQL;
 import scc.db.azure.CosmosPostgreSQL;
-import scc.db.hibernate.Hibernate;
 import org.hibernate.Session;
-import scc.data.User;
 import scc.data.Following;
 import scc.data.Short;
 import scc.data.Likes;
@@ -19,7 +17,7 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import static scc.db.DatabaseType.*;
+import static java.lang.String.format;
 import static scc.db.azure.CosmosNoSQL.shorts_container;
 import static scc.serverless.HttpFunction.SHORTS_DB_TYPE;
 import static scc.serverless.HttpFunction.USERS_DB_TYPE;
@@ -47,7 +45,9 @@ public class DB {
 				return instance;
 			}
 			default -> {
-				return Hibernate.getInstance();
+				CosmosNoSQL instance = CosmosNoSQL.getInstance();
+				instance.init(container);
+				return instance;
 			}
 		}
 	}
@@ -58,7 +58,7 @@ public class DB {
 	}
 
 	public static <T> List<T> sql(Class<T> clazz, String fmt, Database db, Object ... args) {
-		return db.sql(String.format(fmt, args), clazz).value();
+		return db.sql(format(fmt, args), clazz).value();
 	}
 
 	public static <T> Result<T> getOne(String id, Class<T> clazz, Database db) {
@@ -84,18 +84,6 @@ public class DB {
                         WHERE followee = ownerId AND follower = '%s'
                         ORDER BY timestamp DESC
                         """;
-				return Result.ok(sql(String.class, query_fmt, shortsDB, userId, userId));
-			}
-			case HIBERNATE -> {
-				String query_fmt =
-					"""
-					SELECT s.shortId, s.timestamp FROM Short s WHERE s.ownerId = '%s'
-					UNION
-					SELECT s.shortId, s.timestamp FROM Short s, Following f
-					WHERE f.followee = s.ownerId AND f.follower = '%s'
-					ORDER BY s.timestamp DESC
-					""";
-
 				return Result.ok(sql(String.class, query_fmt, shortsDB, userId, userId));
 			}
 
@@ -136,11 +124,6 @@ public class DB {
 				DB.processDeleteShort(shortId, null);
 				return Result.ok();
 			}
-			case HIBERNATE -> {
-				return DB.transaction(hibernate -> {
-					DB.processDeleteShort(shortId, hibernate);
-				});
-			}
 			case COSMOS_DB_POSTGRESQL -> {
 				shortsDB.deleteAll(null, null, SHORTS, "shortId", shortId);
 				return Result.ok();
@@ -156,11 +139,6 @@ public class DB {
 			case COSMOS_DB_NOSQL -> {
 				DB.processDeleteAllShorts(userId, null);
 				return Result.ok();
-			}
-			case HIBERNATE -> {
-				return DB.transaction(hibernate -> {
-					DB.processDeleteAllShorts(userId, hibernate);
-				});
 			}
 			case COSMOS_DB_POSTGRESQL -> {
 				shortsDB.deleteAll(null, null, SHORTS, "ownerid", userId);
@@ -206,7 +184,7 @@ public class DB {
 			case COSMOS_DB_NOSQL -> {
 				return db.searchPattern(clazz, pattern, container, "id");
 			}
-			case HIBERNATE, COSMOS_DB_POSTGRESQL -> {
+			case COSMOS_DB_POSTGRESQL -> {
 				return db.searchPattern(clazz, pattern, container, attribute);
 			}
             default -> {
@@ -219,10 +197,7 @@ public class DB {
 			case COSMOS_DB_NOSQL -> {
 				return getAllByAttribute(clazz, container, "id", param, match, db);
 			}
-			case HIBERNATE -> {
-				String c = container.equals(USERS)? User.class.getSimpleName() : Short.class.getSimpleName();
-				return getAllByAttribute(clazz, c, attribute, param, match, db);
-			}
+
 			case COSMOS_DB_POSTGRESQL -> {
 				return getAllByAttribute(clazz, container, attribute, param, match, db);
 			}
@@ -231,6 +206,27 @@ public class DB {
 				return Result.error(NOT_IMPLEMENTED);}
 		}
     }
+
+	public static <T> Result<List<Short>> getPopular() {
+
+		long fiveMinutesAgo = System.currentTimeMillis() - (5 * 60 * 1000);
+
+		switch (SHORTS_DB_TYPE) {
+			case COSMOS_DB_POSTGRESQL -> {
+				String query_fmt = format("SELECT * FROM shorts WHERE timestamp >= %d ORDER BY (totalLikes + views) DESC LIMIT 1", fiveMinutesAgo);
+				return Result.ok(sql(Short.class, query_fmt, shortsDB));
+			}
+
+			case COSMOS_DB_NOSQL -> {
+				String query_fmt = format("SELECT * FROM shorts WHERE timestamp >= %d ORDER BY (totalLikes + views) DESC LIMIT 1", fiveMinutesAgo);
+				return Result.ok(sql(Short.class, query_fmt, shortsDB));
+			}
+
+			default -> {
+				return Result.error(NOT_IMPLEMENTED);
+			}
+		}
+	}
 
 
 	private static void processDeleteShort(String shortId, Session session) {

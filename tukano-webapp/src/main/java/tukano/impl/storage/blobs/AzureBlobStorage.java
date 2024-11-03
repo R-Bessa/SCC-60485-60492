@@ -7,10 +7,8 @@ import static tukano.api.Result.ErrorCode.BAD_REQUEST;
 import static tukano.api.Result.ErrorCode.CONFLICT;
 import static tukano.api.Result.ErrorCode.INTERNAL_ERROR;
 import static tukano.api.Result.ErrorCode.NOT_FOUND;
-import static tukano.impl.storage.cache.RedisCache.LIKES_KEY_PREFIX;
 import static tukano.impl.storage.cache.RedisCache.VIEWS_KEY_PREFIX;
-import static tukano.impl.storage.db.DB.LIKES;
-import static tukano.impl.storage.db.DB.shortsDB;
+
 
 import java.io.*;
 import java.util.function.Consumer;
@@ -100,6 +98,8 @@ public class AzureBlobStorage implements BlobStorage {
 
 		if(bytes == null)
 			return error( INTERNAL_ERROR );
+
+		System.out.println("BLOB_ID "+ blobId);
 
 		if(!TukanoApplication.REDIS_CACHE_ON)
 			DB.updateViews(blobId, 1);

@@ -16,7 +16,7 @@ import java.io.ByteArrayOutputStream;
 import java.util.function.Consumer;
 
 import static scc.serverless.HttpFunction.BLOB_STORAGE_KEY;
-import static scc.serverless.HttpFunction.REDIS_CACHE_ON;
+import static scc.utils.RedisCache.REDIS_CACHE_ON;
 import static scc.utils.RedisCache.VIEWS_KEY_PREFIX;
 import static scc.utils.Result.ErrorCode.*;
 import static scc.utils.Result.error;

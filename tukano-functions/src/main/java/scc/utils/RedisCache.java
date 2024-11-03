@@ -6,6 +6,7 @@ import redis.clients.jedis.params.ScanParams;
 import scc.data.Blob;
 import scc.data.User;
 import scc.data.Short;
+import scc.db.DB;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -381,10 +382,12 @@ public class RedisCache {
 			do {
 				var scanResult = jedis.scan(cursor, new ScanParams().match(pattern).count(100));
 				for (String key : scanResult.getResult()) {
-					String shortId = key.split("-")[1];
+					String shortId = key.replaceFirst("^" + VIEWS_KEY_PREFIX, "");
+					System.out.println("WRITE KEY " + key);
+					System.out.println("WRITE BACK " + shortId);
 					int views = Integer.parseInt(jedis.get(key));
 					jedis.del(key);
-					// TODO DB.updateViews(shortId, views);
+					DB.updateViews(shortId, views);
 					recentShorts.add(shortId);
 				}
 
@@ -392,10 +395,10 @@ public class RedisCache {
 
 			} while (!cursor.equals("0"));
 
-			if(!recentShorts.isEmpty())
+			if(!recentShorts.isEmpty()) {
+				System.out.println("DELETE RECENT " + recentShorts.get(0));
 				removeRecentShortsByIds(recentShorts);
-
-			//TODO tukano recommends
+			}
 
 		} catch (Exception e) {
 			e.printStackTrace();

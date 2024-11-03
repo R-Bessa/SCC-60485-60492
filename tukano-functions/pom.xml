@@ -17,8 +17,8 @@
 		<azure.functions.java.library.version>3.1.0</azure.functions.java.library.version>
 		<functionAppName>fun60485-60492westeurope</functionAppName>
 		<functionRegion>westeurope</functionRegion>
-		<functionStorageAccountName>scc60492</functionStorageAccountName>
-		<functionResourceGroup>scc-rg-60485-60492</functionResourceGroup>
+		<functionStorageAccountName>scc60485</functionStorageAccountName>
+		<functionResourceGroup>scc-project-60485-rg</functionResourceGroup>
 	</properties>
 
 	<dependencies>

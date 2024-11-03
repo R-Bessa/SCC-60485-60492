@@ -24,7 +24,7 @@ import static scc.utils.Result.error;
 
 public class CosmosNoSQL implements Database {
 
-    private static final String DB_NAME = "tukano-scc.db-60485";
+    private static final String DB_NAME = "tukano-db-60485";
     private static final String PARTITION_KEY_PATH = "/id";
 
 

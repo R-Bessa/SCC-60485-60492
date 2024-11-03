@@ -22,6 +22,8 @@ import scc.utils.RedisCache;
 import scc.utils.Token;
 
 import java.util.Optional;
+
+import static scc.utils.RedisCache.REDIS_CACHE_ON;
 import static scc.utils.RedisCache.VIEWS_KEY_PREFIX;
 
 public class HttpFunction {
@@ -33,8 +35,8 @@ public class HttpFunction {
 
     /** DB Configs */
 
-    public static final String CONNECTION_URL = "https://scc-cosmos-60485.documents.azure.com:443/";
-    public static final String DB_KEY = "9pLRD8vvj7D6q5Un7oY33g0oimJhQYWoeUb3VqSKlt7CwzxRry63JOaN5XSUvISB97FDv2xWZpY6ACDbo6SmMA==";
+    public static final String CONNECTION_URL = "https://cosmos-60485.documents.azure.com:443/";
+    public static final String DB_KEY = "9PIVUUuSqzCT4HfNinIEEJ1oE3caU1G1pHsNkT8cWlKT7IzMp7bdEUZiL3sFvEoVIujTETOAdxGHACDbCVroNQ==";
 
     //public static final String CONNECTION_URL = "https://scc-60485-60492.documents.azure.com:443/";
     //public static final String DB_KEY = "gZGjVKxBMJF8fSwF2s3UBmsfdSk9k1vOZq6ziCkCBBsEJYx9wBr1ZRH4tncG5YYh5fW3hoDv0nSdACDbosz4Fg==";
@@ -43,11 +45,10 @@ public class HttpFunction {
     private static final String BLOBS = "blobs";
 	private static final String BLOB_ID = "blobId";
     public static final BlobsType BLOBS_TYPE = BlobsType.AZURE_BLOBS;
-    public static final boolean REDIS_CACHE_ON = false;
-    public static final String TUKANO_RECOMMENDS = "tukano-recommends-id";
+    public static final String TUKANO_RECOMMENDS = "tukano";
 
-    public static final DatabaseType USERS_DB_TYPE = DatabaseType.HIBERNATE;
-    public static final DatabaseType SHORTS_DB_TYPE = DatabaseType.HIBERNATE;
+    public static final DatabaseType USERS_DB_TYPE = DatabaseType.COSMOS_DB_NOSQL;
+    public static final DatabaseType SHORTS_DB_TYPE = DatabaseType.COSMOS_DB_NOSQL;
 
     //Write
     private static final String HTTP_WRITE_TRIGGER ="writeReq";
@@ -178,10 +179,9 @@ public class HttpFunction {
         }
 
         if (bytes != null) {
-            if(!REDIS_CACHE_ON) {
-                System.out.println();
+            if(!REDIS_CACHE_ON)
                 DB.updateViews(blobId, 1);
-            }
+
             else
                 RedisCache.incrCounter(VIEWS_KEY_PREFIX, blobId);
 

@@ -7,6 +7,7 @@ import jakarta.ws.rs.core.Application;
 import tukano.impl.JavaUsers;
 import tukano.impl.Token;
 import tukano.impl.data.User;
+import tukano.impl.georeplication.Region;
 import tukano.impl.storage.blobs.BlobsType;
 import tukano.impl.storage.db.DatabaseType;
 
@@ -17,9 +18,12 @@ public class TukanoApplication extends Application {
 	public static final String TUKANO_SECRET = "tukano_app_secret";
 	public static final long MAX_TOKEN_AGE = 300000;
 	public static final BlobsType BLOBS_TYPE = BlobsType.AZURE_BLOBS;
-	public static final DatabaseType USERS_DB_TYPE = DatabaseType.COSMOS_DB_NOSQL;
-	public static final DatabaseType SHORTS_DB_TYPE = DatabaseType.COSMOS_DB_NOSQL;
+	public static final DatabaseType USERS_DB_TYPE = DatabaseType.HIBERNATE;
+	public static final DatabaseType SHORTS_DB_TYPE = DatabaseType.HIBERNATE;
 	public static final boolean REDIS_CACHE_ON = false;
+	public static final Region PRIMARY_REGION = Region.WEST_EUROPE;
+	public static final Region SECONDARY_REGION = Region.NORTH_CENTRAL_US;
+	public static final boolean BLOBS_GEO_REPLICATION = false;
 
 
 	/** Service Base Uri */
@@ -40,6 +44,9 @@ public class TukanoApplication extends Application {
 
 	public static final String CONNECTION_URL = "https://scc-60485-60492.documents.azure.com:443/";
 	public static final String DB_KEY = "ipgvutkBrJQ8pf9REYSAysyJeJHliX3ghwLt7fHEGNOfsURmU1BkkoEaHcPU6OXEeHIYrAK6QS39ACDbKy7mbA==";
+
+	public static final String RedisHostname = "cache-60485.redis.cache.windows.net";
+	public static final String RedisKey = "49XRFLpuEfPNa9vhAcVpeD4nAwUbW59AVAzCaJUXAmA=";
 	public static final String TUKANO_RECOMMENDS = "tukano";
 
 	public TukanoApplication() {

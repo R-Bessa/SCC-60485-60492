@@ -49,8 +49,10 @@ public class JavaUsers implements Users {
 		if (res.isOK())
 			RedisCache.generateCookie(user);
 
-		if(!user.getUserId().equals(TUKANO_RECOMMENDS))
-			JavaShorts.getInstance().follow(user.getUserId(), TUKANO_RECOMMENDS, true, user.getPwd());
+		if(!user.getUserId().equals(TUKANO_RECOMMENDS)) {
+			Executors.defaultThreadFactory().newThread(() ->
+					JavaShorts.getInstance().follow(user.getUserId(), TUKANO_RECOMMENDS, true, user.getPwd())).start();
+		}
 
 		return res;
 	}

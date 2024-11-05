@@ -11,6 +11,7 @@ import static tukano.impl.storage.cache.RedisCache.VIEWS_KEY_PREFIX;
 
 
 import java.io.*;
+import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 
 import com.azure.core.util.BinaryData;
@@ -21,6 +22,7 @@ import com.azure.storage.blob.models.BlobStorageException;
 import com.azure.storage.blob.models.PublicAccessType;
 import tukano.api.Result;
 import tukano.impl.data.Blob;
+import tukano.impl.georeplication.Region;
 import tukano.impl.rest.TukanoApplication;
 import tukano.impl.storage.cache.RedisCache;
 import tukano.impl.storage.db.DB;
@@ -30,7 +32,12 @@ public class AzureBlobStorage implements BlobStorage {
 	private static final int BLOB_CONFLICT = 409;
 	private static final int BLOB_NOT_FOUND = 404;
 	private static final String VIDEOS_CONTAINER = "videos";
+
+	// Client Connect with Primary Region Storage
 	private final BlobContainerClient containerClient;
+
+	// Replication Client Connected with Secondary Region Storage
+	private BlobContainerClient replicationContainerClient;
 
 
 	public AzureBlobStorage() {
@@ -44,10 +51,25 @@ public class AzureBlobStorage implements BlobStorage {
 	
 	@Override
 	public Result<Void> write(String path, byte[] bytes) {
+		var res = execWrite(path, bytes, TukanoApplication.PRIMARY_REGION);
+		if(res.isOK() && TukanoApplication.BLOBS_GEO_REPLICATION) {
+			Executors.defaultThreadFactory().newThread(() ->
+				execWrite(path, bytes, TukanoApplication.SECONDARY_REGION));
+		}
+		return res;
+	}
+
+	private Result<Void> execWrite(String path, byte[] bytes, Region region) {
+		BlobContainerClient client;
+		if(region.equals(Region.WEST_EUROPE) || !TukanoApplication.BLOBS_GEO_REPLICATION)
+			client = containerClient;
+		else
+			client = replicationContainerClient;
+
 		if (path == null)
 			return error(BAD_REQUEST);
 
-		var blob = containerClient.getBlobClient(path);
+		var blob = client.getBlobClient(path);
 		var data = BinaryData.fromBytes(bytes);
 
 		try {
@@ -72,6 +94,12 @@ public class AzureBlobStorage implements BlobStorage {
 
 	@Override
 	public Result<byte[]> read(String path) {
+		BlobContainerClient client;
+		if(TukanoApplication.PRIMARY_REGION.equals(Region.WEST_EUROPE))
+			client = containerClient;
+		else
+			client = replicationContainerClient;
+
 		if (path == null)
 			return error(BAD_REQUEST);
 
@@ -84,7 +112,7 @@ public class AzureBlobStorage implements BlobStorage {
 		}
 
 		byte[] bytes = null;
-		var blob = containerClient.getBlobClient(path);
+		var blob = client.getBlobClient(path);
 
 		try {
 			BinaryData data = blob.downloadContent();
@@ -98,8 +126,6 @@ public class AzureBlobStorage implements BlobStorage {
 
 		if(bytes == null)
 			return error( INTERNAL_ERROR );
-
-		System.out.println("BLOB_ID "+ blobId);
 
 		if(!TukanoApplication.REDIS_CACHE_ON)
 			DB.updateViews(blobId, 1);
@@ -140,10 +166,25 @@ public class AzureBlobStorage implements BlobStorage {
 	
 	@Override
 	public Result<Void> delete(String path) {
+		var res = execDelete(path, TukanoApplication.PRIMARY_REGION);
+		if(res.isOK() && TukanoApplication.BLOBS_GEO_REPLICATION) {
+			Executors.defaultThreadFactory().newThread(() ->
+					execDelete(path, TukanoApplication.SECONDARY_REGION));
+		}
+		return res;
+	}
+
+	public Result<Void> execDelete(String path, Region region) {
+		BlobContainerClient client;
+		if(region.equals(Region.WEST_EUROPE) || !TukanoApplication.BLOBS_GEO_REPLICATION)
+			client = containerClient;
+		else
+			client = replicationContainerClient;
+
 		if (path == null)
 			return error(BAD_REQUEST);
 
-		var blob = containerClient.getBlobClient(path);
+		var blob = client.getBlobClient(path);
 		var blobId = path.replace("/", "+");
 		var owner = path.split("/")[0];
 
@@ -153,7 +194,7 @@ public class AzureBlobStorage implements BlobStorage {
 		}
 
 		else {
-			var blobs = containerClient.listBlobsByHierarchy(path + "/");
+			var blobs = client.listBlobsByHierarchy(path + "/");
 
 			if (!blobs.iterator().hasNext())
 				return error(NOT_FOUND);
@@ -161,7 +202,7 @@ public class AzureBlobStorage implements BlobStorage {
 			else {
 				blobs.forEach(blobItem -> {
 					String blobName = blobItem.getName();
-					containerClient.getBlobClient(blobName).delete();
+					client.getBlobClient(blobName).delete();
 				});
 
 				RedisCache.removeBlobsByOwner(owner);

@@ -8,9 +8,8 @@ import scc.utils.RedisCache;
 import scc.utils.Token;
 
 import static scc.db.DB.shortsDB;
-import static scc.serverless.HttpFunction.TUKANO_RECOMMENDS;
+import static scc.serverless.HttpFunction.REDIS_CACHE_ON;
 import static scc.serverless.HttpFunction.TUKANO_SECRET;
-import static scc.utils.RedisCache.REDIS_CACHE_ON;
 import static scc.utils.Result.errorOrValue;
 
 public class TimerFunction {

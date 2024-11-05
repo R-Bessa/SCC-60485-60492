@@ -17,13 +17,10 @@ import com.microsoft.azure.functions.annotation.HttpTrigger;
 import scc.db.DB;
 import scc.data.Blob;
 import scc.db.DatabaseType;
-import scc.storage.blobs.BlobsType;
 import scc.utils.RedisCache;
 import scc.utils.Token;
 
 import java.util.Optional;
-
-import static scc.utils.RedisCache.REDIS_CACHE_ON;
 import static scc.utils.RedisCache.VIEWS_KEY_PREFIX;
 
 public class HttpFunction {
@@ -41,10 +38,13 @@ public class HttpFunction {
     //public static final String CONNECTION_URL = "https://scc-60485-60492.documents.azure.com:443/";
     //public static final String DB_KEY = "gZGjVKxBMJF8fSwF2s3UBmsfdSk9k1vOZq6ziCkCBBsEJYx9wBr1ZRH4tncG5YYh5fW3hoDv0nSdACDbosz4Fg==";
 
+    public static final boolean REDIS_CACHE_ON = false;
+    public static final String RedisHostname = "cache-60485.redis.cache.windows.net";
+    public static final String RedisKey = "49XRFLpuEfPNa9vhAcVpeD4nAwUbW59AVAzCaJUXAmA=";
+
 
     private static final String BLOBS = "blobs";
 	private static final String BLOB_ID = "blobId";
-    public static final BlobsType BLOBS_TYPE = BlobsType.AZURE_BLOBS;
     public static final String TUKANO_RECOMMENDS = "tukano";
 
     public static final DatabaseType USERS_DB_TYPE = DatabaseType.COSMOS_DB_NOSQL;

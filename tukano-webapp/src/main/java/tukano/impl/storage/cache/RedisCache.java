@@ -15,9 +15,11 @@ import utils.Hex;
 import java.util.ArrayList;
 import java.util.List;
 
+import static tukano.impl.rest.TukanoApplication.RedisHostname;
+import static tukano.impl.rest.TukanoApplication.RedisKey;
+
 public class RedisCache {
-	private static final String RedisHostname = "cache-60485.redis.cache.windows.net";
-	private static final String RedisKey = "49XRFLpuEfPNa9vhAcVpeD4nAwUbW59AVAzCaJUXAmA=";
+
 	private static final int REDIS_PORT = 6380;
 	private static final int REDIS_TIMEOUT = 1000;
 	private static final boolean Redis_USE_TLS = true;

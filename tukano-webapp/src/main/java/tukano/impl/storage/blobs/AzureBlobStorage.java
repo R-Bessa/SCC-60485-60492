@@ -33,7 +33,7 @@ public class AzureBlobStorage implements BlobStorage {
 	private static final String VIDEOS_CONTAINER = "videos";
 
 	private final BlobContainerClient primaryClient = init(TukanoApplication.BLOB_STORAGE_KEY);
-	private final BlobContainerClient secondaryClient = init(TukanoApplication.SECONDARY_BLOB_STORAGE_KEY);;
+	private final BlobContainerClient secondaryClient = init(TukanoApplication.SECONDARY_BLOB_STORAGE_KEY);
 
 
 	private BlobContainerClient init(String key) {
@@ -52,7 +52,7 @@ public class AzureBlobStorage implements BlobStorage {
 		var res = execWrite(path, bytes, primaryClient);
 		if(res.isOK() && TukanoApplication.BLOBS_GEO_REPLICATION) {
 			Executors.defaultThreadFactory().newThread(() ->
-				execWrite(path, bytes, secondaryClient));
+				execWrite(path, bytes, secondaryClient)).start();
 		}
 		return res;
 	}
@@ -150,7 +150,7 @@ public class AzureBlobStorage implements BlobStorage {
 		var res = execDelete(path, primaryClient);
 		if(res.isOK() && TukanoApplication.BLOBS_GEO_REPLICATION) {
 			Executors.defaultThreadFactory().newThread(() ->
-					execDelete(path, secondaryClient));
+					execDelete(path, secondaryClient)).start();
 		}
 		return res;
 	}

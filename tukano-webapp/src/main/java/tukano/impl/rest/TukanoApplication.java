@@ -22,7 +22,7 @@ public class TukanoApplication extends Application {
 
 	/** Service Base Uri  */
 
-	public static final String PRIMARY_BASE_URI = "https://scc-60485-60492.azurewebsites.net/rest";
+	public static final String PRIMARY_BASE_URI = "https://scc-project-60485.azurewebsites.net/rest";
 	public static final String SECONDARY_BASE_URI = "https://scc-60485-60492-us.azurewebsites.net/rest";
 	public static final Region CURRENT_REGION = Region.WEST_EUROPE;
 
@@ -32,8 +32,8 @@ public class TukanoApplication extends Application {
 	public static final boolean BLOBS_GEO_REPLICATION = true;
 	public static final BlobsType BLOBS_TYPE = BlobsType.AZURE_BLOBS;
 	public static final long MAX_TOKEN_AGE = 300000;
-	public static final String BLOB_STORAGE_KEY = "DefaultEndpointsProtocol=https;AccountName=scc60492;AccountKey=2lddvpV/kKYzpiUq6yOzg52AyB599d1OyeJQf694VGMrr0UbRjIj6Rp3Ns/bsm7htNWCmmwkcDSl+AStQ1GPyg==;EndpointSuffix=core.windows.net";
-	public static final String SECONDARY_BLOB_STORAGE_KEY = "";
+	public static final String BLOB_STORAGE_KEY = "DefaultEndpointsProtocol=https;AccountName=scc60485;AccountKey=tRBfHsTj0Fe+vayowI6sGxu24UuVGf1rjY1p9OIL+0jMOP+P6DKzdXX7XSfbNapuL/2ygbMTRxpF+AStL9Ho9A==;EndpointSuffix=core.windows.net";
+	public static final String SECONDARY_BLOB_STORAGE_KEY = "DefaultEndpointsProtocol=https;AccountName=scc60485replication;AccountKey=YwVnQUC8+EruN5zowEYJR/u0L3ku1q65ABIqon4pEC6EK7vGw77IVZdDC1RF6E0K6oRglQqOOnnH+AStFEIYXA==;EndpointSuffix=core.windows.net";
 
 
 	/** DB Configs */

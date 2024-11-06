@@ -3,7 +3,6 @@ package scc.utils;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 import redis.clients.jedis.params.ScanParams;
-import scc.data.Blob;
 import scc.data.User;
 import scc.data.Short;
 import scc.db.DB;
@@ -25,9 +24,7 @@ public class RedisCache {
 	private static final int COOKIE_VALIDITY = 900; // 15 min
 	private static final int FEED_VALIDITY = 1; // 1 min
 	private static final String RECENT_SHORTS = "recent_shorts_list";
-	private static final String RECENT_BLOBS = "recent_blobs_list";
 	private static final int RECENT_SHORTS_SIZE = 100;
-	private static final int RECENT_BLOBS_SIZE = 50;
 
 
 
@@ -148,50 +145,6 @@ public class RedisCache {
 		}
 	}
 
-	public static void addRecentBlob(Blob blob) {
-		addToList(RECENT_BLOBS, RECENT_BLOBS_SIZE, blob);
-	}
-
-	public static Blob getRecentBlob(String blobId) {
-		var res = getList(RECENT_BLOBS, Blob.class);
-		if(res != null) {
-			for(var obj: res.value()) {
-				var blob = (Blob) obj;
-				if(blob.getBlobId().equals(blobId))
-					return blob;
-			}
-		}
-
-		return null;
-	}
-
-	private static void removeRecentBlob(Blob blob) {
-		removeFromList(RECENT_BLOBS, JSON.encode(blob));
-	}
-
-	public static void removeBlobsByOwner(String userId) {
-		var res = getList(RECENT_BLOBS, Blob.class);
-		if(res != null) {
-			for(var obj: res.value()) {
-				var blob = (Blob) obj;
-				if(blob.getOwner().equals(userId))
-					removeRecentBlob(blob);
-			}
-		}
-	}
-
-	public static void removeBlobById(String blobId) {
-		var res = getList(RECENT_BLOBS, Blob.class);
-		if(res != null) {
-			for(var obj: res.value()) {
-				var blob = (Blob) obj;
-				if(blob.getBlobId().equals(blobId)) {
-					removeRecentBlob(blob);
-					break;
-				}
-			}
-		}
-	}
 
 	public static void addShortToFeed(String userId, String shortId) {
 		if(!REDIS_CACHE_ON)

@@ -14,41 +14,54 @@ import com.microsoft.azure.functions.annotation.AuthorizationLevel;
 import com.microsoft.azure.functions.annotation.BindingName;
 import com.microsoft.azure.functions.annotation.FunctionName;
 import com.microsoft.azure.functions.annotation.HttpTrigger;
+import scc.data.Region;
 import scc.db.DB;
-import scc.data.Blob;
 import scc.db.DatabaseType;
 import scc.utils.RedisCache;
 import scc.utils.Token;
 
 import java.util.Optional;
+import java.util.concurrent.Executors;
+
 import static scc.utils.RedisCache.VIEWS_KEY_PREFIX;
 
 public class HttpFunction {
     public static final String TUKANO_SECRET = "tukano_app_secret";
+    public static final String TUKANO_RECOMMENDS = "tukano";
     public static String baseURI;
 
-    public static final String BASE_URI = "https://scc-60485-60492.azurewebsites.net/rest";
-    //public static final String BASE_URI = "https://scc-project-60485.azurewebsites.net/rest";
+    /** Service Base Uri  */
+
+    public static final String PRIMARY_BASE_URI = "https://scc-project-60485.azurewebsites.net/rest";
+    public static final String SECONDARY_BASE_URI = "https://scc-60485-60492-us.azurewebsites.net/rest";
+    public static final Region CURRENT_REGION = Region.WEST_EUROPE;
 
     /** DB Configs */
 
     public static final String CONNECTION_URL = "https://cosmos-60485.documents.azure.com:443/";
     public static final String DB_KEY = "b3MQzL5IUay43ec9YOhrStxS4tzRdEwJz25c2knzdiIksbRlYJIgvHPBAnBxhsZ7gu9NR141WJ2HACDbDYFZ9w==";
+    public static final DatabaseType USERS_DB_TYPE = DatabaseType.COSMOS_DB_NOSQL;
+    public static final DatabaseType SHORTS_DB_TYPE = DatabaseType.COSMOS_DB_NOSQL;
 
-    //public static final String CONNECTION_URL = "https://scc-60485-60492.documents.azure.com:443/";
-    //public static final String DB_KEY = "gZGjVKxBMJF8fSwF2s3UBmsfdSk9k1vOZq6ziCkCBBsEJYx9wBr1ZRH4tncG5YYh5fW3hoDv0nSdACDbosz4Fg==";
+    /** Redis Cache Configs */
 
     public static final boolean REDIS_CACHE_ON = false;
     public static final String RedisHostname = "cache-60485.redis.cache.windows.net";
     public static final String RedisKey = "49XRFLpuEfPNa9vhAcVpeD4nAwUbW59AVAzCaJUXAmA=";
 
+    /** Blob Storage Configs */
 
+    public static final boolean BLOBS_GEO_REPLICATION = true;
     private static final String BLOBS = "blobs";
 	private static final String BLOB_ID = "blobId";
-    public static final String TUKANO_RECOMMENDS = "tukano";
+    private static final int BLOB_CONFLICT = 409;
+    private static final int BLOB_NOT_FOUND = 404;
+    private static final String VIDEOS_CONTAINER = "videos";
+    public static final String BLOB_STORAGE_KEY = "DefaultEndpointsProtocol=https;AccountName=scc60485;AccountKey=tRBfHsTj0Fe+vayowI6sGxu24UuVGf1rjY1p9OIL+0jMOP+P6DKzdXX7XSfbNapuL/2ygbMTRxpF+AStL9Ho9A==;EndpointSuffix=core.windows.net";
+    public static final String SECONDARY_BLOB_STORAGE_KEY = "DefaultEndpointsProtocol=https;AccountName=scc60485replication;AccountKey=YwVnQUC8+EruN5zowEYJR/u0L3ku1q65ABIqon4pEC6EK7vGw77IVZdDC1RF6E0K6oRglQqOOnnH+AStFEIYXA==;EndpointSuffix=core.windows.net";
 
-    public static final DatabaseType USERS_DB_TYPE = DatabaseType.COSMOS_DB_NOSQL;
-    public static final DatabaseType SHORTS_DB_TYPE = DatabaseType.COSMOS_DB_NOSQL;
+
+    /** Azure Functions Configs */
 
     //Write
     private static final String HTTP_WRITE_TRIGGER ="writeReq";
@@ -65,24 +78,19 @@ public class HttpFunction {
     private static final String HTTP_DELETE ="HttpDelete";
     private static final String HTTP_DELETE_TRIGGER_ROUTE ="serverlessBlobs/{" + BLOB_ID + "}";
 
-    private BlobContainerClient containerClient;
-    private static final int BLOB_CONFLICT = 409;
-    private static final int BLOB_NOT_FOUND = 404;
-    private static final String VIDEOS_CONTAINER = "videos";
-    public static final String BLOB_STORAGE_KEY = "DefaultEndpointsProtocol=https;AccountName=scc60492;AccountKey=2lddvpV/kKYzpiUq6yOzg52AyB599d1OyeJQf694VGMrr0UbRjIj6Rp3Ns/bsm7htNWCmmwkcDSl+AStQ1GPyg==;EndpointSuffix=core.windows.net";
-    //public static final String BLOB_STORAGE_KEY = "DefaultEndpointsProtocol=https;AccountName=scc60485;AccountKey=tRBfHsTj0Fe+vayowI6sGxu24UuVGf1rjY1p9OIL+0jMOP+P6DKzdXX7XSfbNapuL/2ygbMTRxpF+AStL9Ho9A==;EndpointSuffix=core.windows.net";
+
+    private final BlobContainerClient primaryClient = init(BLOB_STORAGE_KEY);
+    private final BlobContainerClient secondaryClient = init(SECONDARY_BLOB_STORAGE_KEY);
 
 
-    private void initContainerClient() {
-        containerClient = new BlobServiceClientBuilder()
-                .connectionString(BLOB_STORAGE_KEY)
+    private BlobContainerClient init(String key) {
+        BlobContainerClient containerClient = new BlobServiceClientBuilder()
+                .connectionString(key)
                 .buildClient()
                 .createBlobContainerIfNotExists(VIDEOS_CONTAINER);
-
         containerClient.setAccessPolicy(PublicAccessType.BLOB, null);
-        Token.setSecret(TUKANO_SECRET);
-        baseURI = String.format("%s/%s/", BASE_URI, BLOBS);
 
+        return containerClient;
     }
 
 
@@ -96,31 +104,35 @@ public class HttpFunction {
                 HttpRequestMessage<Optional<String>> request,
                 @BindingName(BLOB_ID) String blobId,
             final ExecutionContext context) {
+                String token = request.getQueryParameters().get("token");
+                if( ! validBlobId( blobId, token ) )
+                    return request.createResponseBuilder(HttpStatus.FORBIDDEN).build();
 
-        initContainerClient();
+                if (blobId == null)
+                    return request.createResponseBuilder(HttpStatus.BAD_REQUEST).build();
 
-        String token = request.getQueryParameters().get("token");
+                if(request.getBody().isEmpty())
+                    return request.createResponseBuilder(HttpStatus.BAD_REQUEST).build();
 
-        if( ! validBlobId( blobId, token ) )
-            return request.createResponseBuilder(HttpStatus.FORBIDDEN).build();
+                String path = toPath(blobId);
+                byte[] bytes = request.getBody().get().getBytes();
 
-        if (blobId == null)
-            return request.createResponseBuilder(HttpStatus.BAD_REQUEST).build();
+                var res = execWrite(path, bytes, primaryClient, request);
+                if(res.getStatusCode() == 200 && BLOBS_GEO_REPLICATION) {
+                    Executors.defaultThreadFactory().newThread(() ->
+                            execWrite(path, bytes, secondaryClient, request)).start();
+                }
 
-        if(request.getBody().isEmpty())
-            return request.createResponseBuilder(HttpStatus.BAD_REQUEST).build();
+                return res;
+            }
 
-        byte[] bytes = request.getBody().get().getBytes();
 
-        String path = toPath(blobId);
-
-        var blob = containerClient.getBlobClient(path);
+    private HttpResponseMessage execWrite(String path, byte[] bytes, BlobContainerClient client,  HttpRequestMessage<Optional<String>> request) {
+        var blob = client.getBlobClient(path);
         var data = BinaryData.fromBytes(bytes);
 
         try {
             blob.upload(data);
-            var owner = path.split("/")[0];
-            RedisCache.addRecentBlob(new Blob(blobId, owner, bytes));
 
         } catch(BlobStorageException e) {
 
@@ -147,50 +159,46 @@ public class HttpFunction {
         @BindingName(BLOB_ID) String blobId,
         final ExecutionContext context) {
 
-        initContainerClient();
+            BlobContainerClient client;
+            if(CURRENT_REGION.equals(Region.WEST_EUROPE))
+                client = primaryClient;
+            else
+                client = secondaryClient;
 
-        String token = request.getQueryParameters().get("token");
+            String token = request.getQueryParameters().get("token");
 
-        if (!validBlobId(blobId, token))
-            return request.createResponseBuilder(HttpStatus.FORBIDDEN).build();
+            if (!validBlobId(blobId, token))
+                return request.createResponseBuilder(HttpStatus.FORBIDDEN).build();
 
-        if (blobId == null)
-            return request.createResponseBuilder(HttpStatus.BAD_REQUEST).build();
+            if (blobId == null)
+                return request.createResponseBuilder(HttpStatus.BAD_REQUEST).build();
 
-        var blobData = RedisCache.getRecentBlob(blobId);
-        if(blobData != null) {
-            RedisCache.incrCounter(VIEWS_KEY_PREFIX, blobId);
-            return request.createResponseBuilder(HttpStatus.OK).body(blobData.getBytes()).build();
-        }
+            String path = toPath(blobId);
+            byte[] bytes = null;
+            var blob = client.getBlobClient(path);
 
-        String path = toPath(blobId);
-        byte[] bytes = null;
-        var blob = containerClient.getBlobClient(path);
-        var owner = path.split("/")[0];
+            try {
+                BinaryData data = blob.downloadContent();
+                bytes = data.toBytes();
 
-        try {
-            BinaryData data = blob.downloadContent();
-            bytes = data.toBytes();
-            RedisCache.addRecentBlob(new Blob(blobId, owner, bytes));
+            } catch (BlobStorageException e) {
+                if (e.getStatusCode() == BLOB_NOT_FOUND)
+                    return request.createResponseBuilder(HttpStatus.NOT_FOUND).build();
+            }
 
-        } catch (BlobStorageException e) {
-            if (e.getStatusCode() == BLOB_NOT_FOUND)
-                return request.createResponseBuilder(HttpStatus.NOT_FOUND).build();
-        }
+            if (bytes != null) {
+                if(!REDIS_CACHE_ON)
+                    DB.updateViews(blobId, 1);
 
-        if (bytes != null) {
-            if(!REDIS_CACHE_ON)
-                DB.updateViews(blobId, 1);
+                else
+                    RedisCache.incrCounter(VIEWS_KEY_PREFIX, blobId);
+
+                return request.createResponseBuilder(HttpStatus.OK).body(bytes).build();
+            }
 
             else
-                RedisCache.incrCounter(VIEWS_KEY_PREFIX, blobId);
-
-            return request.createResponseBuilder(HttpStatus.OK).body(bytes).build();
+                return request.createResponseBuilder(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
-
-        else
-            return request.createResponseBuilder(HttpStatus.INTERNAL_SERVER_ERROR).build();
-    }
 
     @FunctionName(HTTP_DELETE)
     public HttpResponseMessage delete(
@@ -203,29 +211,32 @@ public class HttpFunction {
             @BindingName(BLOB_ID) String blobId,
             final ExecutionContext context) {
 
-        initContainerClient();
+                String token = request.getQueryParameters().get("token");
 
-        String token = request.getQueryParameters().get("token");
+                if( ! validBlobId( blobId, token ) )
+                    return request.createResponseBuilder(HttpStatus.FORBIDDEN).build();
 
-        if( ! validBlobId( blobId, token ) )
-            return request.createResponseBuilder(HttpStatus.FORBIDDEN).build();
+                if (blobId == null)
+                    return request.createResponseBuilder(HttpStatus.BAD_REQUEST).build();
 
-        if (blobId == null)
-            return request.createResponseBuilder(HttpStatus.BAD_REQUEST).build();
+                String path = toPath(blobId);
+                var res = execDelete(path, primaryClient, request);
+                if(res.getStatusCode() == 200 && BLOBS_GEO_REPLICATION) {
+                    Executors.defaultThreadFactory().newThread(() ->
+                            execDelete(path, secondaryClient, request)).start();
+                }
 
-        String path = toPath(blobId);
+                return res;
+            }
 
-        var blob = containerClient.getBlobClient(path);
-        var owner = path.split("/")[0];
+    private HttpResponseMessage execDelete(String path, BlobContainerClient client,  HttpRequestMessage<Optional<String>> request) {
+        var blob = client.getBlobClient(path);
 
-
-        if(blob.deleteIfExists()) {
-            RedisCache.removeBlobById(blobId);
+        if(blob.deleteIfExists())
             return request.createResponseBuilder(HttpStatus.OK).build();
-        }
 
         else {
-            var blobs = containerClient.listBlobsByHierarchy(path + "/");
+            var blobs = client.listBlobsByHierarchy(path + "/");
 
             if (!blobs.iterator().hasNext())
                 return request.createResponseBuilder(HttpStatus.NOT_FOUND).build();
@@ -233,10 +244,9 @@ public class HttpFunction {
             else {
                 blobs.forEach(blobItem -> {
                     String blobName = blobItem.getName();
-                    containerClient.getBlobClient(blobName).delete();
+                    client.getBlobClient(blobName).delete();
                 });
 
-                RedisCache.removeBlobsByOwner(owner);
                 return request.createResponseBuilder(HttpStatus.OK).build();
             }
         }
@@ -250,7 +260,4 @@ public class HttpFunction {
         return Token.isValid(token, blobId);
     }
 
-    private String toURL(String blobId ) {
-        return baseURI + blobId ;
-    }
 }

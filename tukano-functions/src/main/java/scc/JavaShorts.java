@@ -17,7 +17,7 @@ import scc.data.Short;
 
 import static java.lang.String.format;
 import static scc.db.DB.*;
-import static scc.serverless.HttpFunction.BASE_URI;
+import static scc.serverless.HttpFunction.PRIMARY_BASE_URI;
 import static scc.utils.RedisCache.LIKES_KEY_PREFIX;
 import static scc.utils.RedisCache.VIEWS_KEY_PREFIX;
 import static scc.utils.Result.*;
@@ -48,7 +48,7 @@ public class JavaShorts implements Shorts {
 			return error(res.error());
 
 		var shortId = format("%s+%s", userId, UUID.randomUUID());
-		var blobUrl = format("%s/%s/%s", BASE_URI, Blobs.NAME, shortId);
+		var blobUrl = format("%s/%s/%s", PRIMARY_BASE_URI, Blobs.NAME, shortId);
 		var shrt = new Short(shortId, userId, blobUrl);
 		RedisCache.addRecentShort(shrt);
 		RedisCache.addShortToFeed(userId, shortId);

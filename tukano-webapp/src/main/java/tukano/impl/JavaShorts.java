@@ -49,7 +49,7 @@ public class JavaShorts implements Shorts {
 			return Result.error(res.error());
 
 		var shortId = format("%s+%s", userId, UUID.randomUUID());
-		var blobUrl = format("%s/%s/%s", TukanoApplication.BASE_URI, Blobs.NAME, shortId);
+		var blobUrl = format("%s/%s/%s", TukanoApplication.PRIMARY_BASE_URI, Blobs.NAME, shortId);
 		var shrt = new Short(shortId, userId, blobUrl);
 		RedisCache.addRecentShort(shrt);
 		RedisCache.addShortToFeed(userId, shortId);

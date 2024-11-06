@@ -16,7 +16,6 @@ import tukano.impl.rest.TukanoApplication;
 import tukano.impl.storage.blobs.BlobStorage;
 import tukano.impl.storage.blobs.AzureBlobStorage;
 import tukano.impl.storage.blobs.FilesystemStorage;
-import tukano.impl.storage.db.DB;
 import utils.Hash;
 import utils.Hex;
 
@@ -36,7 +35,7 @@ public class JavaBlobs implements Blobs {
 	
 	private JavaBlobs() {
 		storage = initStorage();
-		baseURI = String.format("%s/%s/", TukanoApplication.BASE_URI, Blobs.NAME);
+		baseURI = String.format("%s/%s/", TukanoApplication.PRIMARY_BASE_URI, Blobs.NAME);
 	}
 
 

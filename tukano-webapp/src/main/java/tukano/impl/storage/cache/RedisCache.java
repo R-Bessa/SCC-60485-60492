@@ -7,16 +7,13 @@ import tukano.api.Result;
 import tukano.impl.data.Short;
 import tukano.impl.data.User;
 import tukano.impl.rest.TukanoApplication;
-import tukano.impl.data.Blob;
-import tukano.impl.storage.db.DB;
 import utils.Hash;
 import utils.Hex;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import static tukano.impl.rest.TukanoApplication.RedisHostname;
-import static tukano.impl.rest.TukanoApplication.RedisKey;
+import static tukano.impl.rest.TukanoApplication.REDIS_HOSTNAME;
+import static tukano.impl.rest.TukanoApplication.REDIS_KEY;
 
 public class RedisCache {
 
@@ -30,9 +27,7 @@ public class RedisCache {
 	private static final int COOKIE_VALIDITY = 900; // 15 min
 	private static final int FEED_VALIDITY = 60; // 1 min
 	private static final String RECENT_SHORTS = "recent_shorts_list";
-	private static final String RECENT_BLOBS = "recent_blobs_list";
 	private static final int RECENT_SHORTS_SIZE = 100;
-	private static final int RECENT_BLOBS_SIZE = 50;
 
 
 	
@@ -51,10 +46,9 @@ public class RedisCache {
 		poolConfig.setTestWhileIdle(true);
 		poolConfig.setNumTestsPerEvictionRun(3);
 		poolConfig.setBlockWhenExhausted(true);
-		instance = new JedisPool(poolConfig, RedisHostname, REDIS_PORT, REDIS_TIMEOUT, RedisKey, Redis_USE_TLS);
+		instance = new JedisPool(poolConfig, REDIS_HOSTNAME, REDIS_PORT, REDIS_TIMEOUT, REDIS_KEY, Redis_USE_TLS);
 		return instance;
 	}
-
 
 
 	public static void generateCookie(User u) {
@@ -142,61 +136,6 @@ public class RedisCache {
 		}
 	}
 
-	public static void removeRecentShortsByIds(List<String> shortIds) {
-		var res = getList(RECENT_SHORTS, Short.class);
-		if(res != null) {
-			for(var obj: res.value()) {
-				var shrt = (Short) obj;
-				if(shortIds.contains(shrt.getShortId()))
-					removeRecentShort(shrt);
-			}
-		}
-	}
-
-	public static void addRecentBlob(Blob blob) {
-		addToList(RECENT_BLOBS, RECENT_BLOBS_SIZE, blob);
-	}
-
-	public static Blob getRecentBlob(String blobId) {
-		var res = getList(RECENT_BLOBS, Blob.class);
-		if(res != null) {
-			for(var obj: res.value()) {
-				var blob = (Blob) obj;
-				if(blob.getBlobId().equals(blobId))
-					return blob;
-			}
-		}
-
-		return null;
-	}
-
-	private static void removeRecentBlob(Blob blob) {
-		removeFromList(RECENT_BLOBS, JSON.encode(blob));
-	}
-
-	public static void removeBlobsByOwner(String userId) {
-		var res = getList(RECENT_BLOBS, Blob.class);
-		if(res != null) {
-			for(var obj: res.value()) {
-				var blob = (Blob) obj;
-				if(blob.getOwner().equals(userId))
-					removeRecentBlob(blob);
-			}
-		}
-	}
-
-	public static void removeBlobById(String blobId) {
-		var res = getList(RECENT_BLOBS, Blob.class);
-		if(res != null) {
-			for(var obj: res.value()) {
-				var blob = (Blob) obj;
-				if(blob.getBlobId().equals(blobId)) {
-					removeRecentBlob(blob);
-					break;
-				}
-			}
-		}
-	}
 
 	public static void addShortToFeed(String userId, String shortId) {
 		if(!TukanoApplication.REDIS_CACHE_ON)
@@ -370,37 +309,6 @@ public class RedisCache {
 				cursor = scanResult.getCursor();
 
 			} while (!cursor.equals("0"));
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-
-	public static void writeBackViews() {
-		if(!TukanoApplication.REDIS_CACHE_ON)
-			return;
-
-		try (var jedis = getCachePool().getResource()) {
-			String cursor = "0";
-			String pattern = VIEWS_KEY_PREFIX  + "*";
-			List<String> recentShorts = new ArrayList<>();
-
-			do {
-				var scanResult = jedis.scan(cursor, new ScanParams().match(pattern).count(100));
-				for (String key : scanResult.getResult()) {
-					String shortId = key.replaceFirst("^" + VIEWS_KEY_PREFIX, "");
-					int views = Integer.parseInt(jedis.get(key));
-					jedis.del(key);
-					DB.updateViews(shortId, views);
-					recentShorts.add(shortId);
-				}
-
-				cursor = scanResult.getCursor();
-
-			} while (!cursor.equals("0"));
-
-			if(!recentShorts.isEmpty())
-				removeRecentShortsByIds(recentShorts);
 
 		} catch (Exception e) {
 			e.printStackTrace();

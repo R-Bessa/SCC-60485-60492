@@ -21,7 +21,6 @@ import com.azure.storage.blob.models.BlobRange;
 import com.azure.storage.blob.models.BlobStorageException;
 import com.azure.storage.blob.models.PublicAccessType;
 import tukano.api.Result;
-import tukano.impl.data.Blob;
 import tukano.impl.georeplication.Region;
 import tukano.impl.rest.TukanoApplication;
 import tukano.impl.storage.cache.RedisCache;
@@ -33,39 +32,32 @@ public class AzureBlobStorage implements BlobStorage {
 	private static final int BLOB_NOT_FOUND = 404;
 	private static final String VIDEOS_CONTAINER = "videos";
 
-	// Client Connect with Primary Region Storage
-	private final BlobContainerClient containerClient;
-
-	// Replication Client Connected with Secondary Region Storage
-	private BlobContainerClient replicationContainerClient;
+	private final BlobContainerClient primaryClient = init(TukanoApplication.BLOB_STORAGE_KEY);
+	private final BlobContainerClient secondaryClient = init(TukanoApplication.SECONDARY_BLOB_STORAGE_KEY);;
 
 
-	public AzureBlobStorage() {
-		containerClient = new BlobServiceClientBuilder()
-				.connectionString(TukanoApplication.BLOB_STORAGE_KEY)
+	private BlobContainerClient init(String key) {
+		BlobContainerClient containerClient = new BlobServiceClientBuilder()
+				.connectionString(key)
 				.buildClient()
 				.createBlobContainerIfNotExists(VIDEOS_CONTAINER);
-
 		containerClient.setAccessPolicy(PublicAccessType.BLOB, null);
+
+		return containerClient;
 	}
+
 	
 	@Override
 	public Result<Void> write(String path, byte[] bytes) {
-		var res = execWrite(path, bytes, TukanoApplication.PRIMARY_REGION);
+		var res = execWrite(path, bytes, primaryClient);
 		if(res.isOK() && TukanoApplication.BLOBS_GEO_REPLICATION) {
 			Executors.defaultThreadFactory().newThread(() ->
-				execWrite(path, bytes, TukanoApplication.SECONDARY_REGION));
+				execWrite(path, bytes, secondaryClient));
 		}
 		return res;
 	}
 
-	private Result<Void> execWrite(String path, byte[] bytes, Region region) {
-		BlobContainerClient client;
-		if(region.equals(Region.WEST_EUROPE) || !TukanoApplication.BLOBS_GEO_REPLICATION)
-			client = containerClient;
-		else
-			client = replicationContainerClient;
-
+	private Result<Void> execWrite(String path, byte[] bytes, BlobContainerClient client) {
 		if (path == null)
 			return error(BAD_REQUEST);
 
@@ -74,10 +66,6 @@ public class AzureBlobStorage implements BlobStorage {
 
 		try {
 			blob.upload(data);
-
-			var blobId = path.replace("/", "+");
-			var owner = path.split("/")[0];
-			RedisCache.addRecentBlob(new Blob(blobId, owner, bytes));
 
 		} catch(BlobStorageException e) {
 
@@ -95,21 +83,15 @@ public class AzureBlobStorage implements BlobStorage {
 	@Override
 	public Result<byte[]> read(String path) {
 		BlobContainerClient client;
-		if(TukanoApplication.PRIMARY_REGION.equals(Region.WEST_EUROPE))
-			client = containerClient;
+		if(TukanoApplication.CURRENT_REGION.equals(Region.WEST_EUROPE))
+			client = primaryClient;
 		else
-			client = replicationContainerClient;
+			client = secondaryClient;
 
 		if (path == null)
 			return error(BAD_REQUEST);
 
 		var blobId = path.replace("/", "+");
-		var owner = path.split("/")[0];
-		var blobData = RedisCache.getRecentBlob(blobId);
-		if(blobData != null) {
-			RedisCache.incrCounter(VIEWS_KEY_PREFIX, blobId);
-			return Result.ok(blobData.getBytes());
-		}
 
 		byte[] bytes = null;
 		var blob = client.getBlobClient(path);
@@ -117,9 +99,8 @@ public class AzureBlobStorage implements BlobStorage {
 		try {
 			BinaryData data = blob.downloadContent();
 			bytes = data.toBytes();
-			RedisCache.addRecentBlob(new Blob(blobId, owner, bytes));
-		}
-		catch(BlobStorageException e) {
+
+		} catch(BlobStorageException e) {
 			if(e.getStatusCode() == BLOB_NOT_FOUND)
 				return error(NOT_FOUND);
 		}
@@ -140,7 +121,7 @@ public class AzureBlobStorage implements BlobStorage {
 		if (path == null)
 			return error(BAD_REQUEST);
 
-		var blob = containerClient.getBlobClient(path);
+		var blob = primaryClient.getBlobClient(path);
 
 		if(!blob.exists())
 			return error(NOT_FOUND);
@@ -166,32 +147,21 @@ public class AzureBlobStorage implements BlobStorage {
 	
 	@Override
 	public Result<Void> delete(String path) {
-		var res = execDelete(path, TukanoApplication.PRIMARY_REGION);
+		var res = execDelete(path, primaryClient);
 		if(res.isOK() && TukanoApplication.BLOBS_GEO_REPLICATION) {
 			Executors.defaultThreadFactory().newThread(() ->
-					execDelete(path, TukanoApplication.SECONDARY_REGION));
+					execDelete(path, secondaryClient));
 		}
 		return res;
 	}
 
-	public Result<Void> execDelete(String path, Region region) {
-		BlobContainerClient client;
-		if(region.equals(Region.WEST_EUROPE) || !TukanoApplication.BLOBS_GEO_REPLICATION)
-			client = containerClient;
-		else
-			client = replicationContainerClient;
-
+	public Result<Void> execDelete(String path, BlobContainerClient client) {
 		if (path == null)
 			return error(BAD_REQUEST);
 
 		var blob = client.getBlobClient(path);
-		var blobId = path.replace("/", "+");
-		var owner = path.split("/")[0];
-
-		if(blob.deleteIfExists()) {
-			RedisCache.removeBlobById(blobId);
+		if(blob.deleteIfExists())
 			return ok();
-		}
 
 		else {
 			var blobs = client.listBlobsByHierarchy(path + "/");
@@ -205,7 +175,6 @@ public class AzureBlobStorage implements BlobStorage {
 					client.getBlobClient(blobName).delete();
 				});
 
-				RedisCache.removeBlobsByOwner(owner);
 				return ok();
 			}
 		}

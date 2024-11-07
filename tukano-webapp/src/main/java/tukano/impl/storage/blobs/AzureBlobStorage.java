@@ -37,6 +37,9 @@ public class AzureBlobStorage implements BlobStorage {
 
 
 	private BlobContainerClient init(String key) {
+		if(key.equals(TukanoApplication.SECONDARY_BLOB_STORAGE_KEY) && !TukanoApplication.BLOBS_GEO_REPLICATION)
+			return null;
+
 		BlobContainerClient containerClient = new BlobServiceClientBuilder()
 				.connectionString(key)
 				.buildClient()

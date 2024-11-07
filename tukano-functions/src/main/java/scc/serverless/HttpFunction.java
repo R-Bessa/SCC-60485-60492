@@ -26,7 +26,7 @@ import java.util.concurrent.Executors;
 import static scc.utils.RedisCache.VIEWS_KEY_PREFIX;
 
 public class HttpFunction {
-    public static final String TUKANO_SECRET = "tukano_app_secret";
+    public static final String TUKANO_SECRET = System.getenv("TUKANO_SECRET");
     public static final String TUKANO_RECOMMENDS = "tukano";
     public static String baseURI;
 
@@ -36,29 +36,28 @@ public class HttpFunction {
     public static final String SECONDARY_BASE_URI = "https://scc-60485-60492-us.azurewebsites.net/rest";
     public static final Region CURRENT_REGION = Region.WEST_EUROPE;
 
+    /** Blob Storage Configs */
+
+    public static final boolean BLOBS_GEO_REPLICATION = true;
+    private static final String BLOB_ID = "blobId";
+    private static final int BLOB_CONFLICT = 409;
+    private static final int BLOB_NOT_FOUND = 404;
+    private static final String VIDEOS_CONTAINER = "videos";
+    public static final String BLOB_STORAGE_KEY = System.getenv("BLOB_STORAGE_KEY");
+    public static final String SECONDARY_BLOB_STORAGE_KEY = System.getenv("SECONDARY_BLOB_STORAGE_KEY");
+
     /** DB Configs */
 
-    public static final String CONNECTION_URL = "https://cosmos-60485.documents.azure.com:443/";
-    public static final String DB_KEY = "b3MQzL5IUay43ec9YOhrStxS4tzRdEwJz25c2knzdiIksbRlYJIgvHPBAnBxhsZ7gu9NR141WJ2HACDbDYFZ9w==";
+    public static final String CONNECTION_URL = System.getenv("CONNECTION_URL");
+    public static final String DB_KEY = System.getenv("DB_KEY");
     public static final DatabaseType USERS_DB_TYPE = DatabaseType.COSMOS_DB_NOSQL;
     public static final DatabaseType SHORTS_DB_TYPE = DatabaseType.COSMOS_DB_NOSQL;
 
     /** Redis Cache Configs */
 
     public static final boolean REDIS_CACHE_ON = false;
-    public static final String RedisHostname = "cache-60485.redis.cache.windows.net";
-    public static final String RedisKey = "49XRFLpuEfPNa9vhAcVpeD4nAwUbW59AVAzCaJUXAmA=";
-
-    /** Blob Storage Configs */
-
-    public static final boolean BLOBS_GEO_REPLICATION = true;
-    private static final String BLOBS = "blobs";
-	private static final String BLOB_ID = "blobId";
-    private static final int BLOB_CONFLICT = 409;
-    private static final int BLOB_NOT_FOUND = 404;
-    private static final String VIDEOS_CONTAINER = "videos";
-    public static final String BLOB_STORAGE_KEY = "DefaultEndpointsProtocol=https;AccountName=scc60485;AccountKey=tRBfHsTj0Fe+vayowI6sGxu24UuVGf1rjY1p9OIL+0jMOP+P6DKzdXX7XSfbNapuL/2ygbMTRxpF+AStL9Ho9A==;EndpointSuffix=core.windows.net";
-    public static final String SECONDARY_BLOB_STORAGE_KEY = "DefaultEndpointsProtocol=https;AccountName=scc60485replication;AccountKey=YwVnQUC8+EruN5zowEYJR/u0L3ku1q65ABIqon4pEC6EK7vGw77IVZdDC1RF6E0K6oRglQqOOnnH+AStFEIYXA==;EndpointSuffix=core.windows.net";
+    public static final String REDIS_HOSTNAME = System.getenv("REDIS_HOSTNAME");
+    public static final String REDIS_KEY = System.getenv("REDIS_KEY");
 
 
     /** Azure Functions Configs */

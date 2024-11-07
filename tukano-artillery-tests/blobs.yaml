@@ -1,0 +1,48 @@
+#BLOBS
+config:
+  target: https://scc-60485-60492.azurewebsites.net/rest
+  plugins:
+    metrics-by-endpoint: { } # Used to get metrics for each endpoint individually.
+  phases:
+  - name: "Main test"    # MAIN TESTS: duration: 30s, with 1 new clients/sec
+    duration: 60
+    arrivalRate: 1
+  payload:
+    path: ./data/updated_users.csv
+    #loadAll: true # load the whole CSV
+    order: sequence # selects users sequentially, default is random
+    skipHeader: true # The first line is a header, so we want to skip it
+    delimiter: "," # standard delimiter
+    skipEmptyLines: true # not important in our case
+    fields:
+      - "userId"
+      - "pwd"
+      - "email"
+      - "displayName"
+scenarios:
+  - name: 'Blobs'
+    weight: 1
+    flow:
+      # Create users' shorts
+      - post:
+          url: "/shorts/{{ userId }}?pwd=pwd"
+          headers:
+            Content-Type: application/json
+            Accept: application/json
+          capture:
+            - json: "$.id"
+              as: "id"
+      # Create shorts' blobs
+      - post:
+          url: "/blobs/{{ id }}?token=token"
+          headers:
+            Content-Type: application/octet-stream
+            body: \x00\x01\x02
+      # Download blobs
+      - get:
+          url: "/blobs/{{ id }}?token=token"
+      # Delete all blobs
+      - delete:
+          url: "/blobs/{{ userId }}?token=token"
+
+

@@ -27,7 +27,7 @@ public class RedisCache {
 	private static final int COOKIE_VALIDITY = 900; // 15 min
 	private static final int FEED_VALIDITY = 60; // 1 min
 	private static final String RECENT_SHORTS = "recent_shorts_list";
-	private static final int RECENT_SHORTS_SIZE = 100;
+	private static final int RECENT_SHORTS_SIZE = 50;
 
 
 	

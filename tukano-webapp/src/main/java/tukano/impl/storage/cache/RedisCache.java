@@ -80,7 +80,7 @@ public class RedisCache {
 			if(jsonValue == null)
 				return null;
 
-			User u = JSON.decode( jedis.get(key), User.class);
+			User u = JSON.decode( jsonValue, User.class);
 			jedis.expire(key, COOKIE_VALIDITY);
 
 			return u;

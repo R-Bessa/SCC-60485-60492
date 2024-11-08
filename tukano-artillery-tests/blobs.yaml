@@ -1,12 +1,12 @@
 #BLOBS
 config:
-  target: https://scc-60485-60492.azurewebsites.net/rest
+  target: https://scc-project-60485.azurewebsites.net/rest
   plugins:
     metrics-by-endpoint: { } # Used to get metrics for each endpoint individually.
   phases:
-  - name: "Main test"    # MAIN TESTS: duration: 30s, with 1 new clients/sec
-    duration: 60
-    arrivalRate: 1
+    - name: "Main test"    # MAIN TESTS: duration: 30s, with 1 new clients/sec
+      duration: 30
+      arrivalRate: 5
   payload:
     path: ./data/updated_users.csv
     #loadAll: true # load the whole CSV
@@ -25,7 +25,7 @@ scenarios:
     flow:
       # Create users' shorts
       - post:
-          url: "/shorts/{{ userId }}?pwd=pwd"
+          url: "/shorts/{{ userId }}?pwd={{ pwd }}"
           headers:
             Content-Type: application/json
             Accept: application/json
@@ -44,5 +44,3 @@ scenarios:
       # Delete all blobs
       - delete:
           url: "/blobs/{{ userId }}?token=token"
-
-

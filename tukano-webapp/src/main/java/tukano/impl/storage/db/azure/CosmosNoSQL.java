@@ -72,7 +72,7 @@ public class CosmosNoSQL implements Database {
                 //.gatewayMode()
                 .consistencyLevel(ConsistencyLevel.SESSION)
                 .connectionSharingAcrossClientsEnabled(true)
-                .contentResponseOnWriteEnabled(true) //
+                .contentResponseOnWriteEnabled(true)
                 .buildClient();
 
         db = createDatabaseIfNotExists(client);

@@ -22,7 +22,7 @@ public class TukanoApplication extends Application {
 
 	/** Service Base Uri  */
 
-	public static final String PRIMARY_BASE_URI = "https://scc-60485-60492.azurewebsites.net/rest";
+	public static final String PRIMARY_BASE_URI = "https://scc-project-60485.azurewebsites.net  ";
 	public static final String SECONDARY_BASE_URI = "https://scc-60485-60492-us.azurewebsites.net/rest";
 	public static final Region CURRENT_REGION = Region.WEST_EUROPE;
 
@@ -38,8 +38,8 @@ public class TukanoApplication extends Application {
 
 	/** DB Configs */
 
-	public static final DatabaseType USERS_DB_TYPE = DatabaseType.HIBERNATE;
-	public static final DatabaseType SHORTS_DB_TYPE = DatabaseType.HIBERNATE;
+	public static final DatabaseType USERS_DB_TYPE = DatabaseType.COSMOS_DB_NOSQL;
+	public static final DatabaseType SHORTS_DB_TYPE = DatabaseType.COSMOS_DB_NOSQL;
 	public static final String CONNECTION_URL = "https://scc-60485-60492.documents.azure.com:443/";
 	public static final String DB_KEY = "VNv82akCjt1XIFMw0wvTGubYDF2EpB8tA5ssE3l5Ktr1QK70GePXDYiBY31QZmH33FhVHsC6kvEMACDbwxjd8g==";
 

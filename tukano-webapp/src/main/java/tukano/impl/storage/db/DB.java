@@ -41,9 +41,7 @@ public class DB {
 				return instance;
 			}
 			case COSMOS_DB_POSTGRESQL -> {
-				CosmosPostgreSQL instance = CosmosPostgreSQL.getInstance();
-				instance.init();
-				return instance;
+				return CosmosPostgreSQL.getInstance();
 			}
 			default -> {
 				return Hibernate.getInstance();

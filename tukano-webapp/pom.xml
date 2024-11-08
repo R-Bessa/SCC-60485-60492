@@ -83,25 +83,27 @@
 			                        <include>*.war</include>
 			                    </includes>
 			                </resource>
-			            </resources>
+			            </resources>y
 			        </deployment>
 			        <!--<resourceGroup>scc-project-60485-rg</resourceGroup>
 			    			    	<appName>scc-project-60485</appName>-->
-			        <resourceGroup>scc-rg-60485-60492</resourceGroup>
-			        <appName>scc-60485-60492-us</appName>
-			    </configuration>
-			</plugin>
-		</plugins>
-	</build>
-	<dependencies>
+					<!--<resourceGroup>scc-rg-60485-60492</resourceGroup>
+                    <appName>scc-60485-60492-us</appName>-->
+                    <resourceGroup>scc-project-60485-rg</resourceGroup>
+                    <appName>scc-project-60485</appName>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+    <dependencies>
 
-		<dependency>
-			<groupId>com.microsoft.azure.functions</groupId>
-			<artifactId>azure-functions-java-library</artifactId>
-			<version>3.1.0</version>
-		</dependency>
+        <dependency>
+            <groupId>com.microsoft.azure.functions</groupId>
+            <artifactId>azure-functions-java-library</artifactId>
+            <version>3.1.0</version>
+        </dependency>
 
-		<!-- Local Cache -->
+        <!-- Local Cache -->
 
 		<dependency>
 			<groupId>com.google.guava</groupId>

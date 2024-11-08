@@ -47,8 +47,8 @@ public class JavaBlobs implements Blobs {
 	public Result<Void> upload(String blobId, byte[] bytes, String token) {
 		Log.info(() -> format("upload : blobId = %s, sha256 = %s, token = %s\n", blobId, Hex.of(Hash.sha256(bytes)), token));
 
-		if (!validBlobId(blobId, token))
-			return error(FORBIDDEN);
+		/*if (!validBlobId(blobId, token))
+			return error(FORBIDDEN);*/
 
 		return storage.write( toPath( blobId ), bytes);
 	}
@@ -57,8 +57,8 @@ public class JavaBlobs implements Blobs {
 	public Result<byte[]> download(String blobId, String token) {
 		Log.info(() -> format("download : blobId = %s, token=%s\n", blobId, token));
 
-		if( ! validBlobId( blobId, token ) )
-			return error(FORBIDDEN);
+		/*if( ! validBlobId( blobId, token ) )
+			return error(FORBIDDEN);*/
 
 		return storage.read( toPath( blobId ) );
 	}
@@ -67,8 +67,8 @@ public class JavaBlobs implements Blobs {
 	public Result<Void> downloadToSink(String blobId, Consumer<byte[]> sink, String token) {
 		Log.info(() -> format("downloadToSink : blobId = %s, token = %s\n", blobId, token));
 
-		if( ! validBlobId( blobId, token ) )
-			return error(FORBIDDEN);
+		/*if( ! validBlobId( blobId, token ) )
+			return error(FORBIDDEN);*/
 
 		return storage.read( toPath(blobId), sink);
 	}
@@ -77,8 +77,8 @@ public class JavaBlobs implements Blobs {
 	public Result<Void> delete(String blobId, String token) {
 		Log.info(() -> format("delete : blobId = %s, token=%s\n", blobId, token));
 
-		if( ! validBlobId( blobId, token ) )
-			return error(FORBIDDEN);
+		/*if( ! validBlobId( blobId, token ) )
+			return error(FORBIDDEN);*/
 
 		return storage.delete( toPath(blobId));
 	}

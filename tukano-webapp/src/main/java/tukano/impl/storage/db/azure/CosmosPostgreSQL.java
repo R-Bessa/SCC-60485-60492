@@ -41,11 +41,12 @@ public class CosmosPostgreSQL implements Database {
     synchronized public static CosmosPostgreSQL getInstance() {
         if (instance == null) {
             instance = new CosmosPostgreSQL();
+            init();
         }
         return instance;
     }
 
-    public synchronized void init() {
+    private static void init() {
         try {
             datasource = getDataSource();
             connection = datasource.getConnection();
@@ -54,6 +55,7 @@ public class CosmosPostgreSQL implements Database {
             while (scanner.hasNextLine()) {
                 statement.execute(scanner.nextLine());
             }
+            connection.close();
         }
         catch (SQLException e) {
             e.printStackTrace();
@@ -63,9 +65,6 @@ public class CosmosPostgreSQL implements Database {
     private static DataSource getDataSource() {
         try {
             Properties properties = new Properties();
-            //properties.load(new FileInputStream("src/main/resources/application.properties"));
-
-            // Use ClassLoader to load the properties file
             InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("application.properties");
 
             if (inputStream == null) {
@@ -79,10 +78,10 @@ public class CosmosPostgreSQL implements Database {
             ds.setJdbcUrl(properties.getProperty(DB_URL));
             ds.setUsername(properties.getProperty(DB_USERNAME));
             ds.setPassword(properties.getProperty(DB_PASSWORD));
-            ds.setMinimumIdle(100);
-            ds.setMaximumPoolSize(1000000000);
+            ds.setMinimumIdle(10);
+            ds.setMaximumPoolSize(100000);
             ds.setAutoCommit(true);
-            ds.setLoginTimeout(3);
+            ds.setLoginTimeout(10);
 
             return ds;
 
@@ -93,11 +92,13 @@ public class CosmosPostgreSQL implements Database {
     }
 
     private void executeQuery(String query) throws SQLException {
-        PreparedStatement statement = connection.prepareStatement(query);
-        statement.executeUpdate();
+        try (Connection connection = datasource.getConnection();
+            PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.executeUpdate();
+        }
     }
 
-    private <T> Result<T> insertOne(T obj) throws PSQLException, SQLException {
+    private <T> Result<T> insertOne(T obj) throws SQLException {
         if (obj instanceof User u) {
             String insertUser = format("INSERT INTO users VALUES ('%s', '%s', '%s', '%s');", u.getUserId(), u.getPwd(), u.getEmail(), u.getDisplayName());
             executeQuery(insertUser);
@@ -141,8 +142,10 @@ public class CosmosPostgreSQL implements Database {
 
     private void deleteAux(String table, String attribute, String id) throws SQLException {
         String delete = format("DELETE FROM %s WHERE %s = '%s'", table, attribute, id);
-        PreparedStatement deleteStatement = connection.prepareStatement(delete);
-        deleteStatement.executeUpdate();
+        try (Connection connection = datasource.getConnection();
+             PreparedStatement deleteStatement = connection.prepareStatement(delete)) {
+             deleteStatement.executeUpdate();
+        }
     }
 
     private <T> Result<T> delete(T obj) throws SQLException {
@@ -161,59 +164,71 @@ public class CosmosPostgreSQL implements Database {
 
     private <T> Result<?> getById(String id, Class<T> clazz) throws SQLException {
         if(clazz.equals(User.class)) {
-            PreparedStatement readStatement = connection.prepareStatement("SELECT * FROM users WHERE userId = ?;");
-            readStatement.setString(1, id);
-            ResultSet resultSet = readStatement.executeQuery();
-            if (!resultSet.next()) {
-                return Result.error(NOT_FOUND);
+            try (Connection connection = datasource.getConnection();
+                 PreparedStatement readStatement = connection.prepareStatement("SELECT * FROM users WHERE userId = ?;")) {
+                 readStatement.setString(1, id);
+                ResultSet resultSet = readStatement.executeQuery();
+
+                if (!resultSet.next())
+                    return Result.error(NOT_FOUND);
+
+                User u = new User();
+                u.setUserId(resultSet.getString("userId"));
+                u.setPwd(resultSet.getString("pwd"));
+                u.setEmail(resultSet.getString("email"));
+                u.setDisplayName(resultSet.getString("displayName"));
+                return Result.ok(u);
             }
-            User u = new User();
-            u.setUserId(resultSet.getString("userId"));
-            u.setPwd(resultSet.getString("pwd"));
-            u.setEmail(resultSet.getString("email"));
-            u.setDisplayName(resultSet.getString("displayName"));
-            return Result.ok(u);
+
         }
         else if (clazz.equals(Likes.class)) {
-            PreparedStatement readStatement = connection.prepareStatement("SELECT * FROM likes WHERE id = ?;");
-            readStatement.setString(1, id);
-            ResultSet resultSet = readStatement.executeQuery();
-            if (!resultSet.next()) {
-                return Result.error(NOT_FOUND);
+            try (Connection connection = datasource.getConnection();
+                 PreparedStatement readStatement = connection.prepareStatement("SELECT * FROM likes WHERE id = ?;")) {
+                 readStatement.setString(1, id);
+                 ResultSet resultSet = readStatement.executeQuery();
+                 if (!resultSet.next()) {
+                     return Result.error(NOT_FOUND);
+                 }
+                 Likes l = new Likes();
+                 l.setOwnerId(resultSet.getString("ownerId"));
+                 l.setShortId(resultSet.getString("shortId"));
+                 l.setUserId(resultSet.getString("userId"));
+                 return Result.ok(l);
             }
-            Likes l = new Likes();
-            l.setOwnerId(resultSet.getString("ownerId"));
-            l.setShortId(resultSet.getString("shortId"));
-            l.setUserId(resultSet.getString("userId"));
-            return Result.ok(l);
+
         }
         else if(clazz.equals(Following.class)) {
-            PreparedStatement readStatement = connection.prepareStatement("SELECT * FROM following WHERE id = ?;");
-            readStatement.setString(1, id);
-            ResultSet resultSet = readStatement.executeQuery();
-            if (!resultSet.next()) {
-                return Result.error(NOT_FOUND);
+            try (Connection connection = datasource.getConnection();
+                 PreparedStatement readStatement = connection.prepareStatement("SELECT * FROM following WHERE id = ?;")) {
+                 readStatement.setString(1, id);
+                 ResultSet resultSet = readStatement.executeQuery();
+                 if (!resultSet.next()) {
+                     return Result.error(NOT_FOUND);
+                 }
+                 Following f = new Following();
+                 f.setFollower(resultSet.getString("follower"));
+                 f.setFollowee(resultSet.getString("followee"));
+                 return Result.ok(f);
             }
-            Following f = new Following();
-            f.setFollower(resultSet.getString("follower"));
-            f.setFollowee(resultSet.getString("followee"));
-            return Result.ok(f);
+
         }
         else {
             String query = format("SELECT * FROM public.shorts WHERE shortId = '%s';", id);
-            PreparedStatement readStatement = connection.prepareStatement(query);
-            ResultSet resultSet = readStatement.executeQuery();
-            if (!resultSet.next()) {
-                return Result.error(NOT_FOUND);
-            }
+            try (Connection connection = datasource.getConnection();
+                PreparedStatement readStatement = connection.prepareStatement(query)) {
+                ResultSet resultSet = readStatement.executeQuery();
+                if (!resultSet.next()) {
+                    return Result.error(NOT_FOUND);
+                }
 
-            Short s = new Short();
-            s.setShortId(resultSet.getString("shortId"));
-            s.setOwnerId(resultSet.getString("ownerId"));
-            s.setBlobUrl(resultSet.getString("blobUrl"));
-            s.setTimestamp(resultSet.getLong("timestamp"));
-            s.setTotalLikes(resultSet.getInt("totalLikes"));
-            return Result.ok(s);
+                Short s = new Short();
+                s.setShortId(resultSet.getString("shortId"));
+                s.setOwnerId(resultSet.getString("ownerId"));
+                s.setBlobUrl(resultSet.getString("blobUrl"));
+                s.setTimestamp(resultSet.getLong("timestamp"));
+                s.setTotalLikes(resultSet.getInt("totalLikes"));
+                return Result.ok(s);
+            }
         }
     }
 
@@ -282,16 +297,18 @@ public class CosmosPostgreSQL implements Database {
 
     private <T> Result<List<T>> count(Class<T> clazz, String container, String attribute, String id) throws SQLException {
         String query = format("SELECT COUNT(%s) FROM %s WHERE %s = '%s'", attribute, container, attribute, id);
-        PreparedStatement readStatement = connection.prepareStatement(query);
-        ResultSet resultSet = readStatement.executeQuery();
-        if (!resultSet.next()) {
-            return Result.error(NOT_FOUND);
-        }
+        try (Connection connection = datasource.getConnection();
+            PreparedStatement readStatement = connection.prepareStatement(query)) {
+            ResultSet resultSet = readStatement.executeQuery();
+            if (!resultSet.next()) {
+                return Result.error(NOT_FOUND);
+            }
 
-        int count = resultSet.getInt(1);
-        List<T> resultList = new ArrayList<>();
-        resultList.add(clazz.cast((long)count));
-        return Result.ok(resultList);
+            int count = resultSet.getInt(1);
+            List<T> resultList = new ArrayList<>();
+            resultList.add(clazz.cast((long)count));
+            return Result.ok(resultList);
+        }
     }
 
 
@@ -306,17 +323,17 @@ public class CosmosPostgreSQL implements Database {
 
     private <T> Result<List<T>> getAllByAttributeAux(String container, String attribute, String param, String match) throws SQLException {
         var query = format("SELECT %s FROM %s WHERE %s = '%s'", attribute, container, param, match);
-        PreparedStatement readStatement = connection.prepareStatement(query);
-        ResultSet resultSet = readStatement.executeQuery();
+        try (Connection connection = datasource.getConnection();
+            PreparedStatement readStatement = connection.prepareStatement(query)) {
+            ResultSet resultSet = readStatement.executeQuery();
+            List<T> resultList = new ArrayList<>();
+            while (resultSet.next()) {
+                String result = resultSet.getString(1);
+                resultList.add((T) result);
+            }
 
-        List<T> resultList = new ArrayList<>();
-        while (resultSet.next()) {
-
-            String result = resultSet.getString(1);
-            resultList.add((T) result);
+            return Result.ok(resultList);
         }
-
-        return Result.ok(resultList);
     }
 
     @Override
@@ -331,20 +348,20 @@ public class CosmosPostgreSQL implements Database {
     }
 
     private <T> Result<List<T>> sqlAux(String query) throws SQLException {
+        try (Connection connection = datasource.getConnection();
+            PreparedStatement readStatement = connection.prepareStatement(query)) {
+            ResultSet resultSet = readStatement.executeQuery();
+            List<T> resultList = new ArrayList<>();
+            while (resultSet.next()) {
+                String result1 = resultSet.getString(1);
+                String result2 = resultSet.getString(2);
 
-        PreparedStatement readStatement = connection.prepareStatement(query);
-        ResultSet resultSet = readStatement.executeQuery();
+                resultList.add((T) result1);
+                resultList.add((T) result2);
+            }
 
-        List<T> resultList = new ArrayList<>();
-        while (resultSet.next()) {
-            String result1 = resultSet.getString(1);
-            String result2 = resultSet.getString(2);
-
-            resultList.add((T) result1);
-            resultList.add((T) result2);
+            return Result.ok(resultList);
         }
-
-        return Result.ok(resultList);
     }
 
     @Override
@@ -370,20 +387,21 @@ public class CosmosPostgreSQL implements Database {
 
     private <T> Result<List<T>> searchPatternAux(Class<T> clazz, String pattern, String container, String attribute) throws SQLException {
         String query = format("SELECT * FROM %s u WHERE UPPER(%s) LIKE '%%%s%%'", container, attribute, pattern.toUpperCase());
-        PreparedStatement readStatement = connection.prepareStatement(query);
-        ResultSet resultSet = readStatement.executeQuery();
+        try (Connection connection = datasource.getConnection();
+            PreparedStatement readStatement = connection.prepareStatement(query)) {
+            ResultSet resultSet = readStatement.executeQuery();
+            List<T> resultList = new ArrayList<>();
+            while (resultSet.next()) {
+                String userId = resultSet.getString(1);
+                String pwd = resultSet.getString(2);
+                String email = resultSet.getString(3);
+                String displayName = resultSet.getString(4);
+                User u = new User(userId, pwd, email, displayName);
+                resultList.add((T) u);
+            }
 
-        List<T> resultList = new ArrayList<>();
-        while (resultSet.next()) {
-            String userId = resultSet.getString(1);
-            String pwd = resultSet.getString(2);
-            String email = resultSet.getString(3);
-            String displayName = resultSet.getString(4);
-            User u = new User(userId, pwd, email, displayName);
-            resultList.add((T) u);
+            return Result.ok(resultList);
         }
-
-        return Result.ok(resultList);
     }
 
     @Override

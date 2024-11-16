@@ -4,6 +4,7 @@ import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 import redis.clients.jedis.params.ScanParams;
 import tukano.api.Result;
+import tukano.impl.cookies.Session;
 import tukano.impl.data.Short;
 import tukano.impl.data.User;
 import tukano.impl.rest.TukanoApplication;
@@ -50,6 +51,33 @@ public class RedisCache {
 		return instance;
 	}
 
+	public static void putSession(Session session) {
+		if(!TukanoApplication.REDIS_CACHE_ON)
+			return;
+
+		try (var jedis = getCachePool().getResource()) {
+			jedis.set(session.getUid(), JSON.encode(session));
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public static Session getSession(String uid) {
+		if(!TukanoApplication.REDIS_CACHE_ON)
+			return null;
+
+		try (var jedis = getCachePool().getResource()) {
+			var res = jedis.get(uid);
+			if(res == null)
+				return null;
+			return JSON.decode(res, Session.class);
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
 
 	public static void generateCookie(User u) {
 		if(!TukanoApplication.REDIS_CACHE_ON)

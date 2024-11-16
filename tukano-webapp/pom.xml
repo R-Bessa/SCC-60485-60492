@@ -69,7 +69,7 @@
 			    <configuration>
 			        <schemaVersion>V2</schemaVersion>
 			        <pricingTier>F1</pricingTier>
-			        <region>northcentralus</region>
+			        <region>westeurope</region>
 			        <runtime>
 			            <os>linux</os>
 			            <javaVersion>Java 17</javaVersion>
@@ -85,14 +85,14 @@
 			                </resource>
 			            </resources>y
 			        </deployment>
+			        <resourceGroup>scc-rg-60485-60492</resourceGroup>
+			        <appName>scc-60485-60492</appName>
+			        <!--<resourceGroup>scc-rg-60485-60492</resourceGroup>
+			                        <appName>scc-60485-60492-us</appName>-->
 			        <!--<resourceGroup>scc-project-60485-rg</resourceGroup>
-			    			    	<appName>scc-project-60485</appName>-->
-					<!--<resourceGroup>scc-rg-60485-60492</resourceGroup>
-                    <appName>scc-60485-60492-us</appName>-->
-                    <resourceGroup>scc-project-60485-rg</resourceGroup>
-                    <appName>scc-project-60485</appName>
-                </configuration>
-            </plugin>
+			                        <appName>scc-project-60485</appName>-->
+			    </configuration>
+			</plugin>
         </plugins>
     </build>
     <dependencies>
@@ -271,6 +271,14 @@
 			<groupId>redis.clients</groupId>
 			<artifactId>jedis</artifactId>
 			<version>5.0.1</version>
+		</dependency>
+
+		<!-- Others -->
+
+		<dependency>
+			<groupId>javax.ws.rs</groupId>
+			<artifactId>javax.ws.rs-api</artifactId>
+			<version>2.1.1</version>
 		</dependency>
 
 	</dependencies>

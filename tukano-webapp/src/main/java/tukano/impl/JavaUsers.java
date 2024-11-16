@@ -15,6 +15,7 @@ import java.util.concurrent.Executors;
 import java.util.logging.Logger;
 
 import tukano.api.Result;
+import tukano.impl.cookies.Authentication;
 import tukano.impl.data.User;
 import tukano.api.Users;
 import tukano.impl.storage.cache.RedisCache;
@@ -54,6 +55,8 @@ public class JavaUsers implements Users {
 					JavaShorts.getInstance().follow(user.getUserId(), TUKANO_RECOMMENDS, true, user.getPwd())).start();
 		}
 
+		//TODO - login logic should be here
+
 		return res;
 	}
 
@@ -77,6 +80,8 @@ public class JavaUsers implements Users {
 			return error(FORBIDDEN);
 
 		RedisCache.generateCookie(user);
+
+		var result = Authentication.login(userId); //TODO - might fail here
 
 		return Result.ok(user);
 	}

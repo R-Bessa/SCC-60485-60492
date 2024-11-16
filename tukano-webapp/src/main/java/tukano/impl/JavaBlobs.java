@@ -12,6 +12,7 @@ import java.util.logging.Logger;
 
 import tukano.api.Blobs;
 import tukano.api.Result;
+import tukano.impl.cookies.Authentication;
 import tukano.impl.rest.TukanoApplication;
 import tukano.impl.storage.blobs.BlobStorage;
 import tukano.impl.storage.blobs.AzureBlobStorage;
@@ -46,6 +47,14 @@ public class JavaBlobs implements Blobs {
 	@Override
 	public Result<Void> upload(String blobId, byte[] bytes, String token) {
 		Log.info(() -> format("upload : blobId = %s, sha256 = %s, token = %s\n", blobId, Hex.of(Hash.sha256(bytes)), token));
+
+		String userId = blobId.split("\\+")[0];
+		try {
+			Authentication.validateSession(userId);
+		} catch (Exception e) {
+			return error(FORBIDDEN);
+		}
+
 
 		if (!validBlobId(blobId, token))
 			return error(FORBIDDEN);

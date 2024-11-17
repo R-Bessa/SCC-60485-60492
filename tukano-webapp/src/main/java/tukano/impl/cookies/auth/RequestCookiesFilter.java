@@ -10,7 +10,8 @@ import java.io.IOException;
 public class RequestCookiesFilter implements ContainerRequestFilter {
 
     @Override
-    public void filter(ContainerRequestContext reqCtx) throws IOException {    	
+    public void filter(ContainerRequestContext reqCtx) throws IOException {
+        System.out.println(reqCtx.getCookies() + " FILTEEEEEEEEEEEEER");
     	RequestCookies.set( reqCtx.getCookies() );
     }
 }

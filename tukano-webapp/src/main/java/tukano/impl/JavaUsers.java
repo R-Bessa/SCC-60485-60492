@@ -53,9 +53,9 @@ public class JavaUsers implements Users {
 		if(!user.getUserId().equals(TUKANO_RECOMMENDS)) {
 			Executors.defaultThreadFactory().newThread(() ->
 					JavaShorts.getInstance().follow(user.getUserId(), TUKANO_RECOMMENDS, true, user.getPwd())).start();
-		}
 
-		//TODO - login logic should be here
+			var result = Authentication.login(user.getUserId()); //TODO - might fail here
+		}
 
 		return res;
 	}
@@ -80,8 +80,6 @@ public class JavaUsers implements Users {
 			return error(FORBIDDEN);
 
 		RedisCache.generateCookie(user);
-
-		var result = Authentication.login(userId); //TODO - might fail here
 
 		return Result.ok(user);
 	}

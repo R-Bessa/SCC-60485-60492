@@ -29,10 +29,10 @@ public class Authentication {
 	}
 	
 	static public Session validateSession(String userId) throws NotAuthorizedException {
-		System.out.println("MBAPEEEEEEEEEE");
 		var cookies = RequestCookies.get();
-		System.out.println(cookies + " COOOOOOOOOOOOOOOOOOOOOOKIES");
-		System.out.println("RONALDOOOOOOOOOOOO");
+		cookies.keySet().forEach(x -> System.out.println(x + " GORDAAAAAAAAAAAA"));
+		cookies.values().forEach(x -> System.out.println(x + " OLAAAAAAAAAAAAAAAAA"));
+		System.out.println(cookies.get(COOKIE_KEY) + " COOOOOOOOOOOOOOOOOOOOOOKIES");
 		return validateSession( cookies.get(COOKIE_KEY ), userId );
 	}
 	

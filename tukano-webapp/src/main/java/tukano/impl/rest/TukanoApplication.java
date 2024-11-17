@@ -18,6 +18,7 @@ import tukano.impl.storage.db.DatabaseType;
 
 public class TukanoApplication extends Application {
 	private Set<Object> singletons = new HashSet<>();
+	private Set<Class<?>> resources = new HashSet<>();
 
 	public static final String TUKANO_SECRET = "tukano-secret";
 	public static final String TUKANO_RECOMMENDS = "tukano";
@@ -51,12 +52,16 @@ public class TukanoApplication extends Application {
 
 	public static final boolean REDIS_CACHE_ON = true;
 	public static final String REDIS_HOSTNAME = "scc-60485-60492.redis.cache.windows.net";
-	public static final String REDIS_KEY = "natqdRICc9GWhnw2BghDlUfNDBxQomuTAAzCaEmATj4=";
+	public static final String REDIS_KEY = "5jihAUQRm6SQc3oj4NiGIyzdg8454spVBAzCaOifsh0=";
 
 
 	public TukanoApplication() {
 		singletons.add( new RestUsersResource());
 		singletons.add( new RestShortsResource());
+
+		resources.add(RequestCookiesFilter.class);
+		resources.add(RequestCookiesCleanupFilter.class);
+		resources.add(Authentication.class);
 
 
 		if(!BLOBS_TYPE.equals(BlobsType.SERVERLESS_BLOBS))
@@ -64,6 +69,11 @@ public class TukanoApplication extends Application {
 
 		Token.setSecret(TUKANO_SECRET);
 		JavaUsers.getInstance().createUser(new User(TUKANO_RECOMMENDS, "pwd", "tukano-email", "tukano-recommends"));
+	}
+
+	@Override
+	public Set<Class<?>> getClasses() {
+		return resources;
 	}
 
 	@Override

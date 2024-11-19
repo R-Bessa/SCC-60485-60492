@@ -22,7 +22,7 @@ public class TukanoApplication extends Application {
 
 	public static final String TUKANO_SECRET = "tukano-secret";
 	public static final String TUKANO_RECOMMENDS = "tukano";
-
+	public static final String ADMIN = "admin";
 
 	/** Service Base Uri  */
 
@@ -71,6 +71,8 @@ public class TukanoApplication extends Application {
 
 		Token.setSecret(TUKANO_SECRET);
 		JavaUsers.getInstance().createUser(new User(TUKANO_RECOMMENDS, "pwd", "tukano-email", "tukano-recommends"));
+		JavaUsers.getInstance().createUser(new User(ADMIN, "pwd", "admin-email", "admin"));
+
 	}
 
 	@Override

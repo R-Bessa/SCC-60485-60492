@@ -93,6 +93,12 @@ public class JavaBlobs implements Blobs {
 	public Result<Void> delete(String blobId, String token) {
 		Log.info(() -> format("delete : blobId = %s, token=%s\n", blobId, token));
 
+		try {
+			Authentication.validateSession(TukanoApplication.ADMIN);
+		} catch (Exception e) {
+			return error(FORBIDDEN);
+		}
+
 		if( ! validBlobId( blobId, token ) )
 			return error(FORBIDDEN);
 
@@ -102,7 +108,11 @@ public class JavaBlobs implements Blobs {
 	@Override
 	public Result<Void> deleteAllBlobs(String userId, String pwd) {
 		Log.info(() -> format("deleteAllBlobs : userId = %s, pwd=%s\n", userId, pwd));
-
+		try {
+			Authentication.validateSession(TukanoApplication.ADMIN);
+		} catch (Exception e) {
+			return error(FORBIDDEN);
+		}
 		return errorOrValue(okUser(userId, pwd), storage.delete(toPath(userId)) );
 	}
 	

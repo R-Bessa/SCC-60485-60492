@@ -42,6 +42,9 @@ public class Authentication {
 	
 	static public Session validateSession(String userId) throws NotAuthorizedException {
 		var cookies = RequestCookies.get();
+		cookies.keySet().forEach(x -> System.out.println(x + " GORDOOOOOOOOOOOOOOO"));
+		cookies.values().forEach(x -> System.out.println(x + " OLAAAAAAAAAAAAAAAAA"));
+		System.out.println(cookies.get(COOKIE_KEY) + " COOOOOOOOOOOOOOOOOOOOOOKIES");
 		return validateSession( cookies.get(COOKIE_KEY ), userId );
 	}
 	

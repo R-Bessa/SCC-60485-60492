@@ -51,8 +51,10 @@ public class TukanoApplication extends Application {
 	/** Redis Cache Configs */
 
 	public static final boolean REDIS_CACHE_ON = true;
-	public static final String REDIS_HOSTNAME = "scc-60485-60492.redis.cache.windows.net";
-	public static final String REDIS_KEY = "5jihAUQRm6SQc3oj4NiGIyzdg8454spVBAzCaOifsh0=";
+	//public static final String REDIS_HOSTNAME = "scc-cache-60485.redis.cache.windows.net";
+	//public static final String REDIS_KEY = "wlr8N3BoxpyEoby2wfFgl93sVM7jSbdAeAzCaFNQNnU=";
+	 public static final String REDIS_HOSTNAME = "scc-60485-60492.redis.cache.windows.net";
+	public static final String REDIS_KEY = "1ihtAYVTJwHtafmiYH5ZkmFkKa36CfN32AzCaI9aTQM=";
 
 
 	public TukanoApplication() {

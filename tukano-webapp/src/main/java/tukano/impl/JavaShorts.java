@@ -238,7 +238,7 @@ public class JavaShorts implements Shorts {
 			return error(res.error());
 	}
 
-	private Result<User> checkCookie(String userId, String pwd) {
+	public static Result<User> checkCookie(String userId, String pwd) {
 		User user = RedisCache.checkCookie(pwd);
 		if (user == null) {
 			var res = okUser(userId, pwd);

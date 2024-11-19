@@ -56,9 +56,11 @@ public class RedisCache {
 			return;
 
 		try (var jedis = getCachePool().getResource()) {
+			System.out.println(session + " SESSIOOOOOOOOOON");
 			jedis.set(session.getUid(), JSON.encode(session));
 
 		} catch (Exception e) {
+			System.out.println("ERROOOOOOOOOOOOOO");
 			e.printStackTrace();
 		}
 	}

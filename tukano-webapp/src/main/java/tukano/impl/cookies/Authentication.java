@@ -4,35 +4,44 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Cookie;
 import jakarta.ws.rs.core.NewCookie;
 import jakarta.ws.rs.core.Response;
+import tukano.impl.JavaShorts;
 import tukano.impl.cookies.auth.RequestCookies;
-import tukano.impl.storage.cache.RedisCache;
-
 import java.util.UUID;
 
+@Path(Authentication.PATH)
 public class Authentication {
+	static final String PATH = "login";
 	static final String COOKIE_KEY = "scc:session";
 	private static final int MAX_COOKIE_AGE = 3600;
+	private static final String USER_ID = "userId";
+	private static final String PWD = "pwd";
 
-	public static Response login(String user) {
-		String uid = UUID.randomUUID().toString();
-		var cookie = new NewCookie.Builder(COOKIE_KEY)
-				.value(uid).path("/")
-				.comment("sessionid")
-				.maxAge(MAX_COOKIE_AGE)
-				.secure(true) //ideally it should be true to only work for https requests
-				.httpOnly(true)
-				.build();
+	@POST
+	@Path("/{" + USER_ID+ "}")
+	public static Response login(@PathParam(USER_ID) String user, @QueryParam(PWD) String pwd) {
+		var res = JavaShorts.okUser(user, pwd);
+		if(!res.isOK())
+			throw new NotAuthorizedException("Incorrect login");
+		else {
+			String uid = UUID.randomUUID().toString();
+			var cookie = new NewCookie.Builder(COOKIE_KEY)
+					.value(uid).path("/")
+					.comment("sessionid")
+					.maxAge(MAX_COOKIE_AGE)
+					.secure(false) //ideally it should be true to only work for https requests
+					.httpOnly(true)
+					.build();
 
-		RedisCache.putSession(new Session(uid, user)); //TODO - Might fail here
+			FakeRedisLayer.putSession( new Session( uid, user));
 
-		return Response.ok().cookie(cookie).build();
+			return Response.ok()
+					.cookie(cookie)
+					.build();
+		}
 	}
 	
 	static public Session validateSession(String userId) throws NotAuthorizedException {
 		var cookies = RequestCookies.get();
-		cookies.keySet().forEach(x -> System.out.println(x + " GORDAAAAAAAAAAAA"));
-		cookies.values().forEach(x -> System.out.println(x + " OLAAAAAAAAAAAAAAAAA"));
-		System.out.println(cookies.get(COOKIE_KEY) + " COOOOOOOOOOOOOOOOOOOOOOKIES");
 		return validateSession( cookies.get(COOKIE_KEY ), userId );
 	}
 	
@@ -43,7 +52,7 @@ public class Authentication {
 			throw new NotAuthorizedException("No session initialized");
 		}
 
-		var session = RedisCache.getSession( cookie.getValue());
+		var session = FakeRedisLayer.getSession( cookie.getValue());
 		if( session == null ) {
 			System.out.println("No valid session initialized");
 			throw new NotAuthorizedException("No valid session initialized");

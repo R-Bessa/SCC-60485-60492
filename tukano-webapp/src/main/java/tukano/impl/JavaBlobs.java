@@ -66,6 +66,13 @@ public class JavaBlobs implements Blobs {
 	public Result<byte[]> download(String blobId, String token) {
 		Log.info(() -> format("download : blobId = %s, token=%s\n", blobId, token));
 
+		String userId = blobId.split("\\+")[0];
+		try {
+			Authentication.validateSession(userId);
+		} catch (Exception e) {
+			return error(FORBIDDEN);
+		}
+
 		if( ! validBlobId( blobId, token ) )
 			return error(FORBIDDEN);
 

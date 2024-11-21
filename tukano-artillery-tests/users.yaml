@@ -1,6 +1,6 @@
-# Delete Users
+# Create Users
 config:
-  target: https://scc-project-60485.azurewebsites.net/rest
+  target:  https://scc-60485-60492.azurewebsites.net/rest   
   plugins:
     metrics-by-endpoint: { } # Used to get metrics for each endpoint individually.
   phases:
@@ -24,6 +24,13 @@ scenarios:
   - name: 'DB Storage'
     weight: 1
     flow:
-      # Delete user
-      - delete:
-          url: "/users/{{ userId }}?pwd={{ pwd }}"
+      # Create users
+      - post:
+          url: /users/
+          headers:
+            Content-Type: application/json
+          json:
+            userId: "{{ userId }}"
+            pwd: "{{ pwd }}"
+            email: "{{ email }}"
+            displayName: "{{ displayName }}"

@@ -1,6 +1,6 @@
-# Create Users
+#DB STORAGE
 config:
-  target:  https://scc-project-60485.azurewebsites.net/rest
+  target: https://scc-project-60485.azurewebsites.net/rest
   plugins:
     metrics-by-endpoint: { } # Used to get metrics for each endpoint individually.
   phases:
@@ -24,13 +24,25 @@ scenarios:
   - name: 'DB Storage'
     weight: 1
     flow:
-      # Create users
+      # Create users' shorts
       - post:
-          url: /users/
+          url: "/shorts/{{ userId }}?pwd={{ pwd }}"
           headers:
             Content-Type: application/json
-          json:
-            userId: "{{ userId }}"
-            pwd: "{{ pwd }}"
-            email: "{{ email }}"
-            displayName: "{{ displayName }}"
+            Accept: application/json
+          capture:
+            - json: "$.id"
+              as: "id"
+      # Follow random user
+      - post:
+          url: "/shorts/{{ userId }}/{{ random_user_id }}/followers?pwd={{ pwd }}"
+          headers:
+            Content-Type: application/json
+          json: true
+      # Like short
+      - post:
+          url: "/shorts/{{ id }}/{{ userId }}/likes?pwd={{ pwd }}"
+          headers:
+            Content-Type: application/json
+          json: true
+      

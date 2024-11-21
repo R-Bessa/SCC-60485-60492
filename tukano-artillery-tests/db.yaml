@@ -1,6 +1,6 @@
 #DB STORAGE
 config:
-  target: https://scc-project-60485.azurewebsites.net/rest
+  target: https://scc-60485-60492.azurewebsites.net/rest
   plugins:
     metrics-by-endpoint: { } # Used to get metrics for each endpoint individually.
   phases:
@@ -45,18 +45,11 @@ scenarios:
           headers:
             Content-Type: application/json
           json: true
-      # Get followers of user
-      - get :
-          url: "/shorts/{{ userId }}/followers?pwd={{ pwd }}"
-      # Get likes of short
-      - get:
-          url: "/shorts/{{ id }}/likes?pwd={{ pwd }}"
-      # Get feed of user
+  	# Get feed of user
       - get:
           url: "/shorts/{{ userId }}/feed?pwd={{ pwd }}"
       # Get shorts of user
       - get:
           url: "/shorts/{{ userId }}/shorts"
-      # Delete user shorts
-      - delete:
-          url: "/shorts/{{ userId }}/shorts?pwd={{ pwd }}"
+      
+

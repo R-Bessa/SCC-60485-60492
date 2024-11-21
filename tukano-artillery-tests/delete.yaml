@@ -1,4 +1,4 @@
-#BLOBS
+# Delete Users
 config:
   target: https://scc-60485-60492.azurewebsites.net/rest
   plugins:
@@ -19,37 +19,14 @@ config:
       - "pwd"
       - "email"
       - "displayName"
+      - "random_user_id"
 scenarios:
-  - name: 'Blobs'
+  - name: 'DB Storage'
     weight: 1
     flow:
-      # Create users' shorts
-      - post:
-          url: "/shorts/{{ userId }}?pwd={{ pwd }}"
-          headers:
-            Content-Type: application/json
-            Accept: application/json
-          capture:
-            - json: "$.id"
-              as: "id"
-      # Login users
-      - post:
-          url: "/login/{{ userId }}?pwd={{ pwd }}"
-      # Create shorts' blobs
-      - post:
-          url: "/blobs/{{ id }}?token=token"
-          headers:
-            Content-Type: application/octet-stream
-            body: \x00\x01\x02
-      # Login users
-      - post:
-          url: "/login/{{ userId }}?pwd={{ pwd }}"
-      # Download blobs
-      - get:
-          url: "/blobs/{{ id }}?token=token"
       # Login admin
       - post:
           url: "/login/admin?pwd=pwd"
-      # Delete all blobs
+      # Delete user
       - delete:
-          url: "/blobs/{{ userId }}?token=token"
+          url: "/users/{{ userId }}?pwd={{ pwd }}"

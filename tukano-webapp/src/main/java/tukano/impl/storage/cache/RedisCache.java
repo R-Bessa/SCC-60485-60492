@@ -18,9 +18,9 @@ import static tukano.impl.rest.TukanoApplication.REDIS_KEY;
 
 public class RedisCache {
 
-	private static final int REDIS_PORT = 6380;
+	private static int redis_port;
+	private static boolean redis_use_tls;
 	private static final int REDIS_TIMEOUT = 1000;
-	private static final boolean Redis_USE_TLS = true;
 
 	private static final String FEED_KEY_PREFIX = "feed-";
 	public static final String LIKES_KEY_PREFIX = "likes-";
@@ -30,8 +30,17 @@ public class RedisCache {
 	private static final String RECENT_SHORTS = "recent_shorts_list";
 	private static final int RECENT_SHORTS_SIZE = 50;
 
+	public static void init() {
+		if(TukanoApplication.DOCKERIZED_REDIS) {
+			redis_port = 6379;
+			redis_use_tls = false;
+		}
+		else {
+			redis_port = 6380;
+			redis_use_tls = true;
+		}
+	}
 
-	
 	private static JedisPool instance;
 	
 	public synchronized static JedisPool getCachePool() {
@@ -47,7 +56,7 @@ public class RedisCache {
 		poolConfig.setTestWhileIdle(true);
 		poolConfig.setNumTestsPerEvictionRun(3);
 		poolConfig.setBlockWhenExhausted(true);
-		instance = new JedisPool(poolConfig, REDIS_HOSTNAME, REDIS_PORT, REDIS_TIMEOUT, REDIS_KEY, Redis_USE_TLS);
+		instance = new JedisPool(poolConfig, REDIS_HOSTNAME, redis_port, REDIS_TIMEOUT, REDIS_KEY, redis_use_tls);
 		return instance;
 	}
 

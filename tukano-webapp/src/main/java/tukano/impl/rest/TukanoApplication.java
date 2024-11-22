@@ -12,6 +12,7 @@ import tukano.impl.cookies.auth.RequestCookiesFilter;
 import tukano.impl.data.User;
 import tukano.impl.georeplication.Region;
 import tukano.impl.storage.blobs.BlobsType;
+import tukano.impl.storage.cache.RedisCache;
 import tukano.impl.storage.db.DatabaseType;
 
 /** Cloud Version of Tukano */
@@ -52,10 +53,9 @@ public class TukanoApplication extends Application {
 	/** Redis Cache Configs */
 
 	public static final boolean REDIS_CACHE_ON = true;
-	//public static final String REDIS_HOSTNAME = "scc-cache-60485.redis.cache.windows.net";
-	//public static final String REDIS_KEY = "wlr8N3BoxpyEoby2wfFgl93sVM7jSbdAeAzCaFNQNnU=";
-	 public static final String REDIS_HOSTNAME = "scc-60485-60492.redis.cache.windows.net";
-	public static final String REDIS_KEY = "1ihtAYVTJwHtafmiYH5ZkmFkKa36CfN32AzCaI9aTQM=";
+	public static final boolean DOCKERIZED_REDIS = true;
+	public static final String REDIS_HOSTNAME = "cache"; //TODO name of kubernetes service or container
+	public static final String REDIS_KEY = "cachePwd"; //TODO send as env to kubernetes
 
 
 	public TukanoApplication() {
@@ -69,6 +69,9 @@ public class TukanoApplication extends Application {
 
 		if(!BLOBS_TYPE.equals(BlobsType.SERVERLESS_BLOBS))
 			singletons.add( new RestBlobsResource());
+
+		if(REDIS_CACHE_ON)
+			RedisCache.init();
 
 		Token.setSecret(TUKANO_SECRET);
 		JavaUsers.getInstance().createUser(new User(TUKANO_RECOMMENDS, "pwd", "tukano-email", "tukano-recommends"));

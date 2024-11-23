@@ -80,8 +80,10 @@ public class RedisCache {
 
 		try (var jedis = getCachePool().getResource()) {
 			var res = jedis.get(uid);
+
 			if(res == null)
 				return null;
+
 			return JSON.decode(res, Session.class);
 		}
 		catch (Exception e) {

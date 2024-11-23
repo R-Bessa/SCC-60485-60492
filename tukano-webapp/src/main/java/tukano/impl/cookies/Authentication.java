@@ -34,7 +34,7 @@ public class Authentication {
 					.httpOnly(true)
 					.build();
 
-			//FakeRedisLayer.putSession( new Session( uid, user));
+
 			RedisCache.putSession( new Session( uid, user));
 
 
@@ -51,26 +51,19 @@ public class Authentication {
 	
 	static public Session validateSession(Cookie cookie, String userId) throws NotAuthorizedException {
 
-		if (cookie == null ) {
-			System.out.println("No session initialized");
+		if (cookie == null )
 			throw new NotAuthorizedException("No session initialized");
-		}
 
 		var session = RedisCache.getSession( cookie.getValue());
-		if( session == null ) {
-			System.out.println("No valid session initialized");
-			throw new NotAuthorizedException("No valid session initialized");
-		}
-			
-		if (session.getUser() == null || session.getUser().isEmpty()) {
-			System.out.println("No valid session initialized");
-			throw new NotAuthorizedException("No valid session initialized");
-		}
 
-		if (!session.getUser().equals(userId)) {
-			System.out.println("Invalid session initialized");
+		if( session == null )
+			throw new NotAuthorizedException("No valid session initialized");
+			
+		if (session.getUser() == null || session.getUser().isEmpty())
+			throw new NotAuthorizedException("No valid session initialized");
+
+		if (!session.getUser().equals(userId))
 			throw new NotAuthorizedException("Invalid user : " + session.getUser());
-		}
 
 		return session;
 	}

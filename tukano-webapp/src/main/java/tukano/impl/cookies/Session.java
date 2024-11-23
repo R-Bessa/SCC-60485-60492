@@ -1,13 +1,14 @@
 package tukano.impl.cookies;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Session {
     private String uid;
     private String user;
 
     @JsonCreator
-    public Session(String uid, String user) {
+    public Session(@JsonProperty("uid") String uid, @JsonProperty("user") String user) {
         this.uid = uid;
         this.user = user;
     }

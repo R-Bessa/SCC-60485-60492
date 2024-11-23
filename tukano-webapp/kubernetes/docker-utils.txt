@@ -20,6 +20,8 @@ docker push scc60485/webapp
 
 CACHE
 
+copy target/tukano-1.war kubernetes/cache
+cd kubernetes/cache
 docker build -t tukano-cache .
 docker run -it --rm -p 6379:6379 --name cache --net tukano-network tukano-cache
 

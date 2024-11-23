@@ -6,6 +6,8 @@ import jakarta.ws.rs.core.NewCookie;
 import jakarta.ws.rs.core.Response;
 import tukano.impl.JavaShorts;
 import tukano.impl.cookies.auth.RequestCookies;
+import tukano.impl.storage.cache.RedisCache;
+
 import java.util.UUID;
 
 @Path(Authentication.PATH)
@@ -32,7 +34,9 @@ public class Authentication {
 					.httpOnly(true)
 					.build();
 
-			FakeRedisLayer.putSession( new Session( uid, user));
+			//FakeRedisLayer.putSession( new Session( uid, user));
+			RedisCache.putSession( new Session( uid, user));
+
 
 			return Response.ok()
 					.cookie(cookie)
@@ -42,9 +46,6 @@ public class Authentication {
 	
 	static public Session validateSession(String userId) throws NotAuthorizedException {
 		var cookies = RequestCookies.get();
-		cookies.keySet().forEach(x -> System.out.println(x + " GORDOOOOOOOOOOOOOOO"));
-		cookies.values().forEach(x -> System.out.println(x + " OLAAAAAAAAAAAAAAAAA"));
-		System.out.println(cookies.get(COOKIE_KEY) + " COOOOOOOOOOOOOOOOOOOOOOKIES");
 		return validateSession( cookies.get(COOKIE_KEY ), userId );
 	}
 	
@@ -55,7 +56,7 @@ public class Authentication {
 			throw new NotAuthorizedException("No session initialized");
 		}
 
-		var session = FakeRedisLayer.getSession( cookie.getValue());
+		var session = RedisCache.getSession( cookie.getValue());
 		if( session == null ) {
 			System.out.println("No valid session initialized");
 			throw new NotAuthorizedException("No valid session initialized");

@@ -9,6 +9,7 @@ import tukano.impl.data.Following;
 import tukano.impl.data.Likes;
 import tukano.impl.data.User;
 import tukano.impl.data.Short;
+import tukano.impl.rest.TukanoApplication;
 import tukano.impl.storage.db.Database;
 
 import javax.sql.DataSource;
@@ -30,6 +31,12 @@ public class CosmosPostgreSQL implements Database {
 
     private static CosmosPostgreSQL instance;
 
+    //DOCKER
+    private static final String URL = "jdbc:postgresql://localhost:5432/tukano-db"; // Replace with your Docker container's IP or hostname if different
+    private static final String USER = "citus";
+    private static final String PASSWORD = "Sigma!!!";
+
+    //COSMOS
     private static final String DB_USERNAME = "db.username";
     private static final String DB_PASSWORD = "db.password";
     private static final String DB_URL = "db.url";
@@ -41,7 +48,8 @@ public class CosmosPostgreSQL implements Database {
     synchronized public static CosmosPostgreSQL getInstance() {
         if (instance == null) {
             instance = new CosmosPostgreSQL();
-            init();
+            if (TukanoApplication.DOCKER_POSTGRES_ON)
+                init();
         }
         return instance;
     }
@@ -60,6 +68,12 @@ public class CosmosPostgreSQL implements Database {
         catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    private Connection getConnection() throws SQLException {
+        if(TukanoApplication.DOCKER_POSTGRES_ON)
+            return DriverManager.getConnection(URL, USER, PASSWORD);
+        else return datasource.getConnection();
     }
 
     private static DataSource getDataSource() {
@@ -92,7 +106,7 @@ public class CosmosPostgreSQL implements Database {
     }
 
     private void executeQuery(String query) throws SQLException {
-        try (Connection connection = datasource.getConnection();
+        try (Connection connection = getConnection();
             PreparedStatement statement = connection.prepareStatement(query)) {
             statement.executeUpdate();
         }
@@ -142,7 +156,7 @@ public class CosmosPostgreSQL implements Database {
 
     private void deleteAux(String table, String attribute, String id) throws SQLException {
         String delete = format("DELETE FROM %s WHERE %s = '%s'", table, attribute, id);
-        try (Connection connection = datasource.getConnection();
+        try (Connection connection = getConnection();
              PreparedStatement deleteStatement = connection.prepareStatement(delete)) {
              deleteStatement.executeUpdate();
         }
@@ -164,7 +178,7 @@ public class CosmosPostgreSQL implements Database {
 
     private <T> Result<?> getById(String id, Class<T> clazz) throws SQLException {
         if(clazz.equals(User.class)) {
-            try (Connection connection = datasource.getConnection();
+            try (Connection connection = getConnection();
                  PreparedStatement readStatement = connection.prepareStatement("SELECT * FROM users WHERE userId = ?;")) {
                  readStatement.setString(1, id);
                 ResultSet resultSet = readStatement.executeQuery();
@@ -182,7 +196,7 @@ public class CosmosPostgreSQL implements Database {
 
         }
         else if (clazz.equals(Likes.class)) {
-            try (Connection connection = datasource.getConnection();
+            try (Connection connection = getConnection();
                  PreparedStatement readStatement = connection.prepareStatement("SELECT * FROM likes WHERE id = ?;")) {
                  readStatement.setString(1, id);
                  ResultSet resultSet = readStatement.executeQuery();
@@ -198,7 +212,7 @@ public class CosmosPostgreSQL implements Database {
 
         }
         else if(clazz.equals(Following.class)) {
-            try (Connection connection = datasource.getConnection();
+            try (Connection connection = getConnection();
                  PreparedStatement readStatement = connection.prepareStatement("SELECT * FROM following WHERE id = ?;")) {
                  readStatement.setString(1, id);
                  ResultSet resultSet = readStatement.executeQuery();
@@ -214,7 +228,7 @@ public class CosmosPostgreSQL implements Database {
         }
         else {
             String query = format("SELECT * FROM public.shorts WHERE shortId = '%s';", id);
-            try (Connection connection = datasource.getConnection();
+            try (Connection connection = getConnection();
                 PreparedStatement readStatement = connection.prepareStatement(query)) {
                 ResultSet resultSet = readStatement.executeQuery();
                 if (!resultSet.next()) {
@@ -297,7 +311,7 @@ public class CosmosPostgreSQL implements Database {
 
     private <T> Result<List<T>> count(Class<T> clazz, String container, String attribute, String id) throws SQLException {
         String query = format("SELECT COUNT(%s) FROM %s WHERE %s = '%s'", attribute, container, attribute, id);
-        try (Connection connection = datasource.getConnection();
+        try (Connection connection = getConnection();
             PreparedStatement readStatement = connection.prepareStatement(query)) {
             ResultSet resultSet = readStatement.executeQuery();
             if (!resultSet.next()) {
@@ -323,7 +337,7 @@ public class CosmosPostgreSQL implements Database {
 
     private <T> Result<List<T>> getAllByAttributeAux(String container, String attribute, String param, String match) throws SQLException {
         var query = format("SELECT %s FROM %s WHERE %s = '%s'", attribute, container, param, match);
-        try (Connection connection = datasource.getConnection();
+        try (Connection connection = getConnection();
             PreparedStatement readStatement = connection.prepareStatement(query)) {
             ResultSet resultSet = readStatement.executeQuery();
             List<T> resultList = new ArrayList<>();
@@ -348,7 +362,7 @@ public class CosmosPostgreSQL implements Database {
     }
 
     private <T> Result<List<T>> sqlAux(String query) throws SQLException {
-        try (Connection connection = datasource.getConnection();
+        try (Connection connection = getConnection();
             PreparedStatement readStatement = connection.prepareStatement(query)) {
             ResultSet resultSet = readStatement.executeQuery();
             List<T> resultList = new ArrayList<>();
@@ -387,7 +401,7 @@ public class CosmosPostgreSQL implements Database {
 
     private <T> Result<List<T>> searchPatternAux(Class<T> clazz, String pattern, String container, String attribute) throws SQLException {
         String query = format("SELECT * FROM %s u WHERE UPPER(%s) LIKE '%%%s%%'", container, attribute, pattern.toUpperCase());
-        try (Connection connection = datasource.getConnection();
+        try (Connection connection = getConnection();
             PreparedStatement readStatement = connection.prepareStatement(query)) {
             ResultSet resultSet = readStatement.executeQuery();
             List<T> resultList = new ArrayList<>();

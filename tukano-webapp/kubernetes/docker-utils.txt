@@ -32,4 +32,18 @@ docker login
 docker push scc60485/cache
 
 
+--------------------------------------------------------
+
+POSTGRES
+
+copy target/tukano-1.war kubernetes/db
+cd kubernetes/db
+docker build -t tukano_postgres .
+docker run --it --rm -p 5432:5432 --name postgres --net tukano-network tukano_postgres
+
+docker exec -it postgres psql -U citus -d tukano-db
+
+
+
+
 

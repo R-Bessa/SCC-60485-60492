@@ -37,6 +37,32 @@ docker run --it --rm -p 5432:5432 --name postgres --net tukano-network tukano_po
 
 docker exec -it postgres psql -U citus -d tukano-db
 
+-------------------------------------------------------------------
+
+KUBERNETES
+
+1) Create a service principal
+
+az ad sp create-for-rbac --name http://rbessa-scc2425-kuber --role Contributor --scope /subscriptions/<id_of_your_subscription>
+az ad sp create-for-rbac --name http://rbessa-scc2425-kuber --role Contributor --scope /subscriptions/6c53d58b-c8f4-4f4c-8063-6edc4c244cb5
+
+{
+  "appId": "0189bb9f-d9c6-468e-9c80-c9d2312fdf7c",
+  "displayName": "http://rbessa-scc2425-kuber",
+  "password": "wL18Q~6e2766hbeCLLv4-Zh5-RzO9iwOvGvbYclV",
+  "tenant": "ae7e50a2-ed26-41f7-bd75-f49683f2433a"
+}
+
+
+
+2) Register for Services on Azure Portal
+
+Home -> Subscriptions -> Azure for Students -> Settings -> Resource Providers.
+Register for ContainerService, Quotas, Compute
+
+Create Quotas:
+Home -> Search for "Quotas" -> Select "Quotas" -> Compute -> Total Regional vCPUs (North Europe) -> New Quota Request -> New Limit (4)
+
 
 
 

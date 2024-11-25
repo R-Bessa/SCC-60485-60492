@@ -11,6 +11,7 @@ import tukano.impl.cookies.auth.RequestCookiesCleanupFilter;
 import tukano.impl.cookies.auth.RequestCookiesFilter;
 import tukano.impl.data.User;
 import tukano.impl.georeplication.Region;
+import tukano.impl.kubernetes.HealthMonitor;
 import tukano.impl.storage.blobs.BlobsType;
 import tukano.impl.storage.cache.RedisCache;
 import tukano.impl.storage.db.DatabaseType;
@@ -38,13 +39,13 @@ public class TukanoApplication extends Application {
 	public static final boolean BLOBS_GEO_REPLICATION = false;
 	public static final BlobsType BLOBS_TYPE = BlobsType.AZURE_BLOBS;
 	public static final long MAX_TOKEN_AGE = 300000;
-	public static final String BLOB_STORAGE_KEY = "DefaultEndpointsProtocol=https;AccountName=scc60492;AccountKey=HwhiZRDl0MQcOy2sSzWJ3ZNYNVGnVu2ff9sVlp4l/3trXW2jLVnD6sU8QgBrH7rrChHsWxNpzvSf+AStA+Ln1g==;EndpointSuffix=core.windows.net";
-	//public static final String BLOB_STORAGE_KEY = "DefaultEndpointsProtocol=https;AccountName=scc60485;AccountKey=tRBfHsTj0Fe+vayowI6sGxu24UuVGf1rjY1p9OIL+0jMOP+P6DKzdXX7XSfbNapuL/2ygbMTRxpF+AStL9Ho9A==;EndpointSuffix=core.windows.net";
+	//public static final String BLOB_STORAGE_KEY = "DefaultEndpointsProtocol=https;AccountName=scc60492;AccountKey=HwhiZRDl0MQcOy2sSzWJ3ZNYNVGnVu2ff9sVlp4l/3trXW2jLVnD6sU8QgBrH7rrChHsWxNpzvSf+AStA+Ln1g==;EndpointSuffix=core.windows.net";
+	public static final String BLOB_STORAGE_KEY = "DefaultEndpointsProtocol=https;AccountName=scc60485;AccountKey=tRBfHsTj0Fe+vayowI6sGxu24UuVGf1rjY1p9OIL+0jMOP+P6DKzdXX7XSfbNapuL/2ygbMTRxpF+AStL9Ho9A==;EndpointSuffix=core.windows.net";
 	public static final String SECONDARY_BLOB_STORAGE_KEY = "";
 
 	/** DB Configs */
 
-	public static final boolean DOCKER_POSTGRES_ON = true;
+	public static final boolean DOCKER_POSTGRES_ON = false;
 	public static final DatabaseType USERS_DB_TYPE = DatabaseType.HIBERNATE;
 	public static final DatabaseType SHORTS_DB_TYPE = DatabaseType.HIBERNATE;
 	public static final String CONNECTION_URL = "";
@@ -66,6 +67,7 @@ public class TukanoApplication extends Application {
 		resources.add(RequestCookiesFilter.class);
 		resources.add(RequestCookiesCleanupFilter.class);
 		resources.add(Authentication.class);
+		resources.add(HealthMonitor.class);
 
 
 		if(!BLOBS_TYPE.equals(BlobsType.SERVERLESS_BLOBS))

@@ -1,7 +1,5 @@
 docker network create tukano-network
 
--------------------------------------------------------
-
 WEBAPP
 
 mvn clean compile package
@@ -10,9 +8,10 @@ cd kubernetes/webapp
 docker build -t tukano-webapp .
 docker run -it --rm -p 8080:8080 --name webapp --net tukano-network tukano-webapp
 
-https://app.docker.com/
+
 docker login
-docker push scc60485/webapp
+docker tag tukano-webapp:latest ricardobessa/tukano-webapp:latest
+docker push ricardobessa/tukano-webapp
 
 
 
@@ -20,16 +19,11 @@ docker push scc60485/webapp
 
 CACHE
 
-copy target/tukano-1.war kubernetes/cache
-cd kubernetes/cache
 docker build -t tukano-cache .
 docker run -it --rm -p 6379:6379 --name cache --net tukano-network tukano-cache
 
 docker exec -it cache redis-cli
-
-https://app.docker.com/
-docker login
-docker push scc60485/cache
+auth cachePwd
 
 
 --------------------------------------------------------

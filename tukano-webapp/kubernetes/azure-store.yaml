@@ -37,21 +37,22 @@ spec:
               memory: 512Mi
           startupProbe:
             httpGet:
-              path: /health
+              path: /tukano-1/rest/health
               port: 8080
-            failureThreshold: 3
-            initialDelaySeconds: 5
-            periodSeconds: 5
+            failureThreshold: 10
+            initialDelaySeconds: 20
+            periodSeconds: 10
+            timeoutSeconds: 5
           readinessProbe:
             httpGet:
-              path: /health
+              path: /tukano-1/rest/health
               port: 8080
             failureThreshold: 3
             initialDelaySeconds: 3
             periodSeconds: 3
           livenessProbe:
             httpGet:
-              path: /health
+              path: /tukano-1/rest/health
               port: 8080
             failureThreshold: 5
             initialDelaySeconds: 3
@@ -88,20 +89,3 @@ spec:
       port: 80
       targetPort: 8080
   type: LoadBalancer
----
-# ConfigMap for environment variables
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: tukano-config
-data:
-  TUKANO_ENV_VAR: "xxxxxxxxx"
----
-# Secret for sensitive data
-apiVersion: v1
-kind: Secret
-metadata:
-  name: tukano-secret
-type: Opaque
-data:
-  TUKANO_SECRET_VAR: bXktc2VjcmV0LXZhbHVl # Base64 encode your secret value

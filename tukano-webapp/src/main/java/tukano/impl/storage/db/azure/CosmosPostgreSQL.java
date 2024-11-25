@@ -32,9 +32,7 @@ public class CosmosPostgreSQL implements Database {
     private static CosmosPostgreSQL instance;
 
     //DOCKER
-    private static final String URL = "jdbc:postgresql://localhost:5432/tukano-db"; // Replace with your Docker container's IP or hostname if different
-    private static final String USER = "citus";
-    private static final String PASSWORD = "Sigma!!!";
+    private static final String POSTGRES_URL = "jdbc:postgresql://postgres:5432/tukano-db?user=citus&password=Sigma!!!";
 
     //COSMOS
     private static final String DB_USERNAME = "db.username";
@@ -48,7 +46,7 @@ public class CosmosPostgreSQL implements Database {
     synchronized public static CosmosPostgreSQL getInstance() {
         if (instance == null) {
             instance = new CosmosPostgreSQL();
-            if (TukanoApplication.DOCKER_POSTGRES_ON)
+            if (!TukanoApplication.DOCKER_POSTGRES_ON)
                 init();
         }
         return instance;
@@ -72,7 +70,7 @@ public class CosmosPostgreSQL implements Database {
 
     private Connection getConnection() throws SQLException {
         if(TukanoApplication.DOCKER_POSTGRES_ON)
-            return DriverManager.getConnection(URL, USER, PASSWORD);
+            return DriverManager.getConnection(POSTGRES_URL);
         else return datasource.getConnection();
     }
 

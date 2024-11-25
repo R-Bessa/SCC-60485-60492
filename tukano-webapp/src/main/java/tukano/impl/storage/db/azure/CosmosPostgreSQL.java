@@ -68,10 +68,19 @@ public class CosmosPostgreSQL implements Database {
         }
     }
 
-    private Connection getConnection() throws SQLException {
-        if(TukanoApplication.DOCKER_POSTGRES_ON)
-            return DriverManager.getConnection(POSTGRES_URL);
+    private static Connection getConnection() throws SQLException {
+        if(TukanoApplication.DOCKER_POSTGRES_ON) {
+            try {
+                Connection conn = null;
+                Class.forName("org.postgresql.Driver");
+                conn = DriverManager.getConnection(POSTGRES_URL);
+                return conn;
+            } catch (Exception e) {
+                System.out.println("Failed to create JDBC db connection " + e.toString() + e.getMessage());
+            }
+        }
         else return datasource.getConnection();
+        return null;
     }
 
     private static DataSource getDataSource() {
@@ -125,7 +134,7 @@ public class CosmosPostgreSQL implements Database {
         }
         else {
             Short s = (Short)obj;
-            String insertShort = format("INSERT INTO shorts VALUES ('%s', '%s', '%s', '%s', '%s');", s.getShortId(), s.getOwnerId(), s.getBlobUrl(), s.getTimestamp(), s.getTotalLikes());
+            String insertShort = format("INSERT INTO shorts VALUES ('%s', '%s', '%s', '%s', '%s', 0);", s.getShortId(), s.getOwnerId(), s.getBlobUrl(), s.getTimestamp(), s.getTotalLikes());
             executeQuery(insertShort);
         }
         return Result.ok(obj);
@@ -146,7 +155,7 @@ public class CosmosPostgreSQL implements Database {
         }
         else {
             Short s = (Short)obj;
-            String updateShort = format("UPDATE shorts SET ownerId = '%s', blobUrl = '%s', timestamp = '%s', totalLikes = '%s' WHERE shortId = '%s'", s.getOwnerId(), s.getBlobUrl(), s.getTimestamp(), s.getTotalLikes(), s.getShortId());
+            String updateShort = format("UPDATE shorts SET ownerId = '%s', blobUrl = '%s', timestamp = '%s', totalLikes = '%s', views = '%s' WHERE shortId = '%s'", s.getOwnerId(), s.getBlobUrl(), s.getTimestamp(), s.getTotalLikes(), s.getViews(), s.getShortId());
             executeQuery(updateShort);
         }
         return Result.ok(obj);
@@ -239,6 +248,7 @@ public class CosmosPostgreSQL implements Database {
                 s.setBlobUrl(resultSet.getString("blobUrl"));
                 s.setTimestamp(resultSet.getLong("timestamp"));
                 s.setTotalLikes(resultSet.getInt("totalLikes"));
+                s.setViews(resultSet.getInt("views"));
                 return Result.ok(s);
             }
         }
@@ -426,4 +436,42 @@ public class CosmosPostgreSQL implements Database {
         }
         return null;
     }
+
+    private Result<List<Short>> searchPopularAux() throws SQLException {
+        long fiveMinutesAgo = System.currentTimeMillis() - (5 * 60 * 1000);
+        String query = String.format(
+                "SELECT * FROM public.shorts WHERE timestamp >= %d AND shortId NOT LIKE 'tukano%%' ORDER BY views DESC LIMIT 1",
+                fiveMinutesAgo);
+        try (Connection connection = getConnection();
+             PreparedStatement readStatement = connection.prepareStatement(query)) {
+            ResultSet resultSet = readStatement.executeQuery();
+
+            List<Short> resultList = new ArrayList<>();
+            while (resultSet.next()) {
+                Short s = new Short();
+                s.setShortId(resultSet.getString("shortId"));
+                s.setOwnerId(resultSet.getString("ownerId"));
+                s.setBlobUrl(resultSet.getString("blobUrl"));
+                s.setTimestamp(resultSet.getLong("timestamp"));
+                s.setTotalLikes(resultSet.getInt("totalLikes"));
+                s.setViews(resultSet.getInt("views"));
+                System.out.println(s + " SHOOORT");
+                resultList.add(s);
+            }
+            return Result.ok(resultList);
+        }
+    }
+
+    @Override
+    public Result<List<Short>> searchPopular() {
+            try {
+                return searchPopularAux();
+            }
+            catch (SQLException e) {
+                e.printStackTrace();
+            }
+            return null;
+    }
+
+
 }

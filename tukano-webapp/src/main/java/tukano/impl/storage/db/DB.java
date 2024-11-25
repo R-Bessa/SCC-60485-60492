@@ -14,6 +14,7 @@ import tukano.impl.JavaShorts;
 import tukano.impl.data.Short;
 import tukano.impl.data.Following;
 import tukano.impl.data.Likes;
+import tukano.impl.storage.cache.RedisCache;
 import tukano.impl.storage.db.azure.CosmosNoSQL;
 import tukano.impl.storage.db.azure.CosmosPostgreSQL;
 import tukano.impl.storage.db.hibernate.Hibernate;
@@ -49,6 +50,10 @@ public class DB {
 		}
 	}
 
+	public static Result<List<Short>> getPopular() {
+		RedisCache.writeBackViews();
+		return Result.ok(shortsDB.searchPopular().value());
+	}
 
 	public static <T> Result<List<T>> sql(String query, Class<T> clazz, Database db) {
 		return db.sql(query, clazz);

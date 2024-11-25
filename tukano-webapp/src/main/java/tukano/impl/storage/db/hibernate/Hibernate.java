@@ -12,6 +12,7 @@ import org.hibernate.exception.ConstraintViolationException;
 
 import tukano.api.Result;
 import tukano.api.Result.ErrorCode;
+import tukano.impl.data.Short;
 import tukano.impl.storage.db.Database;
 
 import static java.lang.String.format;
@@ -163,6 +164,11 @@ public class Hibernate implements Database {
 	public <T> Result<List<T>> searchPattern(Class<T> clazz, String pattern, String container, String attribute) {
 		String query = format("SELECT * FROM %s u WHERE UPPER(u.%s) LIKE '%%%s%%'", clazz.getSimpleName(), attribute, pattern.toUpperCase());
 		return sql(query, clazz);
+	}
+
+	@Override
+	public Result<List<Short>> searchPopular() {
+		return null;
 	}
 
 }

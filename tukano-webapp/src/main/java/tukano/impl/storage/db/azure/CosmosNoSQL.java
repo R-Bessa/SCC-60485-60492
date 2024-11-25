@@ -5,6 +5,7 @@ import com.azure.cosmos.models.*;
 import org.hibernate.Session;
 import tukano.api.Result;
 import tukano.api.Result.ErrorCode;
+import tukano.impl.data.Short;
 import tukano.impl.data.User;
 import tukano.impl.data.Following;
 import tukano.impl.data.Likes;
@@ -178,6 +179,11 @@ public class CosmosNoSQL implements Database {
     public <T> Result<List<T>> searchPattern(Class<T> clazz, String pattern, String container, String attribute) {;
         String query = format("SELECT * FROM %s u WHERE UPPER(u.%s) LIKE '%%%s%%'", container, attribute, pattern.toUpperCase());
         return sql(query, clazz);
+    }
+
+    @Override
+    public Result<List<Short>> searchPopular() {
+        return null;
     }
 
     <T> Result<T> tryCatch( Supplier<T> supplierFunc) {

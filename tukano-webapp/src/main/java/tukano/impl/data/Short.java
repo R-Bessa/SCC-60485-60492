@@ -95,10 +95,12 @@ public class Short {
 		this.views += views;
 	}
 
+	public void setViews(int views) { this.views = views; }
+
 	@Override
 	public String toString() {
 		return "Short [shortId=" + shortId + ", ownerId=" + ownerId + ", blobUrl=" + blobUrl + ", timestamp="
-				+ timestamp + ", totalLikes=" + totalLikes + "]";
+				+ timestamp + ", totalLikes=" + totalLikes + ", views=" + views +  "]";
 	}
 
 	public Short copyWithLikes_And_Token(long totLikes) {

@@ -8,13 +8,14 @@ import tukano.impl.cookies.Session;
 import tukano.impl.data.Short;
 import tukano.impl.data.User;
 import tukano.impl.rest.TukanoApplication;
+import tukano.impl.storage.db.DB;
 import utils.Hash;
 import utils.Hex;
 
+import java.util.ArrayList;
 import java.util.List;
 
-import static tukano.impl.rest.TukanoApplication.REDIS_HOSTNAME;
-import static tukano.impl.rest.TukanoApplication.REDIS_KEY;
+import static tukano.impl.rest.TukanoApplication.*;
 
 public class RedisCache {
 
@@ -232,6 +233,48 @@ public class RedisCache {
 			feed.value().stream()
 					.filter(shortId -> shortId.startsWith(userId + "+"))
 					.forEach(shortId -> removeFromList(FEED_KEY_PREFIX + userId, shortId));
+		}
+	}
+
+	public static void writeBackViews() {
+		if(!REDIS_CACHE_ON)
+			return;
+
+		try (var jedis = getCachePool().getResource()) {
+			String cursor = "0";
+			String pattern = VIEWS_KEY_PREFIX  + "*";
+			List<String> recentShorts = new ArrayList<>();
+
+			do {
+				var scanResult = jedis.scan(cursor, new ScanParams().match(pattern).count(100));
+				for (String key : scanResult.getResult()) {
+					String shortId = key.replaceFirst("^" + VIEWS_KEY_PREFIX, "");
+					int views = Integer.parseInt(jedis.get(key));
+					jedis.del(key);
+					DB.updateViews(shortId, views);
+					recentShorts.add(shortId);
+				}
+
+				cursor = scanResult.getCursor();
+
+			} while (!cursor.equals("0"));
+
+			if(!recentShorts.isEmpty())
+				removeRecentShortsByIds(recentShorts);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public static void removeRecentShortsByIds(List<String> shortIds) {
+		var res = getList(RECENT_SHORTS, Short.class);
+		if(res != null) {
+			for(var obj: res.value()) {
+				var shrt = (Short) obj;
+				if(shortIds.contains(shrt.getShortId()))
+					removeRecentShort(shrt);
+			}
 		}
 	}
 

@@ -2,6 +2,7 @@ package tukano.impl.storage.db;
 
 import org.hibernate.Session;
 import tukano.api.Result;
+import tukano.impl.data.Short;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -31,4 +32,6 @@ public interface Database {
     <T> Result<T> execute(Function<Session, Result<T>> func);
 
     <T> Result<List<T>> searchPattern(Class<T> clazz, String pattern, String container, String attribute);
+
+    Result<List<Short>> searchPopular();
 }

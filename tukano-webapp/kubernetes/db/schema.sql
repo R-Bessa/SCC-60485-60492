@@ -3,7 +3,7 @@ CREATE TABLE public.users(userId text PRIMARY KEY, pwd text, email text, display
 CREATE INDEX idx_userId ON public.users(userId);
 
 DROP TABLE IF EXISTS public.shorts CASCADE;
-CREATE TABLE public.shorts(shortId text PRIMARY KEY, ownerId text REFERENCES users(userId) ON DELETE CASCADE , blobUrl text, timestamp bigint, totalLikes integer);
+CREATE TABLE public.shorts(shortId text PRIMARY KEY, ownerId text REFERENCES users(userId) ON DELETE CASCADE , blobUrl text, timestamp bigint, totalLikes integer, views integer);
 CREATE INDEX idx_shortId ON public.shorts(shortId);
 
 DROP TABLE IF EXISTS public.following CASCADE;

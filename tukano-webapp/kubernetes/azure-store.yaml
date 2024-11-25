@@ -1,0 +1,107 @@
+# Tukano Webapp Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tukano
+  labels:
+    app: tukano
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tukano
+  template:
+    metadata:
+      labels:
+        app: tukano
+    spec:
+      nodeSelector:
+        "kubernetes.io/os": linux
+      containers:
+        - name: tukano-webapp
+          image: ricardobessa/tukano-webapp:latest
+          ports:
+            - containerPort: 8080
+              name: tukano-webapp
+          envFrom:
+            - configMapRef:
+                name: tukano-config
+            - secretRef:
+                name: tukano-secret
+          resources:
+            requests:
+              cpu: 1m
+              memory: 200Mi
+            limits:
+              cpu: 1000m
+              memory: 512Mi
+          startupProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            failureThreshold: 3
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            failureThreshold: 3
+            initialDelaySeconds: 3
+            periodSeconds: 3
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            failureThreshold: 5
+            initialDelaySeconds: 3
+            periodSeconds: 3
+---
+# Service to expose Tukano within the cluster
+apiVersion: v1
+kind: Service
+metadata:
+  name: tukano
+  labels:
+    app: tukano
+spec:
+  selector:
+    app: tukano
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+  type: ClusterIP
+---
+# Service to expose Tukano to external clients
+apiVersion: v1
+kind: Service
+metadata:
+  name: tukano-lb
+  labels:
+    app: tukano
+spec:
+  selector:
+    app: tukano
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080
+  type: LoadBalancer
+---
+# ConfigMap for environment variables
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tukano-config
+data:
+  TUKANO_ENV_VAR: "xxxxxxxxx"
+---
+# Secret for sensitive data
+apiVersion: v1
+kind: Secret
+metadata:
+  name: tukano-secret
+type: Opaque
+data:
+  TUKANO_SECRET_VAR: bXktc2VjcmV0LXZhbHVl # Base64 encode your secret value

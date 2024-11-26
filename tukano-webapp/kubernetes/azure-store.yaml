@@ -23,11 +23,6 @@ spec:
           ports:
             - containerPort: 8080
               name: tukano-webapp
-          envFrom:
-            - configMapRef:
-                name: tukano-config
-            - secretRef:
-                name: tukano-secret
           resources:
             requests:
               cpu: 1m
@@ -37,21 +32,22 @@ spec:
               memory: 512Mi
           startupProbe:
             httpGet:
-              path: /health
+              path: /tukano-1/rest/health
               port: 8080
-            failureThreshold: 3
-            initialDelaySeconds: 5
-            periodSeconds: 5
+            failureThreshold: 10
+            initialDelaySeconds: 20
+            periodSeconds: 10
+            timeoutSeconds: 5
           readinessProbe:
             httpGet:
-              path: /health
+              path: /tukano-1/rest/health
               port: 8080
             failureThreshold: 3
             initialDelaySeconds: 3
             periodSeconds: 3
           livenessProbe:
             httpGet:
-              path: /health
+              path: /tukano-1/rest/health
               port: 8080
             failureThreshold: 5
             initialDelaySeconds: 3
@@ -89,19 +85,51 @@ spec:
       targetPort: 8080
   type: LoadBalancer
 ---
-# ConfigMap for environment variables
-apiVersion: v1
-kind: ConfigMap
+# Redis Cache Deployment
+apiVersion: apps/v1
+kind: Deployment
 metadata:
-  name: tukano-config
-data:
-  TUKANO_ENV_VAR: "xxxxxxxxx"
+  name: cache
+  labels:
+    app: cache
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cache
+  template:
+    metadata:
+      labels:
+        app: cache
+    spec:
+      nodeSelector:
+        "kubernetes.io/os": linux
+      containers:
+        - name: redis-cache
+          image: ricardobessa/tukano-cache:latest
+          ports:
+            - containerPort: 6379
+              name: redis-cache
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              cpu: 1000m
+              memory: 1Gi
 ---
-# Secret for sensitive data
+# Service to expose Redis within the cluster
 apiVersion: v1
-kind: Secret
+kind: Service
 metadata:
-  name: tukano-secret
-type: Opaque
-data:
-  TUKANO_SECRET_VAR: bXktc2VjcmV0LXZhbHVl # Base64 encode your secret value
+  name: cache
+  labels:
+    app: cache
+spec:
+  selector:
+    app: cache
+  ports:
+    - protocol: TCP
+      port: 6379
+      targetPort: 6379
+  type: ClusterIP

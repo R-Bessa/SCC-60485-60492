@@ -11,6 +11,7 @@ import tukano.impl.cookies.auth.RequestCookiesCleanupFilter;
 import tukano.impl.cookies.auth.RequestCookiesFilter;
 import tukano.impl.data.User;
 import tukano.impl.georeplication.Region;
+import tukano.impl.kubernetes.HealthMonitor;
 import tukano.impl.storage.blobs.BlobsType;
 import tukano.impl.storage.cache.RedisCache;
 import tukano.impl.storage.db.DatabaseType;
@@ -66,6 +67,7 @@ public class TukanoApplication extends Application {
 		resources.add(RequestCookiesFilter.class);
 		resources.add(RequestCookiesCleanupFilter.class);
 		resources.add(Authentication.class);
+		resources.add(HealthMonitor.class);
 
 
 		if(!BLOBS_TYPE.equals(BlobsType.SERVERLESS_BLOBS))

@@ -113,9 +113,14 @@ public class JavaBlobs implements Blobs {
 		} catch (Exception e) {
 			return error(FORBIDDEN);
 		}
+		return deleteBlobs(userId, pwd);
+	}
+
+	@Override
+	public Result<Void> deleteBlobs(String userId, String pwd) {
 		return errorOrValue(okUser(userId, pwd), storage.delete(toPath(userId)) );
 	}
-	
+
 	private boolean validBlobId(String blobId, String token) {
 		return Token.isValid(token, blobId);
 	}

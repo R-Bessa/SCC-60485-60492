@@ -65,4 +65,9 @@ public class RestBlobsClient extends RestClient implements Blobs {
 	public Result<Void> deleteAllBlobs(String userId, String password) {
 		return super.reTry( () -> _deleteAllBlobs(userId, password));
 	}
+
+	@Override
+	public Result<Void> deleteBlobs(String userId, String pwd) {
+		return super.reTry( () -> _deleteAllBlobs(userId, pwd));
+	}
 }

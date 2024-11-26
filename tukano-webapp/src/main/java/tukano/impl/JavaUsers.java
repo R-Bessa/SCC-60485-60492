@@ -7,8 +7,7 @@ import static tukano.api.Result.errorOrResult;
 import static tukano.api.Result.errorOrValue;
 import static tukano.api.Result.ok;
 import static tukano.impl.rest.TukanoApplication.TUKANO_RECOMMENDS;
-import static tukano.impl.storage.db.DB.USERS;
-import static tukano.impl.storage.db.DB.usersDB;
+import static tukano.impl.storage.db.DB.*;
 
 import java.util.List;
 import java.util.concurrent.Executors;
@@ -52,8 +51,7 @@ public class JavaUsers implements Users {
 			RedisCache.generateCookie(user);
 
 		if(!user.getUserId().equals(TUKANO_RECOMMENDS)) {
-			Executors.defaultThreadFactory().newThread(() ->
-					JavaShorts.getInstance().follow(user.getUserId(), TUKANO_RECOMMENDS, true, user.getPwd())).start();
+			JavaShorts.getInstance().follow(user.getUserId(), TUKANO_RECOMMENDS, true, user.getPwd());
 		}
 
 		return res;
@@ -157,6 +155,15 @@ public class JavaUsers implements Users {
 	@Override
 	public Result<List<User>> searchUsers(String pattern) {
 		Log.info( () -> format("searchUsers : patterns = %s\n", pattern));
+
+		//TODO - trocar getPopular de sitio
+		/*var res = DB.getPopular();
+		if(res.isOK()) {
+			var shrt = res.value().get(0);
+			String shortId = "tukano+" + shrt.getShortId();
+			shrt.setShortId(shortId);
+			errorOrValue(DB.insertOne(shrt, shortsDB), s -> s.copyWithLikes_And_Token(0));
+		}*/
 
 		var hits = DB.searchPattern(usersDB, User.class, pattern, USERS, "userId")
 				.value()

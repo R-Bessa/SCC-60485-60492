@@ -169,8 +169,6 @@ public class JavaShorts implements Shorts {
 			RedisCache.decrCounter(LIKES_KEY_PREFIX, shortId);
 
 
-		DB.getPopular();
-
 		return Result.ok();
 	}
 

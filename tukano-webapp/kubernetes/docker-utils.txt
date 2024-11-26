@@ -66,217 +66,9 @@ Home -> Search for "Quotas" -> Select "Quotas" -> Compute -> Total Regional vCPU
 3) Create a Cluster
 az group create --name scc2425-container-60485 --location northeurope
 
-{
-  "id": "/subscriptions/6c53d58b-c8f4-4f4c-8063-6edc4c244cb5/resourceGroups/scc2425-container-60485",
-  "location": "northeurope",
-  "managedBy": null,
-  "name": "scc2425-container-60485",
-  "properties": {
-    "provisioningState": "Succeeded"
-  },
-  "tags": null,
-  "type": "Microsoft.Resources/resourceGroups"
-}
-
 
 az aks create --resource-group scc2425-container-60485 --name my-scc2425-cluster-60485 --node-vm-size Standard_B2s --generate-ssh-keys --node-count 2 --service-principal <appId_REPLACE> --client-secret <password_REPLACE>
 az aks create --resource-group scc2425-container-60485 --name my-scc2425-cluster-60485 --node-vm-size Standard_B2s --generate-ssh-keys --node-count 2 --service-principal 0189bb9f-d9c6-468e-9c80-c9d2312fdf7c --client-secret wL18Q~6e2766hbeCLLv4-Zh5-RzO9iwOvGvbYclV
-
-
-{
-  "aadProfile": null,
-  "addonProfiles": null,
-  "agentPoolProfiles": [
-    {
-      "availabilityZones": null,
-      "capacityReservationGroupId": null,
-      "count": 2,
-      "creationData": null,
-      "currentOrchestratorVersion": "1.29.9",
-      "enableAutoScaling": false,
-      "enableEncryptionAtHost": false,
-      "enableFips": false,
-      "enableNodePublicIp": false,
-      "enableUltraSsd": false,
-      "gpuInstanceProfile": null,
-      "hostGroupId": null,
-      "kubeletConfig": null,
-      "kubeletDiskType": "OS",
-      "linuxOsConfig": null,
-      "maxCount": null,
-      "maxPods": 110,
-      "minCount": null,
-      "mode": "System",
-      "name": "nodepool1",
-      "networkProfile": null,
-      "nodeImageVersion": "AKSUbuntu-2204gen2containerd-202411.03.0",
-      "nodeLabels": null,
-      "nodePublicIpPrefixId": null,
-      "nodeTaints": null,
-      "orchestratorVersion": "1.29",
-      "osDiskSizeGb": 128,
-      "osDiskType": "Managed",
-      "osSku": "Ubuntu",
-      "osType": "Linux",
-      "podSubnetId": null,
-      "powerState": {
-        "code": "Running"
-      },
-      "provisioningState": "Succeeded",
-      "proximityPlacementGroupId": null,
-      "scaleDownMode": null,
-      "scaleSetEvictionPolicy": null,
-      "scaleSetPriority": null,
-      "spotMaxPrice": null,
-      "tags": null,
-      "type": "VirtualMachineScaleSets",
-      "upgradeSettings": {
-        "drainTimeoutInMinutes": null,
-        "maxSurge": "10%",
-        "nodeSoakDurationInMinutes": null
-      },
-      "vmSize": "Standard_B2s",
-      "vnetSubnetId": null,
-      "windowsProfile": null,
-      "workloadRuntime": null
-    }
-  ],
-  "apiServerAccessProfile": null,
-  "autoScalerProfile": null,
-  "autoUpgradeProfile": {
-    "nodeOsUpgradeChannel": "NodeImage",
-    "upgradeChannel": null
-  },
-  "azureMonitorProfile": null,
-  "azurePortalFqdn": "my-scc2425-scc2425-containe-6c53d5-r625i3vl.portal.hcp.northeurope.azmk8s.io",
-  "currentKubernetesVersion": "1.29.9",
-  "disableLocalAccounts": false,
-  "diskEncryptionSetId": null,
-  "dnsPrefix": "my-scc2425-scc2425-containe-6c53d5",
-  "enablePodSecurityPolicy": null,
-  "enableRbac": true,
-  "extendedLocation": null,
-  "fqdn": "my-scc2425-scc2425-containe-6c53d5-r625i3vl.hcp.northeurope.azmk8s.io",
-  "fqdnSubdomain": null,
-  "httpProxyConfig": null,
-  "id": "/subscriptions/6c53d58b-c8f4-4f4c-8063-6edc4c244cb5/resourcegroups/scc2425-container-60485/providers/Microsoft.ContainerService/managedClusters/my-scc2425-cluster-60485",
-  "identity": null,
-  "identityProfile": null,
-  "ingressProfile": null,
-  "kubernetesVersion": "1.29",
-  "linuxProfile": {
-    "adminUsername": "azureuser",
-    "ssh": {
-      "publicKeys": [
-        {
-          "keyData": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDnraRA3QjGkhybe+7fgKV28AOPhwjv587b3CH6cBrLr5of0GMHzHlq3GykaDk0A4AVoSq26Secf4GRGp3bPJ4iR0ycarXfr8QS+lMu1S0IA71242BO/ylt2o
-0++2oXSlkLdcURPutrIQBcwMYjOjTNy4VakXjFOimTT6Fzw376BNY2Z7XBWMS7dRepgeQRsRnZrdrBSreOhhe+aqqYtoeZKJxECMgirS6gpgKgsaJfcJdkrgfdt3jpcGQOeG+ktFVqOKsIx6rbMmxuRr1dP9BHnKh/TpFtE1YPda0B8pW6kvxwstZOJSMlJyPbytODc6+IJpF6XZe4Xw7mwODa5Zv7"
-        }
-      ]
-    }
-  },
-  "location": "northeurope",
-  "maxAgentPools": 100,
-  "metricsProfile": {
-    "costAnalysis": {
-      "enabled": false
-    }
-  },
-  "name": "my-scc2425-cluster-60485",
-  "networkProfile": {
-    "dnsServiceIp": "10.0.0.10",
-    "ipFamilies": [
-      "IPv4"
-    ],
-    "loadBalancerProfile": {
-      "allocatedOutboundPorts": null,
-      "backendPoolType": "nodeIPConfiguration",
-      "effectiveOutboundIPs": [
-        {
-          "id": "/subscriptions/6c53d58b-c8f4-4f4c-8063-6edc4c244cb5/resourceGroups/MC_scc2425-container-60485_my-scc2425-cluster-60485_northeurope/providers/Microsoft.Network/publicIPAddresses/0ee27b46-6491-4c0d-bd7f-873f6c158a1b",
-          "resourceGroup": "MC_scc2425-container-60485_my-scc2425-cluster-60485_northeurope"
-        }
-      ],
-      "enableMultipleStandardLoadBalancers": null,
-      "idleTimeoutInMinutes": null,
-      "managedOutboundIPs": {
-        "count": 1,
-        "countIpv6": null
-      },
-      "outboundIPs": null,
-      "outboundIpPrefixes": null
-    },
-    "loadBalancerSku": "standard",
-    "natGatewayProfile": null,
-    "networkDataplane": null,
-    "networkMode": null,
-    "networkPlugin": "kubenet",
-    "networkPluginMode": null,
-    "networkPolicy": "none",
-    "outboundType": "loadBalancer",
-    "podCidr": "10.244.0.0/16",
-    "podCidrs": [
-      "10.244.0.0/16"
-    ],
-    "serviceCidr": "10.0.0.0/16",
-    "serviceCidrs": [
-      "10.0.0.0/16"
-    ]
-  },
-  "nodeResourceGroup": "MC_scc2425-container-60485_my-scc2425-cluster-60485_northeurope",
-  "oidcIssuerProfile": {
-    "enabled": false,
-    "issuerUrl": null
-  },
-  "podIdentityProfile": null,
-  "powerState": {
-    "code": "Running"
-  },
-  "privateFqdn": null,
-  "privateLinkResources": null,
-  "provisioningState": "Succeeded",
-  "publicNetworkAccess": null,
-  "resourceGroup": "scc2425-container-60485",
-  "resourceUid": "6745005d9b34dc0001adc917",
-  "securityProfile": {
-    "azureKeyVaultKms": null,
-    "defender": null,
-    "imageCleaner": null,
-    "workloadIdentity": null
-  },
-  "serviceMeshProfile": null,
-  "servicePrincipalProfile": {
-    "clientId": "0189bb9f-d9c6-468e-9c80-c9d2312fdf7c",
-    "secret": null
-  },
-  "sku": {
-    "name": "Base",
-    "tier": "Free"
-  },
-  "storageProfile": {
-    "blobCsiDriver": null,
-    "diskCsiDriver": {
-      "enabled": true
-    },
-    "fileCsiDriver": {
-      "enabled": true
-    },
-    "snapshotController": {
-      "enabled": true
-    }
-  },
-  "supportPlan": "KubernetesOfficial",
-  "systemData": null,
-  "tags": null,
-  "type": "Microsoft.ContainerService/ManagedClusters",
-  "upgradeSettings": null,
-  "windowsProfile": null,
-  "workloadAutoScalerProfile": {
-    "keda": null,
-    "verticalPodAutoscaler": null
-  }
-}
-
 
 az aks get-credentials --resource-group scc2425-container-60485 --name my-scc2425-cluster-60485
 az aks install-cli
@@ -285,13 +77,13 @@ kubectl get services
 
 
 
-kubectl delete deployments,services,pods -all
+kubectl delete deployments,services,pods --all
 
 Deleter persistent volumes (if used).
 kubectl delete pv --all
 
 Delete the resource group to delete the cluster
-az group delete --resource-group <rg-name>
+az group delete --resource-group scc2425-container-60485
 
 
 

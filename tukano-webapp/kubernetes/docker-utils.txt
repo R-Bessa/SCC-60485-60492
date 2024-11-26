@@ -14,6 +14,11 @@ docker tag tukano-webapp:latest ricardobessa/tukano-webapp:latest
 docker push ricardobessa/tukano-webapp
 
 
+neel
+docker tag tukano-webapp:latest neeldb/tukano-webapp:latest
+docker push neeldb/tukano-webapp
+docker tag tukano-postgres:latest neeldb/tukano-postgres:latest
+docker push neeldb/tukano-postgres
 
 --------------------------------------------------------
 
@@ -84,6 +89,9 @@ kubectl delete pv --all
 
 Delete the resource group to delete the cluster
 az group delete --resource-group scc2425-container-60485
+
+neel
+az group delete --resource-group scc2425-container-60492
 
 
 

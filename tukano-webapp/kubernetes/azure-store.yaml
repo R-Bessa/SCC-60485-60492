@@ -19,7 +19,7 @@ spec:
         "kubernetes.io/os": linux
       containers:
         - name: tukano-webapp
-          image: ricardobessa/tukano-webapp:latest
+          image: neeldb/tukano-webapp:latest
           ports:
             - containerPort: 8080
               name: tukano-webapp
@@ -132,4 +132,53 @@ spec:
     - protocol: TCP
       port: 6379
       targetPort: 6379
+  type: ClusterIP
+---
+# Postgres Database Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres
+  labels:
+    app: postgres
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      nodeSelector:
+        "kubernetes.io/os": linux
+      containers:
+        - name: postgres
+          image: neeldb/tukano-postgres:latest
+          ports:
+            - containerPort: 5432
+              name: postgres
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              cpu: 1000m
+              memory: 1Gi
+---
+# Service to expose Postgres within the cluster
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+  labels:
+    app: postgres
+spec:
+  selector:
+    app: postgres
+  ports:
+    - protocol: TCP
+      port: 5432
+      targetPort: 5432
   type: ClusterIP

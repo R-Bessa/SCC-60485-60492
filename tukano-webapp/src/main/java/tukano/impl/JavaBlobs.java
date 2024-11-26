@@ -26,7 +26,7 @@ public class JavaBlobs implements Blobs {
 	private static final Logger Log = Logger.getLogger(JavaBlobs.class.getName());
 
 	public static String baseURI;
-	private final BlobStorage storage;
+	private static BlobStorage storage;
 	
 	synchronized public static Blobs getInstance() {
 		if( instance == null )
@@ -116,8 +116,7 @@ public class JavaBlobs implements Blobs {
 		return deleteBlobs(userId, pwd);
 	}
 
-	@Override
-	public Result<Void> deleteBlobs(String userId, String pwd) {
+		public static Result<Void> deleteBlobs(String userId, String pwd) {
 		return errorOrValue(okUser(userId, pwd), storage.delete(toPath(userId)) );
 	}
 
@@ -125,7 +124,7 @@ public class JavaBlobs implements Blobs {
 		return Token.isValid(token, blobId);
 	}
 
-	private String toPath(String blobId) {
+	private static String toPath(String blobId) {
 		return blobId.replace("+", "/");
 	}
 	

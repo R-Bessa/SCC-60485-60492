@@ -23,11 +23,6 @@ spec:
           ports:
             - containerPort: 8080
               name: tukano-webapp
-          envFrom:
-            - configMapRef:
-                name: tukano-config
-            - secretRef:
-                name: tukano-secret
           resources:
             requests:
               cpu: 1m
@@ -89,3 +84,52 @@ spec:
       port: 80
       targetPort: 8080
   type: LoadBalancer
+---
+# Redis Cache Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cache
+  labels:
+    app: cache
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cache
+  template:
+    metadata:
+      labels:
+        app: cache
+    spec:
+      nodeSelector:
+        "kubernetes.io/os": linux
+      containers:
+        - name: redis-cache
+          image: ricardobessa/tukano-cache:latest
+          ports:
+            - containerPort: 6379
+              name: redis-cache
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              cpu: 1000m
+              memory: 1Gi
+---
+# Service to expose Redis within the cluster
+apiVersion: v1
+kind: Service
+metadata:
+  name: cache
+  labels:
+    app: cache
+spec:
+  selector:
+    app: cache
+  ports:
+    - protocol: TCP
+      port: 6379
+      targetPort: 6379
+  type: ClusterIP

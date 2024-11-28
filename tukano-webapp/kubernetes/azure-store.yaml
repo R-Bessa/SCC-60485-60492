@@ -19,10 +19,23 @@ spec:
         "kubernetes.io/os": linux
       containers:
         - name: tukano-webapp
-          image: neeldb/tukano-webapp:latest
+          image: ricardobessa/tukano-webapp:latest
           ports:
             - containerPort: 8080
               name: tukano-webapp
+          env:
+            - name: REDIS_HOSTNAME
+              value: "cache"
+            - name: TUKANO_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: tukano-secrets
+                  key: TUKANO_SECRET
+            - name: CACHE_PWD
+              valueFrom:
+                secretKeyRef:
+                  name: tukano-secrets
+                  key: CACHE_PWD
           resources:
             requests:
               cpu: 1m
@@ -182,3 +195,13 @@ spec:
       port: 5432
       targetPort: 5432
   type: ClusterIP
+---
+# Sensitive information
+apiVersion: v1
+kind: Secret
+metadata:
+  name: tukano-secrets
+type: Opaque
+data:
+  TUKANO_SECRET: dHVrYW5vLXNlY3JldA==
+  CACHE_PWD: Y2FjaGVQd2Q=

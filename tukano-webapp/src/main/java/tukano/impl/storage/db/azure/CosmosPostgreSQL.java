@@ -26,13 +26,11 @@ import java.util.function.Function;
 
 import static java.lang.String.format;
 import static tukano.api.Result.ErrorCode.*;
+import static tukano.impl.rest.TukanoApplication.POSTGRES_URL;
 
 public class CosmosPostgreSQL implements Database {
 
     private static CosmosPostgreSQL instance;
-
-    //DOCKER
-    private static final String POSTGRES_URL = "jdbc:postgresql://postgres:5432/tukano-db?user=citus&password=Sigma!!!";
 
     //COSMOS
     private static final String DB_USERNAME = "db.username";

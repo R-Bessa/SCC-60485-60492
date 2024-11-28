@@ -51,6 +51,8 @@ public class TukanoApplication extends Application {
 	public static final DatabaseType SHORTS_DB_TYPE = DatabaseType.COSMOS_DB_POSTGRESQL;
 	public static final String CONNECTION_URL = "";
 	public static final String DB_KEY = "";
+	public static final String POSTGRES_URL = System.getenv("POSTGRES_URL");
+
 
 
 	/** Redis Cache Configs */

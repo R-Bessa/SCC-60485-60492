@@ -36,6 +36,11 @@ spec:
                 secretKeyRef:
                   name: tukano-secrets
                   key: CACHE_PWD
+            - name: POSTGRES_URL
+              valueFrom:
+                secretKeyRef:
+                  name: tukano-secrets
+                  key: POSTGRES_URL
           resources:
             requests:
               cpu: 1m
@@ -210,7 +215,7 @@ spec:
           containers:
             - name: get-popular
               image: curlimages/curl:latest
-              command: ["curl", "http://52.158.29.38/tukano-1/rest/shorts/popular"]
+              command: ["curl", "http://48.209.158.108/tukano-1/rest/shorts/popular"]
           restartPolicy: OnFailure
 ---
 # Sensitive information
@@ -222,3 +227,4 @@ type: Opaque
 data:
   TUKANO_SECRET: dHVrYW5vLXNlY3JldA==
   CACHE_PWD: Y2FjaGVQd2Q=
+  POSTGRES_URL: amRiYzpwb3N0Z3Jlc3FsOi8vcG9zdGdyZXM6NTQzMi90dWthbm8tZGI/dXNlcj1jaXR1cyZwYXNzd29yZD1TaWdtYSEhIQ==

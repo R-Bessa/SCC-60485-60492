@@ -229,7 +229,13 @@ public class JavaShorts implements Shorts {
 
 	@Override
 	public Result<List<Short>> getPopular() {
-		return DB.getPopular();
+		var res = DB.getPopular();
+		if(res.isOK()) {
+			var shrt = res.value().get(0);
+			shrt.setShortId("tukano+" + shrt.getShortId());
+			errorOrValue(DB.insertOne(shrt, shortsDB), s -> s.copyWithLikes_And_Token(0));
+		}
+		return res;
 	}
 
 	public static Result<User> okUser(String userId, String pwd) {

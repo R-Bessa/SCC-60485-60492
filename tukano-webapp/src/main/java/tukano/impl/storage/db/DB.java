@@ -51,7 +51,9 @@ public class DB {
 	}
 
 	public static Result<List<Short>> getPopular() {
+		System.out.println("OLA OLA OLA");
 		RedisCache.writeBackViews();
+		System.out.println("SIUUUUUUUUUUUU");
 		return Result.ok(shortsDB.searchPopular().value());
 	}
 

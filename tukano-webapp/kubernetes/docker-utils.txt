@@ -37,8 +37,8 @@ POSTGRES
 
 copy target/tukano-1.war kubernetes/db
 cd kubernetes/db
-docker build -t tukano_postgres .
-docker run --rm -p 5432:5432 --name postgres --net tukano-network tukano_postgres
+docker build -t tukano-postgres .
+docker run --rm -p 5432:5432 --name postgres --net tukano-network tukano-postgres
 
 docker exec -it postgres psql -U citus -d tukano-db
 

@@ -125,6 +125,17 @@ public class RestShortsClient extends RestClient implements Shorts{
 				.request()
 				.get());
 	}
+
+	public Result<List<Short>> _getPopular() {
+		return super.toJavaResult(
+				target
+				.path(RestShorts.SHORTS)
+				.path(RestShorts.POPULAR)
+				.request()
+				.get(), new GenericType<List<Short>>() {}
+		);
+
+	}
 		
 	@Override
 	public Result<Short> createShort(String userId, String password) {
@@ -174,5 +185,10 @@ public class RestShortsClient extends RestClient implements Shorts{
 	@Override
 	public Result<Void> deleteAllShorts(String userId, String password) {
 		return super.reTry( () -> _deleteAllShorts(userId, password));
+	}
+
+	@Override
+	public Result<List<Short>> getPopular() {
+		return super.reTry(this::_getPopular);
 	}
 }

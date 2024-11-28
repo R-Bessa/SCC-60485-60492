@@ -19,7 +19,7 @@ spec:
         "kubernetes.io/os": linux
       containers:
         - name: tukano-webapp
-          image: ricardobessa/tukano-webapp:latest
+          image: neeldb/tukano-webapp:latest
           ports:
             - containerPort: 8080
               name: tukano-webapp
@@ -195,6 +195,23 @@ spec:
       port: 5432
       targetPort: 5432
   type: ClusterIP
+---
+# Call each minute to get popular short
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: get-popular
+spec:
+  schedule: "* * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: get-popular
+              image: curlimages/curl:latest
+              command: ["curl", "http://172.205.86.207/tukano-1/rest/shorts/popular"]
+          restartPolicy: OnFailure
 ---
 # Sensitive information
 apiVersion: v1

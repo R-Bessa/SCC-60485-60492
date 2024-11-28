@@ -125,4 +125,6 @@ public interface Shorts {
 	Result<List<String>> getFeed(String userId, String password);
 
 	Result<Void> deleteAllShorts(String userId, String password);
+
+	Result<List<Short>> getPopular();
 }

@@ -227,6 +227,11 @@ public class JavaShorts implements Shorts {
 		return DB.deleteAllShorts(userId);
 	}
 
+	@Override
+	public Result<List<Short>> getPopular() {
+		return DB.getPopular();
+	}
+
 	public static Result<User> okUser(String userId, String pwd) {
 		return JavaUsers.getInstance().getUser(userId, pwd);
 	}

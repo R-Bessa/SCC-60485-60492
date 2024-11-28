@@ -46,8 +46,8 @@ public class TukanoApplication extends Application {
 	/** DB Configs */
 
 	public static final boolean DOCKER_POSTGRES_ON = false;
-	public static final DatabaseType USERS_DB_TYPE = DatabaseType.HIBERNATE;
-	public static final DatabaseType SHORTS_DB_TYPE = DatabaseType.HIBERNATE;
+	public static final DatabaseType USERS_DB_TYPE = DatabaseType.COSMOS_DB_POSTGRESQL;
+	public static final DatabaseType SHORTS_DB_TYPE = DatabaseType.COSMOS_DB_POSTGRESQL;
 	public static final String CONNECTION_URL = "";
 	public static final String DB_KEY = "";
 

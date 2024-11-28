@@ -81,5 +81,5 @@ public interface RestShorts {
 	@GET
 	@Path(POPULAR)
 	@Produces(MediaType.APPLICATION_JSON)
-	List<String> getPopular();
+	List<Short> getPopular();
 }

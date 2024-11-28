@@ -63,7 +63,7 @@ public class RestShortsResource extends RestResource implements RestShorts {
 	}
 
 	@Override
-	public List<String> getPopular() {
-		return List.of();
+	public List<Short> getPopular() {
+		return super.resultOrThrow( impl.getPopular());
 	}
 }

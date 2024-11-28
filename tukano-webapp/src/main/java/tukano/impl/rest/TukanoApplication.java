@@ -22,7 +22,7 @@ public class TukanoApplication extends Application {
 	private Set<Object> singletons = new HashSet<>();
 	private Set<Class<?>> resources = new HashSet<>();
 
-	public static final String TUKANO_SECRET = "tukano-secret";
+	public static final String TUKANO_SECRET = System.getenv("TUKANO_SECRET");
 	public static final String TUKANO_RECOMMENDS = "tukano";
 	public static final String ADMIN = "admin";
 
@@ -39,15 +39,15 @@ public class TukanoApplication extends Application {
 	public static final boolean BLOBS_GEO_REPLICATION = false;
 	public static final BlobsType BLOBS_TYPE = BlobsType.AZURE_BLOBS;
 	public static final long MAX_TOKEN_AGE = 300000;
-	public static final String BLOB_STORAGE_KEY = "DefaultEndpointsProtocol=https;AccountName=scc60492;AccountKey=HwhiZRDl0MQcOy2sSzWJ3ZNYNVGnVu2ff9sVlp4l/3trXW2jLVnD6sU8QgBrH7rrChHsWxNpzvSf+AStA+Ln1g==;EndpointSuffix=core.windows.net";
-	//public static final String BLOB_STORAGE_KEY = "DefaultEndpointsProtocol=https;AccountName=scc60485;AccountKey=tRBfHsTj0Fe+vayowI6sGxu24UuVGf1rjY1p9OIL+0jMOP+P6DKzdXX7XSfbNapuL/2ygbMTRxpF+AStL9Ho9A==;EndpointSuffix=core.windows.net";
+	//public static final String BLOB_STORAGE_KEY = "DefaultEndpointsProtocol=https;AccountName=scc60492;AccountKey=HwhiZRDl0MQcOy2sSzWJ3ZNYNVGnVu2ff9sVlp4l/3trXW2jLVnD6sU8QgBrH7rrChHsWxNpzvSf+AStA+Ln1g==;EndpointSuffix=core.windows.net";
+	public static final String BLOB_STORAGE_KEY = "DefaultEndpointsProtocol=https;AccountName=scc60485;AccountKey=tRBfHsTj0Fe+vayowI6sGxu24UuVGf1rjY1p9OIL+0jMOP+P6DKzdXX7XSfbNapuL/2ygbMTRxpF+AStL9Ho9A==;EndpointSuffix=core.windows.net";
 	public static final String SECONDARY_BLOB_STORAGE_KEY = "";
 
 	/** DB Configs */
 
-	public static final boolean DOCKER_POSTGRES_ON = true;
-	public static final DatabaseType USERS_DB_TYPE = DatabaseType.COSMOS_DB_POSTGRESQL;
-	public static final DatabaseType SHORTS_DB_TYPE = DatabaseType.COSMOS_DB_POSTGRESQL;
+	public static final boolean DOCKER_POSTGRES_ON = false;
+	public static final DatabaseType USERS_DB_TYPE = DatabaseType.HIBERNATE;
+	public static final DatabaseType SHORTS_DB_TYPE = DatabaseType.HIBERNATE;
 	public static final String CONNECTION_URL = "";
 	public static final String DB_KEY = "";
 
@@ -56,8 +56,8 @@ public class TukanoApplication extends Application {
 
 	public static final boolean REDIS_CACHE_ON = true;
 	public static final boolean DOCKERIZED_REDIS = true;
-	public static final String REDIS_HOSTNAME = "cache"; //TODO name of kubernetes service or container
-	public static final String REDIS_KEY = "cachePwd"; //TODO send as env to kubernetes
+	public static final String REDIS_HOSTNAME = System.getenv("REDIS_HOSTNAME");
+	public static final String REDIS_KEY = System.getenv("CACHE_PWD");
 
 
 	public TukanoApplication() {

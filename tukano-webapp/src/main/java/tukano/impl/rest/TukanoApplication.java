@@ -22,7 +22,8 @@ public class TukanoApplication extends Application {
 	private Set<Object> singletons = new HashSet<>();
 	private Set<Class<?>> resources = new HashSet<>();
 
-	public static final String TUKANO_SECRET = System.getenv("TUKANO_SECRET");
+	//public static final String TUKANO_SECRET = System.getenv("TUKANO_SECRET");
+	public static final String TUKANO_SECRET = "tukano-secret";
 	public static final String TUKANO_RECOMMENDS = "tukano";
 	public static final String ADMIN = "admin";
 
@@ -45,7 +46,7 @@ public class TukanoApplication extends Application {
 
 	/** DB Configs */
 
-	public static final boolean DOCKER_POSTGRES_ON = false;
+	public static final boolean DOCKER_POSTGRES_ON = true;
 	public static final DatabaseType USERS_DB_TYPE = DatabaseType.COSMOS_DB_POSTGRESQL;
 	public static final DatabaseType SHORTS_DB_TYPE = DatabaseType.COSMOS_DB_POSTGRESQL;
 	public static final String CONNECTION_URL = "";
@@ -56,9 +57,10 @@ public class TukanoApplication extends Application {
 
 	public static final boolean REDIS_CACHE_ON = true;
 	public static final boolean DOCKERIZED_REDIS = true;
-	public static final String REDIS_HOSTNAME = System.getenv("REDIS_HOSTNAME");
-	public static final String REDIS_KEY = System.getenv("CACHE_PWD");
-
+	//public static final String REDIS_HOSTNAME = System.getenv("REDIS_HOSTNAME");
+	//public static final String REDIS_KEY = System.getenv("CACHE_PWD");
+	public static final String REDIS_HOSTNAME = "cache"; //TODO name of kubernetes service or container
+	public static final String REDIS_KEY = "cachePwd"; //TODO send as env to kubernetes
 
 	public TukanoApplication() {
 		singletons.add( new RestUsersResource());

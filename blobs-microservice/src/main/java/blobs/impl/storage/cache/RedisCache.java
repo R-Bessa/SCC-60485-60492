@@ -1,9 +1,12 @@
 package blobs.impl.storage.cache;
 
+import blobs.impl.data.User;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 import blobs.impl.cookies.Session;
 import blobs.impl.rest.BlobsMicroService;
+import utils.Hash;
+import utils.Hex;
 
 import static blobs.impl.rest.BlobsMicroService.*;
 
@@ -13,6 +16,8 @@ public class RedisCache {
 	private static boolean redis_use_tls;
 	private static final int REDIS_TIMEOUT = 1000;
 	public static final String VIEWS_KEY_PREFIX = "views-";
+	private static final int COOKIE_VALIDITY = 900; // 15 min
+
 
 	public static void init() {
 		if(BlobsMicroService.DOCKERIZED_REDIS) {
@@ -84,5 +89,40 @@ public class RedisCache {
 			e.printStackTrace();
 		}
 
+	}
+
+	public static String getCookieKey(String pwd) {
+		return Hex.of(Hash.sha256(pwd.getBytes()));
+	}
+
+	public static User checkCookie(String pwd) {
+		try (var jedis = getCachePool().getResource()) {
+			String key = getCookieKey(pwd);
+			String jsonValue = jedis.get(key);
+			if(jsonValue == null)
+				return null;
+
+			User u = JSON.decode( jsonValue, User.class);
+			jedis.expire(key, COOKIE_VALIDITY);
+
+			return u;
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+
+	}
+
+	public static void generateCookie(User u) {
+		try (var jedis = getCachePool().getResource()) {
+			String key = getCookieKey(u.getPwd());
+			String value = JSON.encode(u);
+			jedis.set(key, value);
+			jedis.expire(key, COOKIE_VALIDITY);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 }

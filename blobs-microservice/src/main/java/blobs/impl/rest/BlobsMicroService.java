@@ -31,6 +31,7 @@ public class BlobsMicroService extends Application {
 	public static final long MAX_TOKEN_AGE = 300000;
 	public static final String BLOB_STORAGE_KEY = "DefaultEndpointsProtocol=https;AccountName=scc60492;AccountKey=HwhiZRDl0MQcOy2sSzWJ3ZNYNVGnVu2ff9sVlp4l/3trXW2jLVnD6sU8QgBrH7rrChHsWxNpzvSf+AStA+Ln1g==;EndpointSuffix=core.windows.net";
 	//public static final String BLOB_STORAGE_KEY = "DefaultEndpointsProtocol=https;AccountName=scc60485;AccountKey=tRBfHsTj0Fe+vayowI6sGxu24UuVGf1rjY1p9OIL+0jMOP+P6DKzdXX7XSfbNapuL/2ygbMTRxpF+AStL9Ho9A==;EndpointSuffix=core.windows.net";
+	public static final String POSTGRES_URL = "jdbc:postgresql://postgres:5432/tukano-db?user=citus&password=Sigma!!!";
 
 	/** Redis Cache Configs */
 

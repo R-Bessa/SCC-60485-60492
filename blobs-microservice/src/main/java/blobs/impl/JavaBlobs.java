@@ -3,20 +3,23 @@ package blobs.impl;
 import blobs.api.Blobs;
 import blobs.api.Result;
 import blobs.impl.cookies.Authentication;
+import blobs.impl.data.User;
 import blobs.impl.rest.BlobsMicroService;
+import blobs.impl.storage.CosmosPostgreSQL;
 import blobs.impl.storage.blobs.AzureBlobStorage;
 import blobs.impl.storage.blobs.BlobStorage;
 import blobs.impl.storage.blobs.FilesystemStorage;
 import utils.Hash;
 import utils.Hex;
+import blobs.impl.storage.cache.RedisCache;
 
 import java.util.function.Consumer;
 import java.util.logging.Logger;
 
+import static blobs.api.Result.errorOrValue;
 import static java.lang.String.format;
 import static blobs.api.Result.ErrorCode.FORBIDDEN;
 import static blobs.api.Result.error;
-import static blobs.api.Result.errorOrValue;
 import static blobs.impl.storage.blobs.BlobsType.AZURE_BLOBS;
 
 public class JavaBlobs implements Blobs {
@@ -48,18 +51,17 @@ public class JavaBlobs implements Blobs {
 		Log.info(() -> format("upload : blobId = %s, sha256 = %s, token = %s\n", blobId, Hex.of(Hash.sha256(bytes)), token));
 
 		String userId = blobId.split("\\+")[0];
+		System.out.println(userId + "USEEEEEEEEEER");
 		try {
 			Authentication.validateSession(userId);
 		} catch (Exception e) {
 			return error(FORBIDDEN);
 		}
 
-		System.out.println("AQUIIII");
+		System.out.println("OLA OLA OLA");
 
-		if (!validBlobId(blobId, token)) {
-			System.out.println("LALALALALA");
+		if (!validBlobId(blobId, token))
 			return error(FORBIDDEN);
-		}
 
 		return storage.write( toPath( blobId ), bytes);
 	}
@@ -119,10 +121,7 @@ public class JavaBlobs implements Blobs {
 	}
 
 	public static Result<Void> deleteBlobs(String userId, String pwd) {
-		//TODO
-		//return errorOrValue(okUser(userId, pwd), storage.delete(toPath(userId)) );
-		return storage.delete(toPath(userId));
-
+		return errorOrValue(okUser(userId, pwd), storage.delete(toPath(userId)) );
 	}
 
 	private boolean validBlobId(String blobId, String token) {
@@ -135,5 +134,23 @@ public class JavaBlobs implements Blobs {
 	
 	private String toURL(String blobId ) {
 		return baseURI + blobId ;
+	}
+
+	public static Result<User> okUser(String userId, String pwd) {
+		User user = RedisCache.checkCookie(pwd);
+		if(user != null)
+			return Result.ok(user);
+
+		var res = CosmosPostgreSQL.getInstance().getOne(userId, User.class);
+		if(!res.isOK())
+			return res;
+
+		user = res.value();
+		if(!user.getPwd().equals(pwd))
+			return error(FORBIDDEN);
+
+		RedisCache.generateCookie(user);
+
+		return Result.ok(user);
 	}
 }

@@ -6,6 +6,9 @@ import java.util.Set;
 import jakarta.ws.rs.core.Application;
 import tukano.impl.JavaUsers;
 import tukano.impl.Token;
+import tukano.impl.cookies.Authentication;
+import tukano.impl.cookies.auth.RequestCookiesCleanupFilter;
+import tukano.impl.cookies.auth.RequestCookiesFilter;
 import tukano.impl.data.User;
 import tukano.impl.georeplication.Region;
 import tukano.impl.kubernetes.HealthMonitor;
@@ -48,22 +51,26 @@ public class TukanoApplication extends Application {
 	public static final DatabaseType SHORTS_DB_TYPE = DatabaseType.COSMOS_DB_POSTGRESQL;
 	public static final String CONNECTION_URL = "";
 	public static final String DB_KEY = "";
-	public static final String POSTGRES_URL = System.getenv("POSTGRES_URL");
-
-
+	//public static final String POSTGRES_URL = System.getenv("POSTGRES_URL");
+	public static final String POSTGRES_URL = "jdbc:postgresql://postgres:5432/tukano-db?user=citus&password=Sigma!!!";
 
 	/** Redis Cache Configs */
 
 	public static final boolean REDIS_CACHE_ON = true;
 	public static final boolean DOCKERIZED_REDIS = true;
-	public static final String REDIS_HOSTNAME = System.getenv("REDIS_HOSTNAME");
-	public static final String REDIS_KEY = System.getenv("CACHE_PWD");
+	//public static final String REDIS_HOSTNAME = System.getenv("REDIS_HOSTNAME");
+	//public static final String REDIS_KEY = System.getenv("CACHE_PWD");
+	public static final String REDIS_HOSTNAME = "cache";
+	public static final String REDIS_KEY = "cachePwd";
 
 	public TukanoApplication() {
 		singletons.add( new RestUsersResource());
 		singletons.add( new RestShortsResource());
 
 		resources.add(HealthMonitor.class);
+		resources.add(Authentication.class);
+		resources.add(RequestCookiesCleanupFilter.class);
+		resources.add(RequestCookiesFilter.class);
 
 
 		if(!BLOBS_TYPE.equals(BlobsType.MICROSERVICE_BLOBS))

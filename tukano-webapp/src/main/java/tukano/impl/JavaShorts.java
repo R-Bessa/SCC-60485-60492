@@ -101,7 +101,7 @@ public class JavaShorts implements Shorts {
 		String blobUrl = shrt.getBlobUrl();
 		String queryParam = "token=";
 		String token = blobUrl.substring(blobUrl.indexOf(queryParam) + queryParam.length());
-		JavaBlobs.getInstance().delete(shortId, token);
+		//JavaBlobs.getInstance().delete(shortId, token);
 
 		RedisCache.removeRecentShort(shrt);
 		RedisCache.removeFromList("feed-" + shrt.getOwnerId(), shortId);

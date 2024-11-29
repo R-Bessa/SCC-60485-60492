@@ -215,7 +215,7 @@ spec:
           containers:
             - name: get-popular
               image: curlimages/curl:latest
-              command: ["curl", "http://48.209.158.108/tukano-1/rest/shorts/popular"]
+              command: ["curl", "http://4.209.224.204/tukano-1/rest/shorts/popular"]
           restartPolicy: OnFailure
 ---
 # Sensitive information

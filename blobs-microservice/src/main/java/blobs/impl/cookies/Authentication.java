@@ -1,12 +1,11 @@
-package tukano.impl.cookies;
+package blobs.impl.cookies;
 
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Cookie;
 import jakarta.ws.rs.core.NewCookie;
 import jakarta.ws.rs.core.Response;
-import tukano.impl.JavaShorts;
-import tukano.impl.cookies.auth.RequestCookies;
-import tukano.impl.storage.cache.RedisCache;
+import blobs.impl.cookies.auth.RequestCookies;
+import blobs.impl.storage.cache.RedisCache;
 
 import java.util.UUID;
 
@@ -21,10 +20,11 @@ public class Authentication {
 	@POST
 	@Path("/{" + USER_ID+ "}")
 	public static Response login(@PathParam(USER_ID) String user, @QueryParam(PWD) String pwd) {
-		var res = JavaShorts.okUser(user, pwd);
+		//TODO
+		/*var res = JavaShorts.okUser(user, pwd);
 		if(!res.isOK())
 			throw new NotAuthorizedException("Incorrect login");
-		else {
+		else {*/
 			String uid = UUID.randomUUID().toString();
 			var cookie = new NewCookie.Builder(COOKIE_KEY)
 					.value(uid).path("/")
@@ -41,7 +41,7 @@ public class Authentication {
 			return Response.ok()
 					.cookie(cookie)
 					.build();
-		}
+		//}
 	}
 	
 	static public Session validateSession(String userId) throws NotAuthorizedException {

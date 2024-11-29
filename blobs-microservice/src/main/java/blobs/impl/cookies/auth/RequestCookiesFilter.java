@@ -1,4 +1,4 @@
-package tukano.impl.cookies.auth;
+package blobs.impl.cookies.auth;
 
 import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.container.ContainerRequestFilter;

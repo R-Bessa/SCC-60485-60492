@@ -44,6 +44,15 @@ docker exec -it postgres psql -U citus -d tukano-db
 
 -------------------------------------------------------------------
 
+BLOBS
+
+copy target/blobs-1.war docker
+docker build -t blobs-image .
+docker run -it --rm -p 8080:8080 --name blobs --net tukano-network blobs-image
+
+
+-------------------------------------------------------------------
+
 KUBERNETES
 
 1) Create a service principal

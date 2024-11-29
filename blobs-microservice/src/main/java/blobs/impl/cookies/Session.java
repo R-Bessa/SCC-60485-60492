@@ -1,4 +1,4 @@
-package tukano.impl.cookies;
+package blobs.impl.cookies;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;

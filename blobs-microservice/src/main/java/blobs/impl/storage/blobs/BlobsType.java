@@ -1,4 +1,4 @@
-package tukano.impl.storage.blobs;
+package blobs.impl.storage.blobs;
 
 public enum BlobsType {
     FILESYSTEM,

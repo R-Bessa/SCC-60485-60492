@@ -7,6 +7,7 @@ import static tukano.api.Result.errorOrResult;
 import static tukano.api.Result.errorOrValue;
 import static tukano.api.Result.ok;
 import static tukano.impl.rest.TukanoApplication.TUKANO_RECOMMENDS;
+import static tukano.impl.rest.TukanoApplication.TUKANO_SECRET;
 import static tukano.impl.storage.db.DB.*;
 
 import java.util.List;
@@ -18,6 +19,7 @@ import tukano.impl.cookies.Authentication;
 import tukano.impl.data.User;
 import tukano.api.Users;
 import tukano.impl.rest.TukanoApplication;
+import tukano.impl.rest.client.RestBlobsClient;
 import tukano.impl.storage.cache.RedisCache;
 import tukano.impl.storage.db.DB;
 
@@ -35,6 +37,8 @@ public class JavaUsers implements Users {
 	}
 	
 	private JavaUsers() {}
+
+	private final RestBlobsClient blobsClient = new RestBlobsClient("http://blobs:8081/blobs-1/rest");
 	
 	@Override
 	public Result<String> createUser(User user) {
@@ -116,12 +120,6 @@ public class JavaUsers implements Users {
 	public Result<User> deleteUser(String userId, String pwd) {
 		Log.info(() -> format("deleteUser : userId = %s, pwd = %s\n", userId, pwd));
 
-		try {
-			Authentication.validateSession(TukanoApplication.ADMIN);
-		} catch (Exception e) {
-			return error(FORBIDDEN);
-		}
-
 		if (userId == null || pwd == null )
 			return error(BAD_REQUEST);
 
@@ -144,7 +142,7 @@ public class JavaUsers implements Users {
 			// Delete user shorts and related info asynchronously in a separate thread
 			Executors.defaultThreadFactory().newThread( () -> {
 				JavaShorts.getInstance().deleteAllShorts(userId, pwd);
-				JavaBlobs.deleteBlobs(userId, pwd);
+				blobsClient.deleteAllBlobs(userId, pwd, TUKANO_SECRET);
 				RedisCache.invalidate(RedisCache.getCookieKey(pwd));
 			}).start();
 
@@ -155,15 +153,6 @@ public class JavaUsers implements Users {
 	@Override
 	public Result<List<User>> searchUsers(String pattern) {
 		Log.info( () -> format("searchUsers : patterns = %s\n", pattern));
-
-		//TODO - trocar getPopular de sitio
-		/*var res = DB.getPopular();
-		if(res.isOK()) {
-			var shrt = res.value().get(0);
-			String shortId = "tukano+" + shrt.getShortId();
-			shrt.setShortId(shortId);
-			errorOrValue(DB.insertOne(shrt, shortsDB), s -> s.copyWithLikes_And_Token(0));
-		}*/
 
 		var hits = DB.searchPattern(usersDB, User.class, pattern, USERS, "userId")
 				.value()

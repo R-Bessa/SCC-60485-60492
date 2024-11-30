@@ -68,13 +68,13 @@ public class TukanoApplication extends Application {
 		singletons.add( new RestShortsResource());
 
 		resources.add(HealthMonitor.class);
-		resources.add(Authentication.class);
-		resources.add(RequestCookiesCleanupFilter.class);
-		resources.add(RequestCookiesFilter.class);
 
-
-		if(!BLOBS_TYPE.equals(BlobsType.MICROSERVICE_BLOBS))
+		if(!BLOBS_TYPE.equals(BlobsType.MICROSERVICE_BLOBS)) {
 			singletons.add( new RestBlobsResource());
+			resources.add(Authentication.class);
+			resources.add(RequestCookiesCleanupFilter.class);
+			resources.add(RequestCookiesFilter.class);
+		}
 
 		if(REDIS_CACHE_ON)
 			RedisCache.init();

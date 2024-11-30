@@ -13,6 +13,8 @@ public interface RestBlobs {
 	String PWD = "pwd";
 	String BLOBS = "blobs";
 	String USER_ID = "userId";
+	String SECRET = "secret";
+	String TUKANO = "tukano";
 
  	@POST
  	@Path("/{" + BLOB_ID +"}")
@@ -33,4 +35,12 @@ public interface RestBlobs {
 	@DELETE
 	@Path("/{" + USER_ID + "}/" + BLOBS)
 	void deleteAllBlobs(@PathParam(USER_ID) String userId, @QueryParam(PWD) String pwd );
+
+	@DELETE
+	@Path("/{" + BLOB_ID + "}/" + SECRET)
+	void delete(@PathParam(BLOB_ID) String blobId, @QueryParam(TOKEN) String token, @QueryParam(SECRET) String secret );
+
+	@DELETE
+	@Path("/{" + USER_ID + "}/" + BLOBS + "/" + SECRET)
+	void deleteAllBlobs(@PathParam(USER_ID) String userId, @QueryParam(PWD) String pwd, @QueryParam(SECRET) String secret );
 }

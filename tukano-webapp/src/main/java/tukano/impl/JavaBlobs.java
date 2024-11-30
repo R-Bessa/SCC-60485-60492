@@ -116,7 +116,17 @@ public class JavaBlobs implements Blobs {
 		return deleteBlobs(userId, pwd);
 	}
 
-		public static Result<Void> deleteBlobs(String userId, String pwd) {
+	@Override
+	public Result<Void> delete(String blobId, String token, String secret) {
+		return null;
+	}
+
+	@Override
+	public Result<Void> deleteAllBlobs(String userId, String pwd, String secret) {
+		return null;
+	}
+
+	public static Result<Void> deleteBlobs(String userId, String pwd) {
 		return errorOrValue(okUser(userId, pwd), storage.delete(toPath(userId)) );
 	}
 

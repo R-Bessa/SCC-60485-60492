@@ -17,6 +17,7 @@ import java.util.function.Consumer;
 import java.util.logging.Logger;
 
 import static blobs.api.Result.errorOrValue;
+import static blobs.impl.rest.BlobsMicroService.TUKANO_SECRET;
 import static java.lang.String.format;
 import static blobs.api.Result.ErrorCode.FORBIDDEN;
 import static blobs.api.Result.error;
@@ -51,14 +52,11 @@ public class JavaBlobs implements Blobs {
 		Log.info(() -> format("upload : blobId = %s, sha256 = %s, token = %s\n", blobId, Hex.of(Hash.sha256(bytes)), token));
 
 		String userId = blobId.split("\\+")[0];
-		System.out.println(userId + "USEEEEEEEEEER");
 		try {
 			Authentication.validateSession(userId);
 		} catch (Exception e) {
 			return error(FORBIDDEN);
 		}
-
-		System.out.println("OLA OLA OLA");
 
 		if (!validBlobId(blobId, token))
 			return error(FORBIDDEN);
@@ -117,6 +115,20 @@ public class JavaBlobs implements Blobs {
 		} catch (Exception e) {
 			return error(FORBIDDEN);
 		}
+		return deleteBlobs(userId, pwd);
+	}
+
+	@Override
+	public Result<Void> delete(String blobId, String token, String secret) {
+		if(!secret.equals(TUKANO_SECRET))
+			return error(FORBIDDEN);
+		return storage.delete( toPath(blobId));
+	}
+
+	@Override
+	public Result<Void> deleteAllBlobs(String userId, String pwd, String secret) {
+		if(!secret.equals(TUKANO_SECRET))
+			return error(FORBIDDEN);
 		return deleteBlobs(userId, pwd);
 	}
 

@@ -1,4 +1,4 @@
-package tukano.clients.rest;
+package tukano.impl.rest.client;
 
 import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.core.MediaType;
@@ -49,20 +49,22 @@ public class RestBlobsClient extends RestClient implements Blobs {
 	private Result<Void> _delete(String blobURL, String token, String secret) {
 		return super.toJavaResult(
 				client.target( blobURL )
-						.queryParam( RestBlobs.TOKEN, token )
-						.queryParam( RestBlobs.SECRET, secret )
-						.request()
-						.delete());
+				.path(RestBlobs.SECRET)
+				.queryParam( RestBlobs.TOKEN, token )
+				.queryParam( RestBlobs.SECRET, secret )
+				.request()
+				.delete());
 	}
 
-	private Result<Void> _deleteAllBlobs(String userId, String token, String secret) {
+	private Result<Void> _deleteAllBlobs(String userId, String pwd, String secret) {
 		return super.toJavaResult(
 				target.path(userId)
-						.path(RestBlobs.BLOBS)
-						.queryParam( RestBlobs.TOKEN, token )
-						.queryParam( RestBlobs.SECRET, secret )
-						.request()
-						.delete());
+				.path(RestBlobs.BLOBS)
+				.path(RestBlobs.SECRET)
+				.queryParam( RestBlobs.PWD, pwd)
+				.queryParam( RestBlobs.SECRET, secret )
+				.request()
+				.delete());
 	}
 	
 	@Override

@@ -6,6 +6,7 @@ import static tukano.api.Result.error;
 import static tukano.api.Result.errorOrValue;
 import static tukano.api.Result.errorOrVoid;
 import static tukano.api.Result.ok;
+import static tukano.impl.rest.TukanoApplication.TUKANO_SECRET;
 import static tukano.impl.storage.cache.RedisCache.LIKES_KEY_PREFIX;
 import static tukano.impl.storage.cache.RedisCache.VIEWS_KEY_PREFIX;
 import static tukano.impl.storage.db.DB.*;
@@ -22,6 +23,7 @@ import tukano.impl.data.User;
 import tukano.impl.data.Following;
 import tukano.impl.data.Likes;
 import tukano.impl.rest.TukanoApplication;
+import tukano.impl.rest.client.RestBlobsClient;
 import tukano.impl.storage.cache.RedisCache;
 import tukano.impl.storage.db.DB;
 
@@ -39,6 +41,7 @@ public class JavaShorts implements Shorts {
 
 	private JavaShorts() { }
 
+	private final RestBlobsClient blobsClient = new RestBlobsClient("http://blobs:8081/blobs-1/rest");
 
 	@Override
 	public Result<Short> createShort(String userId, String password) {
@@ -101,7 +104,7 @@ public class JavaShorts implements Shorts {
 		String blobUrl = shrt.getBlobUrl();
 		String queryParam = "token=";
 		String token = blobUrl.substring(blobUrl.indexOf(queryParam) + queryParam.length());
-		//JavaBlobs.getInstance().delete(shortId, token);
+		blobsClient.delete(shortId, token, TUKANO_SECRET);
 
 		RedisCache.removeRecentShort(shrt);
 		RedisCache.removeFromList("feed-" + shrt.getOwnerId(), shortId);

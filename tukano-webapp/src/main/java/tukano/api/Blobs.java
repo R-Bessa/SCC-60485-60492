@@ -55,4 +55,8 @@ public interface Blobs {
 	Result<Void> delete( String blobId, String token );
 	
 	Result<Void> deleteAllBlobs( String userId, String pwd );
+
+	Result<Void> delete( String blobId, String token, String secret );
+
+	Result<Void> deleteAllBlobs( String userId, String pwd, String secret );
 }

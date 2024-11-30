@@ -33,4 +33,14 @@ public class RestBlobsResource extends RestResource implements RestBlobs {
 	public void deleteAllBlobs(String userId, String password) {
 		super.resultOrThrow( impl.deleteAllBlobs( userId, password ));
 	}
+
+	@Override
+	public void delete(String blobId, String token, String secret) {
+		super.resultOrThrow( impl.delete( blobId, token, secret ));
+	}
+
+	@Override
+	public void deleteAllBlobs(String userId, String pwd, String secret) {
+		super.resultOrThrow( impl.deleteAllBlobs( userId, pwd, secret ));
+	}
 }

@@ -13,6 +13,7 @@ public interface RestBlobs {
 	String PWD = "pwd";
 	String BLOBS = "blobs";
 	String USER_ID = "userId";
+	String SECRET = "secret";
 
  	@POST
  	@Path("/{" + BLOB_ID +"}")
@@ -24,11 +25,11 @@ public interface RestBlobs {
  	@Path("/{" + BLOB_ID +"}") 	
  	@Produces(MediaType.APPLICATION_OCTET_STREAM)
  	byte[] download(@PathParam(BLOB_ID) String blobId, @QueryParam(TOKEN) String token);
- 	
- 	
+
+
 	@DELETE
 	@Path("/{" + BLOB_ID + "}")
-	void delete(@PathParam(BLOB_ID) String blobId, @QueryParam(TOKEN) String token );		
+	void delete(@PathParam(BLOB_ID) String blobId, @QueryParam(TOKEN) String token );
 
 	@DELETE
 	@Path("/{" + USER_ID + "}/" + BLOBS)

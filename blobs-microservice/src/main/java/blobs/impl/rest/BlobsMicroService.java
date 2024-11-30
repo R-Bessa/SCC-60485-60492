@@ -18,7 +18,7 @@ public class BlobsMicroService extends Application {
 	private Set<Object> singletons = new HashSet<>();
 	private Set<Class<?>> resources = new HashSet<>();
 
-	public static final String TUKANO_SECRET = "tukano-secret";
+	public static final String TUKANO_SECRET = System.getenv("TUKANO_SECRET");
 	public static final String ADMIN = "admin";
 
 	/** Service Base Uri  */
@@ -27,18 +27,17 @@ public class BlobsMicroService extends Application {
 
 	/** Blobs Configs */
 
-	public static final BlobsType BLOBS_TYPE = BlobsType.FILESYSTEM;
 	public static final long MAX_TOKEN_AGE = 300000;
 	//public static final String BLOB_STORAGE_KEY = "DefaultEndpointsProtocol=https;AccountName=scc60492;AccountKey=HwhiZRDl0MQcOy2sSzWJ3ZNYNVGnVu2ff9sVlp4l/3trXW2jLVnD6sU8QgBrH7rrChHsWxNpzvSf+AStA+Ln1g==;EndpointSuffix=core.windows.net";
 	public static final String BLOB_STORAGE_KEY = "DefaultEndpointsProtocol=https;AccountName=scc60485;AccountKey=tRBfHsTj0Fe+vayowI6sGxu24UuVGf1rjY1p9OIL+0jMOP+P6DKzdXX7XSfbNapuL/2ygbMTRxpF+AStL9Ho9A==;EndpointSuffix=core.windows.net";
-	public static final String POSTGRES_URL = "jdbc:postgresql://postgres:5432/tukano-db?user=citus&password=Sigma!!!";
+	public static final String POSTGRES_URL = System.getenv("POSTGRES_URL");
 
 	/** Redis Cache Configs */
 
 	public static final boolean REDIS_CACHE_ON = true;
 	public static final boolean DOCKERIZED_REDIS = true;
-	public static final String REDIS_HOSTNAME = "cache"; // TODO put as env
-	public static final String REDIS_KEY = "cachePwd"; // TODO put as env
+	public static final String REDIS_HOSTNAME = System.getenv("REDIS_HOSTNAME");
+	public static final String REDIS_KEY = System.getenv("CACHE_PWD");
 
 	public BlobsMicroService() {
 

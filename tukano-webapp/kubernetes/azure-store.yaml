@@ -91,22 +91,6 @@ spec:
       targetPort: 8080
   type: ClusterIP
 ---
-# Service to expose Tukano to external clients
-apiVersion: v1
-kind: Service
-metadata:
-  name: tukano-lb
-  labels:
-    app: tukano
-spec:
-  selector:
-    app: tukano
-  ports:
-    - protocol: TCP
-      port: 80
-      targetPort: 8080
-  type: LoadBalancer
----
 # Redis Cache Deployment
 apiVersion: apps/v1
 kind: Deployment
@@ -318,22 +302,6 @@ spec:
       targetPort: 8080
   type: ClusterIP
 ---
-# Service to expose Tukano Blobs to external clients
-apiVersion: v1
-kind: Service
-metadata:
-  name: blobs-lb
-  labels:
-    app: blobs
-spec:
-  selector:
-    app: blobs
-  ports:
-    - protocol: TCP
-      port: 80
-      targetPort: 8080
-  type: LoadBalancer
----
 # Persistent Volume
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -357,3 +325,68 @@ data:
   TUKANO_SECRET: dHVrYW5vLXNlY3JldA==
   CACHE_PWD: Y2FjaGVQd2Q=
   POSTGRES_URL: amRiYzpwb3N0Z3Jlc3FsOi8vcG9zdGdyZXM6NTQzMi90dWthbm8tZGI/dXNlcj1jaXR1cyZwYXNzd29yZD1TaWdtYSEhIQ==
+---
+# Proxy
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: proxy
+  labels:
+    app: proxy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: proxy
+  template:
+    metadata:
+      labels:
+        app: proxy
+    spec:
+      nodeSelector:
+        "kubernetes.io/os": linux
+      containers:
+        - name: tukano-proxy
+          image: ricardobessa/tukano-proxy:latest
+          ports:
+            - containerPort: 80
+              name: tukano-proxy
+          resources:
+            requests:
+              cpu: 1m
+              memory: 200Mi
+            limits:
+              cpu: 1000m
+              memory: 512Mi
+---
+# Service to expose Proxy within the cluster
+apiVersion: v1
+kind: Service
+metadata:
+  name: proxy
+  labels:
+    app: proxy
+spec:
+  selector:
+    app: proxy
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+  type: ClusterIP
+---
+# Service to expose Proxy to external clients
+apiVersion: v1
+kind: Service
+metadata:
+  name: proxy-lb
+  labels:
+    app: proxy
+spec:
+  selector:
+    app: proxy
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+  type: LoadBalancer

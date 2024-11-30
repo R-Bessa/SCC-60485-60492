@@ -6,8 +6,7 @@ import static tukano.api.Result.error;
 import static tukano.api.Result.errorOrResult;
 import static tukano.api.Result.errorOrValue;
 import static tukano.api.Result.ok;
-import static tukano.impl.rest.TukanoApplication.TUKANO_RECOMMENDS;
-import static tukano.impl.rest.TukanoApplication.TUKANO_SECRET;
+import static tukano.impl.rest.TukanoApplication.*;
 import static tukano.impl.storage.db.DB.*;
 
 import java.util.List;
@@ -38,7 +37,6 @@ public class JavaUsers implements Users {
 	
 	private JavaUsers() {}
 
-	private final RestBlobsClient blobsClient = new RestBlobsClient("http://blobs:8081/blobs-1/rest");
 	
 	@Override
 	public Result<String> createUser(User user) {

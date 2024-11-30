@@ -7,6 +7,7 @@ import static tukano.api.Result.errorOrValue;
 import static tukano.api.Result.errorOrVoid;
 import static tukano.api.Result.ok;
 import static tukano.impl.rest.TukanoApplication.TUKANO_SECRET;
+import static tukano.impl.rest.TukanoApplication.blobsClient;
 import static tukano.impl.storage.cache.RedisCache.LIKES_KEY_PREFIX;
 import static tukano.impl.storage.cache.RedisCache.VIEWS_KEY_PREFIX;
 import static tukano.impl.storage.db.DB.*;
@@ -41,7 +42,6 @@ public class JavaShorts implements Shorts {
 
 	private JavaShorts() { }
 
-	private final RestBlobsClient blobsClient = new RestBlobsClient("http://blobs:8081/blobs-1/rest");
 
 	@Override
 	public Result<Short> createShort(String userId, String password) {

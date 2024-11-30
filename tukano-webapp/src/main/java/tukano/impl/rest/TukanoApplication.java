@@ -12,6 +12,7 @@ import tukano.impl.cookies.auth.RequestCookiesFilter;
 import tukano.impl.data.User;
 import tukano.impl.georeplication.Region;
 import tukano.impl.kubernetes.HealthMonitor;
+import tukano.impl.rest.client.RestBlobsClient;
 import tukano.impl.storage.blobs.BlobsType;
 import tukano.impl.storage.cache.RedisCache;
 import tukano.impl.storage.db.DatabaseType;
@@ -22,8 +23,7 @@ public class TukanoApplication extends Application {
 	private Set<Object> singletons = new HashSet<>();
 	private Set<Class<?>> resources = new HashSet<>();
 
-	//public static final String TUKANO_SECRET = System.getenv("TUKANO_SECRET");
-	public static final String TUKANO_SECRET = "tukano-secret";
+	public static final String TUKANO_SECRET = System.getenv("TUKANO_SECRET");
 	public static final String TUKANO_RECOMMENDS = "tukano";
 	public static final String ADMIN = "admin";
 
@@ -43,6 +43,9 @@ public class TukanoApplication extends Application {
 	public static final String BLOB_STORAGE_KEY = "DefaultEndpointsProtocol=https;AccountName=scc60492;AccountKey=HwhiZRDl0MQcOy2sSzWJ3ZNYNVGnVu2ff9sVlp4l/3trXW2jLVnD6sU8QgBrH7rrChHsWxNpzvSf+AStA+Ln1g==;EndpointSuffix=core.windows.net";
 	//public static final String BLOB_STORAGE_KEY = "DefaultEndpointsProtocol=https;AccountName=scc60485;AccountKey=tRBfHsTj0Fe+vayowI6sGxu24UuVGf1rjY1p9OIL+0jMOP+P6DKzdXX7XSfbNapuL/2ygbMTRxpF+AStL9Ho9A==;EndpointSuffix=core.windows.net";
 	public static final String SECONDARY_BLOB_STORAGE_KEY = "";
+	public static final String BLOBS_URL = System.getenv("BLOBS_URL");
+	public static final RestBlobsClient blobsClient = new RestBlobsClient(BLOBS_URL);
+
 
 	/** DB Configs */
 
@@ -51,17 +54,15 @@ public class TukanoApplication extends Application {
 	public static final DatabaseType SHORTS_DB_TYPE = DatabaseType.COSMOS_DB_POSTGRESQL;
 	public static final String CONNECTION_URL = "";
 	public static final String DB_KEY = "";
-	//public static final String POSTGRES_URL = System.getenv("POSTGRES_URL");
-	public static final String POSTGRES_URL = "jdbc:postgresql://postgres:5432/tukano-db?user=citus&password=Sigma!!!";
+	public static final String POSTGRES_URL = System.getenv("POSTGRES_URL");
 
 	/** Redis Cache Configs */
 
-	public static final boolean REDIS_CACHE_ON = true;
+	public static final boolean REDIS_CACHE_ON = System.getenv("REDIS_CACHE_ON").equals("true");
 	public static final boolean DOCKERIZED_REDIS = true;
-	//public static final String REDIS_HOSTNAME = System.getenv("REDIS_HOSTNAME");
-	//public static final String REDIS_KEY = System.getenv("CACHE_PWD");
-	public static final String REDIS_HOSTNAME = "cache";
-	public static final String REDIS_KEY = "cachePwd";
+	public static final String REDIS_HOSTNAME = System.getenv("REDIS_HOSTNAME");
+	public static final String REDIS_KEY = System.getenv("CACHE_PWD");
+
 
 	public TukanoApplication() {
 		singletons.add( new RestUsersResource());

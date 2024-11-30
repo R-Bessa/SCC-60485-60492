@@ -6,37 +6,33 @@ mvn clean compile package
 copy target/tukano-1.war kubernetes/webapp
 cd kubernetes/webapp
 docker build -t tukano-webapp .
-docker run -it --rm -p 8080:8080 --name webapp --net tukano-network tukano-webapp
-
+docker run -it --rm -d -p 8080:8080 --name webapp --net tukano-network tukano-webapp
 
 docker login
 docker tag tukano-webapp:latest ricardobessa/tukano-webapp:latest
 docker push ricardobessa/tukano-webapp
 
-
-neel
-docker tag tukano-webapp:latest neeldb/tukano-webapp:latest
-docker push neeldb/tukano-webapp
-docker tag tukano-postgres:latest neeldb/tukano-postgres:latest
-docker push neeldb/tukano-postgres
+echo -n "tukano-secret" | base64
 
 --------------------------------------------------------
 
 CACHE
 
 docker build -t tukano-cache .
-docker run -it --rm -p 6379:6379 --name cache --net tukano-network tukano-cache
+docker run -it --rm -d -p 6379:6379 --name cache --net tukano-network tukano-cache
 
 docker exec -it cache redis-cli
 auth cachePwd
 
+docker tag tukano-cache:latest ricardobessa/tukano-cache:latest
+docker push ricardobessa/tukano-cache
 
---------------------------------------------------------
+---------------------------------------------------------------
 
 POSTGRES
 
 docker build -t tukano-postgres .
-docker run --rm -p 5432:5432 --name postgres --net tukano-network tukano-postgres
+docker run --rm -d -p 5432:5432 --name postgres --net tukano-network tukano-postgres
 
 docker exec -it postgres psql -U citus -d tukano-db
 
@@ -45,8 +41,30 @@ docker exec -it postgres psql -U citus -d tukano-db
 BLOBS
 
 copy target/blobs-1.war docker
-docker build -t blobs-image .
-docker run -it --rm -p 8080:8080 --name blobs --net tukano-network blobs-image
+cd docker
+docker build -t tukano-blobs .
+docker run -it --rm -d -p 8081:8080 --name blobs --net tukano-network tukano-blobs
+
+docker tag tukano-blobs:latest ricardobessa/tukano-blobs:latest
+docker push ricardobessa/tukano-blobs
+
+
+
+-------------------------------------------------------------------
+
+PROXY
+
+docker build -t tukano-proxy .
+docker run -it --rm -d -p 8082:80 --name proxy --net tukano-network tukano-proxy
+
+curl webapp:8080/tukano-1/rest/health
+curl blobs:8080/blobs-1/rest/health
+
+docker tag tukano-proxy:latest ricardobessa/tukano-proxy:latest
+docker push ricardobessa/tukano-proxy
+
+
+
 
 
 -------------------------------------------------------------------
@@ -78,9 +96,10 @@ Home -> Search for "Quotas" -> Select "Quotas" -> Compute -> Total Regional vCPU
 3) Create a Cluster
 az group create --name scc2425-container-60485 --location northeurope
 
-
 az aks create --resource-group scc2425-container-60485 --name my-scc2425-cluster-60485 --node-vm-size Standard_B2s --generate-ssh-keys --node-count 2 --service-principal <appId_REPLACE> --client-secret <password_REPLACE>
 az aks create --resource-group scc2425-container-60485 --name my-scc2425-cluster-60485 --node-vm-size Standard_B2s --generate-ssh-keys --node-count 2 --service-principal 0189bb9f-d9c6-468e-9c80-c9d2312fdf7c --client-secret wL18Q~6e2766hbeCLLv4-Zh5-RzO9iwOvGvbYclV
+
+
 
 az aks get-credentials --resource-group scc2425-container-60485 --name my-scc2425-cluster-60485
 az aks install-cli
@@ -96,11 +115,6 @@ kubectl delete pv --all
 
 Delete the resource group to delete the cluster
 az group delete --resource-group scc2425-container-60485
-
-neel
-az group delete --resource-group scc2425-container-60492
-
-
 
 
 

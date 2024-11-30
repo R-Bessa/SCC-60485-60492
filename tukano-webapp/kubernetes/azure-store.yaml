@@ -19,13 +19,17 @@ spec:
         "kubernetes.io/os": linux
       containers:
         - name: tukano-webapp
-          image: neeldb/tukano-webapp:latest
+          image: ricardobessa/tukano-webapp:latest
           ports:
             - containerPort: 8080
               name: tukano-webapp
           env:
             - name: REDIS_HOSTNAME
               value: "cache"
+            - name: REDIS_CACHE_ON
+              value: "true"
+            - name: BLOBS_URL
+              value: "http://blobs:8080/blobs-1/rest"
             - name: TUKANO_SECRET
               valueFrom:
                 secretKeyRef:
@@ -173,7 +177,7 @@ spec:
         "kubernetes.io/os": linux
       containers:
         - name: postgres
-          image: neeldb/tukano-postgres:latest
+          image: ricardobessa/tukano-postgres:latest
           ports:
             - containerPort: 5432
               name: postgres
@@ -215,8 +219,133 @@ spec:
           containers:
             - name: get-popular
               image: curlimages/curl:latest
-              command: ["curl", "http://4.209.224.204/tukano-1/rest/shorts/popular"]
+              command: ["curl", "http://135.236.224.2/tukano-1/rest/shorts/popular"]
           restartPolicy: OnFailure
+---
+# Tukano Blobs Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: blobs
+  labels:
+    app: blobs
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: blobs
+  template:
+    metadata:
+      labels:
+        app: blobs
+    spec:
+      nodeSelector:
+        "kubernetes.io/os": linux
+      volumes:
+        - name: mediavolume
+          persistentVolumeClaim:
+            claimName: azure-managed-disk
+      containers:
+        - name: tukano-blobs
+          image: ricardobessa/tukano-blobs:latest
+          volumeMounts:
+            - mountPath: "/mnt/vol"
+              name: mediavolume
+          ports:
+            - containerPort: 8080
+              name: tukano-blobs
+          env:
+            - name: REDIS_HOSTNAME
+              value: "cache"
+            - name: TUKANO_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: tukano-secrets
+                  key: TUKANO_SECRET
+            - name: CACHE_PWD
+              valueFrom:
+                secretKeyRef:
+                  name: tukano-secrets
+                  key: CACHE_PWD
+            - name: POSTGRES_URL
+              valueFrom:
+                secretKeyRef:
+                  name: tukano-secrets
+                  key: POSTGRES_URL
+          resources:
+            requests:
+              cpu: 1m
+              memory: 200Mi
+            limits:
+              cpu: 1000m
+              memory: 512Mi
+          startupProbe:
+            httpGet:
+              path: /blobs-1/rest/health
+              port: 8080
+            failureThreshold: 10
+            initialDelaySeconds: 20
+            periodSeconds: 10
+            timeoutSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /blobs-1/rest/health
+              port: 8080
+            failureThreshold: 3
+            initialDelaySeconds: 3
+            periodSeconds: 3
+          livenessProbe:
+            httpGet:
+              path: /blobs-1/rest/health
+              port: 8080
+            failureThreshold: 5
+            initialDelaySeconds: 3
+            periodSeconds: 3
+---
+# Service to expose Tukano Blobs within the cluster
+apiVersion: v1
+kind: Service
+metadata:
+  name: blobs
+  labels:
+    app: blobs
+spec:
+  selector:
+    app: blobs
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+  type: ClusterIP
+---
+# Service to expose Tukano Blobs to external clients
+apiVersion: v1
+kind: Service
+metadata:
+  name: blobs-lb
+  labels:
+    app: blobs
+spec:
+  selector:
+    app: blobs
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080
+  type: LoadBalancer
+---
+# Persistent Volume
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: azure-managed-disk
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: azurefile
+  resources:
+    requests:
+      storage: 1Gi
 ---
 # Sensitive information
 apiVersion: v1

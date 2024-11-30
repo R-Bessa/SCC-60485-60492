@@ -6,7 +6,6 @@ import blobs.impl.cookies.Authentication;
 import blobs.impl.data.User;
 import blobs.impl.rest.BlobsMicroService;
 import blobs.impl.storage.CosmosPostgreSQL;
-import blobs.impl.storage.blobs.AzureBlobStorage;
 import blobs.impl.storage.blobs.BlobStorage;
 import blobs.impl.storage.blobs.FilesystemStorage;
 import utils.Hash;
@@ -44,7 +43,7 @@ public class JavaBlobs implements Blobs {
 
 
 	private BlobStorage initStorage() {
-		return BlobsMicroService.BLOBS_TYPE.equals(AZURE_BLOBS) ? new AzureBlobStorage() : new FilesystemStorage();
+		return new FilesystemStorage();
 	}
 	
 	@Override
@@ -133,7 +132,7 @@ public class JavaBlobs implements Blobs {
 	}
 
 	public static Result<Void> deleteBlobs(String userId, String pwd) {
-		return errorOrValue(okUser(userId, pwd), storage.delete(toPath(userId)) );
+		return storage.delete(toPath(userId));
 	}
 
 	private boolean validBlobId(String blobId, String token) {

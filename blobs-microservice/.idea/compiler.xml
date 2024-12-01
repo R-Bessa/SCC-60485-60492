@@ -7,10 +7,12 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="tukano" />
+        <module name="blobs" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
       <module name="azure-functions" target="17" />
+      <module name="tukano" target="17" />
       <module name="tukano-main" target="17" />
     </bytecodeTargetLevel>
   </component>

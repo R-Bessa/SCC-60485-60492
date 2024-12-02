@@ -1,6 +1,6 @@
 #DB STORAGE
 config:
-  target: https://scc-60485-60492.azurewebsites.net/rest
+  target: http://74.178.105.240/tukano/tukano-1/rest
   plugins:
     metrics-by-endpoint: { } # Used to get metrics for each endpoint individually.
   phases:
@@ -25,11 +25,10 @@ scenarios:
     weight: 1
     flow:
 
-# Get followers of user
+      # Get followers of user
       # Get feed of user
       - get:
           url: "/shorts/{{ userId }}/feed?pwd={{ pwd }}"
       # Get shorts of user
       - get:
           url: "/shorts/{{ userId }}/shorts"
-      

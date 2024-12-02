@@ -1,6 +1,6 @@
 # Create Users
 config:
-  target:  https://scc-60485-60492.azurewebsites.net/rest   
+  target:  http://74.178.105.240/tukano/tukano-1/rest
   plugins:
     metrics-by-endpoint: { } # Used to get metrics for each endpoint individually.
   phases:
@@ -21,7 +21,7 @@ config:
       - "displayName"
       - "random_user_id"
 scenarios:
-  - name: 'DB Storage'
+  - name: 'Create Users'
     weight: 1
     flow:
       # Create users

@@ -1,6 +1,6 @@
 #BLOBS
 config:
-  target: https://scc-60485-60492.azurewebsites.net/rest
+  target: http://74.178.105.240
   plugins:
     metrics-by-endpoint: { } # Used to get metrics for each endpoint individually.
   phases:
@@ -25,7 +25,7 @@ scenarios:
     flow:
       # Create users' shorts
       - post:
-          url: "/shorts/{{ userId }}?pwd={{ pwd }}"
+          url: "http://74.178.105.240/tukano/tukano-1/rest/shorts/{{ userId }}?pwd={{ pwd }}"
           headers:
             Content-Type: application/json
             Accept: application/json
@@ -34,22 +34,22 @@ scenarios:
               as: "id"
       # Login users
       - post:
-          url: "/login/{{ userId }}?pwd={{ pwd }}"
+          url: "http://74.178.105.240/blobs/blobs-1/rest/login/{{ userId }}?pwd={{ pwd }}"
       # Create shorts' blobs
       - post:
-          url: "/blobs/{{ id }}?token=token"
+          url: "http://74.178.105.240/blobs/blobs-1/rest/blobs/{{ id }}?token=token"
           headers:
             Content-Type: application/octet-stream
             body: \x00\x01\x02
       # Login users
       - post:
-          url: "/login/{{ userId }}?pwd={{ pwd }}"
+          url: "http://74.178.105.240/blobs/blobs-1/rest/login/{{ userId }}?pwd={{ pwd }}"
       # Download blobs
       - get:
-          url: "/blobs/{{ id }}?token=token"
+          url: "http://74.178.105.240/blobs/blobs-1/rest/blobs/{{ id }}?token=token"
       # Login admin
       - post:
-          url: "/login/admin?pwd=pwd"
+          url: "http://74.178.105.240/blobs/blobs-1/rest/login/admin?pwd=pwd"
       # Delete all blobs
       - delete:
-          url: "/blobs/{{ userId }}?token=token"
+          url: "http://74.178.105.240/blobs/blobs-1/rest/blobs/{{ userId }}?token=token"

@@ -1,6 +1,6 @@
 # Delete Users
 config:
-  target: https://scc-60485-60492.azurewebsites.net/rest
+  target: http://74.178.105.240/tukano/tukano-1/rest
   plugins:
     metrics-by-endpoint: { } # Used to get metrics for each endpoint individually.
   phases:
@@ -24,9 +24,6 @@ scenarios:
   - name: 'DB Storage'
     weight: 1
     flow:
-      # Login admin
-      - post:
-          url: "/login/admin?pwd=pwd"
       # Delete user
       - delete:
           url: "/users/{{ userId }}?pwd={{ pwd }}"

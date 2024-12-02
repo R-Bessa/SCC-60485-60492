@@ -1,6 +1,6 @@
 #DB STORAGE
 config:
-  target: https://scc-project-60485.azurewebsites.net/rest
+  target: http://74.178.105.240/tukano/tukano-1/rest
   plugins:
     metrics-by-endpoint: { } # Used to get metrics for each endpoint individually.
   phases:
@@ -45,4 +45,3 @@ scenarios:
           headers:
             Content-Type: application/json
           json: true
-      

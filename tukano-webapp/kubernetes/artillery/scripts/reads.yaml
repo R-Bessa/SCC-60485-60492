@@ -1,0 +1,34 @@
+#DB STORAGE
+config:
+  target: http://135.236.194.252/tukano/tukano-1/rest
+  plugins:
+    metrics-by-endpoint: { } # Used to get metrics for each endpoint individually.
+  phases:
+    - name: "Main test"    # MAIN TESTS: duration: 30s, with 1 new clients/sec
+      duration: 30
+      arrivalRate: 5
+  payload:
+    path: ./data/updated_users.csv
+    #loadAll: true # load the whole CSV
+    order: sequence # selects users sequentially, default is random
+    skipHeader: true # The first line is a header, so we want to skip it
+    delimiter: "," # standard delimiter
+    skipEmptyLines: true # not important in our case
+    fields:
+      - "userId"
+      - "pwd"
+      - "email"
+      - "displayName"
+      - "random_user_id"
+scenarios:
+  - name: 'DB Storage'
+    weight: 1
+    flow:
+
+      # Get followers of user
+      # Get feed of user
+      - get:
+          url: "/shorts/{{ userId }}/feed?pwd={{ pwd }}"
+      # Get shorts of user
+      - get:
+          url: "/shorts/{{ userId }}/shorts"
